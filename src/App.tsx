@@ -8,14 +8,24 @@ import { Avisos } from './interfaz/Avisos'
 import { Recorrido } from './interfaz/Recorrido'
 import { SelectorContenedor } from './interfaz/SelectorContenedor'
 import { consolidar } from './interfaz/consolidar'
+import { IDS_DE_PRUEBA, itemsDelEscenarioDePrueba } from './interfaz/escenario-de-prueba'
 import { Escena } from './vista3d/Escena'
 import { coloresDe } from './vista3d/color-por-item'
 import { posicionTrasRecalcular } from './vista3d/recorrido'
 import { aplicarResultado, eliminarItem, ESTADO_INICIAL, type Estado } from './interfaz/estado'
 
 export function App() {
-  const [estado, setEstado] = useState<Estado>(ESTADO_INICIAL)
-  const [contenedorId, setContenedorId] = useState<string | null>(null)
+  // En desarrollo, ?escenario=sc009 carga una disposición sin pasar por el modelo, para poder
+  // verificar la vista 3D con los ojos y medir SC-009. En producción devuelve null.
+  // La guarda va ACÁ y no adentro de la función: con `import.meta.env.DEV` reemplazado por
+  // false al construir, la rama entera queda muerta y el empaquetador descarta el módulo. Con
+  // la guarda adentro, la referencia sobrevivía y los datos viajaban al bundle —lo verifiqué
+  // con el test de bundle, que me desmintió.
+  const deLaUrl = import.meta.env.DEV ? itemsDelEscenarioDePrueba(window.location.search) : null
+  const [estado, setEstado] = useState<Estado>(
+    deLaUrl === null ? ESTADO_INICIAL : { ...ESTADO_INICIAL, items: deLaUrl },
+  )
+  const [contenedorId, setContenedorId] = useState<string | null>(deLaUrl === null ? null : '40hc')
 
   // Se recalcula con cada cambio de la lista o del contenedor: editar un campo estimado
   // dispara el recálculo (FR-006), y cambiar de contenedor también (AC-13).
@@ -91,6 +101,16 @@ export function App() {
           Catálogo: {catalogo.objetos.length} objetos y {catalogo.contenedores.length} contenedores,
           cada uno con su ficha de origen.
         </p>
+        {import.meta.env.DEV ? (
+          <p>
+            Escenarios de prueba (solo en desarrollo):{' '}
+            {IDS_DE_PRUEBA.map((id) => (
+              <a key={id} href={`?escenario=${id}`} style={{ marginRight: '0.75rem' }}>
+                {id}
+              </a>
+            ))}
+          </p>
+        ) : null}
       </footer>
     </main>
   )

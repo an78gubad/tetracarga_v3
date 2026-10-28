@@ -22,6 +22,7 @@ const CLAVE = 'sk-centinela-de-bundle-test-9f3a7c1e'
 const URL_PROVEEDOR = 'https://centinela.proveedor-del-modelo.test/v1'
 
 let archivos: { ruta: string; contenido: string }[] = []
+let nodeEnvPrevio: string | undefined
 
 function recorrer(carpeta: string): string[] {
   return readdirSync(carpeta).flatMap((entrada) => {
@@ -37,8 +38,17 @@ beforeAll(async () => {
   process.env['DEEPSEEK_BASE_URL'] = URL_PROVEEDOR
 
   rmSync(salida, { recursive: true, force: true })
+
+  // **NODE_ENV tiene que decir production.** vitest lo pone en 'test', y Vite deriva
+  // `isProduction` de NODE_ENV antes que de `mode`: con 'test', `import.meta.env.DEV` queda en
+  // true y el bundle que se mide no es el que llega al navegador. Pasar solo `mode` no alcanza
+  // —lo comprobé: los escenarios de desarrollo seguían apareciendo.
+  nodeEnvPrevio = process.env['NODE_ENV']
+  process.env['NODE_ENV'] = 'production'
+
   await build({
     root: raiz,
+    mode: 'production',
     logLevel: 'error',
     build: { outDir: salida, emptyOutDir: true, sourcemap: true },
   })
@@ -53,6 +63,8 @@ afterAll(() => {
   rmSync(salida, { recursive: true, force: true })
   delete process.env['DEEPSEEK_API_KEY']
   delete process.env['DEEPSEEK_BASE_URL']
+  if (nodeEnvPrevio === undefined) delete process.env['NODE_ENV']
+  else process.env['NODE_ENV'] = nodeEnvPrevio
 })
 
 describe('lo que llega al navegador (AC-19, SC-010)', () => {
@@ -82,6 +94,15 @@ describe('lo que llega al navegador (AC-19, SC-010)', () => {
     // Los mapas de origen entran en la cuenta: también llegan al navegador.
     const culpables = archivos
       .filter((a) => /deepseek/i.test(a.contenido))
+      .map((a) => a.ruta)
+    expect(culpables).toEqual([])
+  })
+
+  it('los escenarios de prueba no llegan al bundle de producción', () => {
+    // Están detrás de import.meta.env.DEV, que Vite reemplaza por false al construir, así que
+    // el empaquetador descarta la rama entera. Si algún día deja de hacerlo, acá se nota.
+    const culpables = archivos
+      .filter((a) => a.ruta.endsWith('.js') && /tipo-12|escenario-de-prueba|IDS_DE_PRUEBA/.test(a.contenido))
       .map((a) => a.ruta)
     expect(culpables).toEqual([])
   })
