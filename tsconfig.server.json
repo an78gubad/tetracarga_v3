@@ -1,10 +1,7 @@
 {
   // server/ y api/: Vercel los compila archivo por archivo y Node, en ESM, no completa
   // extensiones, así que los imports relativos llevan .js y la resolución es nodenext.
-  //
-  // Todavía no está enganchado al script `typecheck`: tsc da error cuando un proyecto no
-  // tiene ni un archivo, y server/ aparece en T018. El commit que cree server/modelo/
-  // vuelve a poner `&& tsc -p tsconfig.server.json --noEmit` en package.json.
+
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2023"],
