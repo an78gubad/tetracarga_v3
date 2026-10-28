@@ -1,4 +1,4 @@
-# PRD-001v5: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
+# PRD-001v6: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
 
 ## Contexto y Problema
 Antes de exportar hay que responder si la mercadería entra en un contenedor y cómo acomodarla.
@@ -76,7 +76,14 @@ dónde salió cada dato completado.
   transitorio; credenciales inválidas o saldo agotado no lo son.
 - RNF-09: El proxy rechaza, sin llamar al proveedor, las descripciones de más de 2.000
   caracteres, y acota la longitud de la respuesta que le pide al modelo. Una respuesta del
-  modelo que no cumple el esquema de ítems se descarta entera.
+  modelo que no cumple el esquema de ítems se descarta entera. El esquema exige cantidad entera
+  ≥ 1, y medidas y peso > 0: un número fuera de rango no cumple el esquema, y ni el signo ni el
+  valor se corrigen para salvarlo.
+- RNF-10: El repositorio se clona y la aplicación se corre siguiendo solo el README, sin leer
+  código: el README dice los comandos de desarrollo, de tests y del eval, y `.env.example` nombra
+  todas las variables de entorno que hacen falta, sin valores.
+- RNF-11: El proxy limita los pedidos por IP y rechaza, sin llamar al proveedor, los que exceden
+  10 por minuto o 60 por hora, con un mensaje que dice el límite.
 
 ## Los tres artefactos versionados
 Primer entregable: sin ellos, RNF-02 y RNF-05 son decorativos.
@@ -151,6 +158,15 @@ Primer entregable: sin ellos, RNF-02 y RNF-05 son decorativos.
 - AC-26 (RNF-09): Dada una respuesta del modelo que no cumple el esquema de ítems, cuando se
   interpreta, entonces no se muestra ningún ítem de esa respuesta y se trata como la respuesta
   vacía de AC-20.
+- AC-27 (RF-02, RNF-09): Dado "-5 cajas de 60x40x30", cuando se interpreta, entonces la cantidad
+  no queda en 5 ni en -5: el valor no cumple el esquema, la respuesta se descarta entera como en
+  AC-26 y, si vuelve igual, la cantidad queda faltante y el sistema la pide.
+- AC-28 (RNF-10): Dado el repositorio recién clonado y sin `.env`, cuando se siguen los pasos del
+  README, entonces la aplicación arranca, o dice exactamente qué variable de `.env.example` falta,
+  sin que haya que leer el código para averiguar su nombre.
+- AC-29 (RNF-11): Dadas 10 interpretaciones de la misma IP dentro de un minuto, cuando llega la
+  número 11, entonces el proxy la rechaza con un mensaje que dice el límite y la implementación
+  del modelo no recibe ninguna llamada.
 
 ## Stack
 TypeScript en todo el proyecto sobre Node 22 LTS, React con Vite, Three.js con geometría
@@ -173,8 +189,9 @@ proveedor inicial, detrás de la interfaz de RNF-08.
 - El 80% de apoyo de RF-08 es un criterio propio sin fuente.
 - El aprovechamiento de volumen no se compara contra ningún óptimo: RNF-05 detecta que cambió, no
   si es bueno.
-- El proxy no limita la cantidad de pedidos por cliente: un tercero puede gastar saldo con pedidos
-  válidos. Se acota con el tope de gasto configurado en el proveedor.
+- El límite por IP de RNF-11 cuenta en la memoria de cada instancia del proxy y se reinicia con
+  cada arranque en frío: el tope efectivo es más laxo que el declarado y no frena a un tercero
+  distribuido. El total se sigue acotando con el tope de gasto configurado en el proveedor.
 
 ## Diferido
 Existe solo si todo lo anterior está terminado. No tiene criterios de aceptación y nada depende de
@@ -187,8 +204,8 @@ esto.
 - El modelo asocia el ítem a la entrada equivocada → RF-03 muestra cuál usó, RF-04 la hace
   corregible y RNF-02 (c) lo mide.
 - El modelo completa una medida que no existe en el catálogo → RNF-02 (b) lo verifica en binario.
-- Un tercero usa el proxy público y agota el saldo → RNF-09 acota el costo de cada pedido y el
-  tope de gasto del proveedor, el total.
+- Un tercero usa el proxy público y agota el saldo → RNF-09 acota el costo de cada pedido,
+  RNF-11 la cantidad de pedidos por IP, y el tope de gasto del proveedor, el total.
 - El proveedor falla de manera intermitente y se confunde con un error de interpretación → RNF-08.
 - El acomodo es NP-duro y puede comerse el proyecto → se congela contra la línea base de RNF-05
   apenas los escenarios estén cerrados; mejorarlo queda fuera de alcance.

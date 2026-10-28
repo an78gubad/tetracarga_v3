@@ -21,6 +21,7 @@ Leé `CONTEXTO.md` e `INSTRUCCIONES.md` antes de empezar; el PRD, cuando el paso
 - `api/`: la función de Vercel, que solo envuelve al manejador. En desarrollo lo sirve Vite como middleware, así que `npm run dev` alcanza.
 - En `server/` y `api/` los imports relativos llevan extensión `.js`: Vercel compila archivo por archivo y Node, en ESM, no completa extensiones.
 - `PLAN.md`: el plan vigente, un paso por vez. Si no existe, se arma y se acuerda antes de escribir código.
+- `.env.example`: nombra toda variable de entorno que hace falta, sin valores. El README dice cómo correr la aplicación, los tests y el eval: el nombre de una variable no se descubre leyendo el código (RNF-10, AC-28).
 
 ## Qué NO hacer
 - **No tocar la línea base, el dataset ni el catálogo para que algo pase.** Si falla AC-14, el error está en el código, no en la disposición congelada. Si el eval de RNF-02 no llega, no se "corrigen" etiquetas. Cambiar cualquiera de los tres lo decide el usuario.
@@ -30,4 +31,5 @@ Leé `CONTEXTO.md` e `INSTRUCCIONES.md` antes de empezar; el PRD, cuando el paso
 - **No agregar dependencias sin acordarlo.** En particular, ninguna librería de packing (ver CONTEXTO.md).
 - **No reportar números que no salgan de una corrida real.** Van a `eval/ultimo-informe.md` con la fecha y el comando que los produjo.
 - **No usar variables con prefijo `VITE_` para nada secreto.** Vite las mete en el bundle del navegador; la API key va en `.env` sin prefijo.
+- **No "arreglar" un número fuera de rango.** Cantidad entera ≥ 1, medidas y peso > 0. Un valor negativo o cero no es un dato declarado: no se toma su valor absoluto, no se ignora el signo (RNF-09, AC-27).
 - **No probar AC-19 con patrones genéricos.** El test busca la clave, la URL del proveedor y el encabezado de autorización reales: patrones como `sk-` dan falsos positivos con el código de React. El test arma su propio bundle; no depende de un `dist/` que puede estar viejo.
