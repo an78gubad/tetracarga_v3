@@ -127,3 +127,39 @@ describe('el 80% de apoyo vale para TODO prefijo de la secuencia (AC-24)', () =>
     }
   })
 })
+
+describe('AC-30 — el tercer motivo: "restricción"', () => {
+  it('un bulto que no entra en NINGUNA orientación lleva "restricción", no "volumen"', () => {
+    // Un contenedor más grande lo arreglaría; pero este no entra ni vacío, así que el informe
+    // no tiene que mandar a buscar uno más grande por el motivo equivocado.
+    const enorme = itemDe({ id: 'enorme', cantidad: 2, largo: 5000, ancho: 5000, alto: 5000, peso: 100 })
+    const d = acomodar([enorme], CONTENEDOR_CHICO)
+    expect(d.secuencia).toHaveLength(0)
+    for (const a of d.afuera) expect(a.motivo).toBe('restriccion')
+  })
+
+  it('un bulto que SÍ entraría vacío pero no quedaba lugar lleva "volumen"', () => {
+    const normal = itemDe({ id: 'normal', cantidad: 100, largo: 600, ancho: 400, alto: 300, peso: 10 })
+    const d = acomodar([normal], CONTENEDOR_CHICO)
+    expect(d.afuera.length).toBeGreaterThan(0)
+    for (const a of d.afuera) expect(a.motivo).toBe('volumen')
+  })
+
+  it('"peso" sigue ganando sobre los otros dos (AC-23)', () => {
+    const pesadoYEnorme = itemDe({ id: 'ambos', cantidad: 3, largo: 5000, ancho: 5000, alto: 5000, peso: 900_000 })
+    const d = acomodar([pesadoYEnorme], CONTENEDOR_CHICO)
+    // No entra por tamaño Y supera la carga útil: manda el peso.
+    expect(d.afuera[1]?.motivo).toBe('peso')
+  })
+
+  it('un bulto bloqueado solo por sus marcas también lleva "restricción"', () => {
+    // Cabe de sobra, pero su orientación obligatoria lo deja más alto que el contenedor.
+    const altoObligado = itemDe({
+      id: 'alto', cantidad: 2, largo: 300, ancho: 300, alto: 1500, peso: 1000,
+      orientacionObligatoria: true,
+    })
+    const d = acomodar([altoObligado], CONTENEDOR_CHICO)
+    expect(d.secuencia).toHaveLength(0)
+    for (const a of d.afuera) expect(a.motivo).toBe('restriccion')
+  })
+})

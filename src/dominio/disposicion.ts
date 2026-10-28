@@ -61,10 +61,17 @@ export type Colocacion = {
 }
 
 /**
- * Por qué un bulto quedó afuera. "peso" gana sobre "volumen": si colocarlo superaba la carga
- * máxima, el motivo es "peso" aunque además no entrara por volumen (AC-23).
+ * Por qué un bulto quedó afuera, con esta **precedencia** (FR-012, AC-23, AC-30):
+ *
+ *   1. `peso` — colocarlo superaba la carga máxima. Gana sobre los otros dos aunque además no
+ *      entrara por volumen.
+ *   2. `restriccion` — ninguna posición es válida por su tamaño o por sus marcas de FR-008.
+ *   3. `volumen` — no quedaba lugar.
+ *
+ * El tercero existe porque decir "volumen" de un bulto bloqueado por "no apilable" manda a
+ * reservar un contenedor más grande, que no resuelve nada.
  */
-export type MotivoAfuera = 'peso' | 'volumen'
+export type MotivoAfuera = 'peso' | 'restriccion' | 'volumen'
 
 export type BultoAfuera = {
   readonly bulto: Bulto

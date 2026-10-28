@@ -170,6 +170,25 @@ export function acomodar(items: readonly Item[], contenedor: Contenedor): Dispos
   return { contenedorId: contenedor.id, secuencia, afuera }
 }
 
+/**
+ * ¿Entraría este bulto en el contenedor **vacío**, en alguna orientación?
+ *
+ * Es la pregunta que separa "no quedaba lugar" de "no cabe": si ni solo entra, el motivo es
+ * restricción. Se prueba contra el contenedor vacío a propósito, sin mirar lo ya colocado.
+ */
+function cabeEnContenedorVacio(
+  item: Item,
+  orientaciones: readonly Orientacion[],
+  contenedor: Contenedor,
+): boolean {
+  for (const orientacion of orientaciones) {
+    const { dx, dy, dz } = medidasEn(item, orientacion)
+    if (dx <= 0 || dy <= 0 || dz <= 0) continue
+    if (cabeEnContenedor({ x: 0, y: 0, z: 0, dx, dy, dz }, contenedor)) return true
+  }
+  return false
+}
+
 function buscarLugar(
   bulto: Bulto,
   item: Item,
