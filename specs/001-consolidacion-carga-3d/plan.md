@@ -47,7 +47,11 @@ intermediario con el proveedor del modelo.
 consolidación de hasta 200 bultos < 5 s p95 sobre los 10 escenarios (SC-007); vista 3D ≥ 30 fps con
 200 bultos en 12 tipos (SC-009).
 
-**Constraints**: longitudes en milímetros enteros y pesos en gramos enteros, sin punto flotante en
+**Constraints**: el acomodador y el validador **reciben el contenedor por argumento** y ninguno
+importa `src/catalogo/` —`acomodar(items, contenedor)` y `validar(disposicion, contenedor)`—: quien
+lee el catálogo es el orquestador, una sola vez, y le pasa el mismo valor a los dos, de modo que un
+error de lectura no lo puedan cometer los dos igual; longitudes en milímetros enteros y pesos en
+gramos enteros, sin punto flotante en
 el reparto de peso (FR-009, FR-027); el validador no comparte código ni constantes con el
 acomodador, solo tipos (FR-010); la credencial del proveedor nunca llega al navegador, ni la clave
 ni la URL ni ningún encabezado (FR-015); descripción de hasta 2.000 caracteres y 10 pedidos por
@@ -64,7 +68,7 @@ objetos y contenedores, dataset de 50 descripciones etiquetadas y 10 escenarios 
 | Principio | Cómo lo hace cumplir este plan | Estado |
 |---|---|---|
 | **I. El modelo interpreta, el código decide** | El modelo solo devuelve la lista de ítems. Completar sale de `src/catalogo/`; el id propuesto lo verifica `catalogo.ts` y si no existe se descarta la propuesta entera, sin buscar parecidos. El acomodador no importa nada de `cliente-modelo/` ni de `server/` | PASS |
-| **II. Ninguna disposición imposible llega a la pantalla** | `src/validador/` corre antes de renderizar y bloquea. Vive en su propia carpeta, con sus propias constantes y sus propias cuentas; de `src/dominio/` solo trae tipos, con `import type`, y un test lo verifica parseando los imports | PASS |
+| **II. Ninguna disposición imposible llega a la pantalla** | `src/validador/` corre antes de renderizar y bloquea. Vive en su propia carpeta, con sus propias constantes y sus propias cuentas; de `src/dominio/` solo trae tipos, con `import type`. `tests/arquitectura/imports.test.ts` verifica cuatro reglas parseando los imports: ninguna de las dos carpetas importa de la otra, los imports de `dominio/` son de tipos, nada de `src/` importa de `server/`, y ninguna de las dos importa del catálogo —el contenedor llega por argumento | PASS |
 | **III. Determinística y congelada** | Aritmética entera en todo el acomodador. La línea base es `escenarios/linea-base.json`, comparada bulto por bulto por un test propio; no hay snapshots de Vitest en ese camino | PASS |
 | **IV. Ningún dato sin fuente** | Cada entrada del catálogo trae el campo `fuente` con la ficha exacta; el esquema del catálogo lo exige y un test falla si falta. Los números medidos van a `eval/ultimo-informe.md` con fecha y comando | PASS |
 | **V. El proveedor aislado detrás del servidor** | `server/modelo/interfaz.ts` es el único contrato; `deepseek.ts` la única implementación que habla con la red. El navegador llama a `/api/interpretar` y a nada más. Un test arma su propio bundle y busca la clave, la URL y el encabezado reales | PASS |
@@ -114,6 +118,7 @@ src/                            # Todo lo que llega al navegador. Nada de acá h
 │   ├── apoyo.ts                #   Área de contacto y el 80%
 │   ├── peso.ts                 #   Reparto entero por área, redondeo hacia arriba (FR-027)
 │   ├── orientacion.ts
+│   ├── informe.ts              #   Aprovechamiento de volumen y de peso (FR-012)
 │   └── *.test.ts
 ├── validador/                  # Mismas cuentas, escritas de nuevo. Sin importar del acomodador
 │   ├── validar.ts
@@ -134,12 +139,15 @@ src/                            # Todo lo que llega al navegador. Nada de acá h
 │   ├── instanciado.ts          #   Una malla instanciada por tipo de ítem
 │   ├── paleta.ts               #   Los 12 colores y el umbral declarado al lado
 │   ├── paleta.test.ts          #   Falla si algún par queda por debajo del umbral (SC-015)
+│   ├── color-por-item.ts       #   El color atado al ítem, no a la posición (AC-09)
 │   └── recorrido.ts            #   El prefijo de k bultos (FR-014)
 └── interfaz/
     ├── CampoDescripcion.tsx
     ├── ListaItems.tsx
     ├── SelectorContenedor.tsx
     ├── InformeConsolidacion.tsx
+    ├── EdicionItem.tsx         #   Editar, agregar y eliminar ítems y campos (FR-006)
+    ├── EditorDeMarcas.tsx      #   Las tres marcas por ítem (FR-008)
     └── Avisos.tsx              #   Colores reciclados (>12 tipos) y rendimiento (>200 bultos)
 
 server/                         # No sabe de Vercel ni de Vite. Imports relativos con extensión .js
@@ -159,7 +167,9 @@ api/
 escenarios/
 ├── escenarios.ts               # Los 10 de referencia, calibrados a ~115% (CONTEXTO.md)
 ├── linea-base.json             # Congelada una sola vez, cuando los escenarios estén cerrados
-└── linea-base.test.ts          # Recalcula y compara bulto por bulto, sin tolerancia
+├── linea-base.test.ts          # Recalcula y compara bulto por bulto, sin tolerancia
+├── validador.test.ts           # Ninguna de las 10 dispara el validador (AC-10)
+└── tiempo.test.ts              # p95 de consolidación sobre los 10 escenarios (SC-007)
 
 eval/
 ├── dataset/                    # Las 50 descripciones etiquetadas

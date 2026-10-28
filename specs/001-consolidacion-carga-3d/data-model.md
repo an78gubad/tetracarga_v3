@@ -168,6 +168,28 @@ pegados no se superpongan (research.md §5).
 bulto por bulto: sin índice, dos bultos del mismo ítem son indistinguibles y la comparación de
 FR-018 no tendría sujeto.
 
+## Contenedor
+
+Lo que el acomodador y el validador reciben **por argumento**. Ninguno de los dos importa
+`src/catalogo/`: lo lee el orquestador una sola vez y les pasa el mismo valor.
+
+```ts
+type Contenedor = {
+  id: string
+  largoInterior: Milimetros; anchoInterior: Milimetros; altoInterior: Milimetros
+  cargaUtil: Gramos          // la carga útil (max payload), no el peso bruto (FR-007)
+}
+
+acomodar(items: Item[], contenedor: Contenedor): Disposicion
+validar(disposicion: Disposicion, contenedor: Contenedor): ResultadoValidacion
+```
+
+Por qué por argumento y no leyéndolo cada uno: si los dos importaran el catálogo compartirían un
+origen de valores, y un error al leerlo lo cometerían los dos igual —con lo cual el validador no lo
+detectaría, que es justo lo que el Principio II existe para evitar. Pasándolo por argumento, lo
+único común es el dato de entrada. De paso el validador se vuelve testeable con un contenedor
+inventado, sin montar el catálogo.
+
 ## Informe de consolidación
 
 | Campo | Tipo | Regla |
@@ -223,3 +245,7 @@ por separado y no promediarlos: el primero mide extracción, el segundo mide que
 
 El acomodador y el validador no comparten ni el 80%, ni el orden de los ejes, ni la fórmula del
 reparto: cada uno los escribe. Un test lo verifica (research.md §11).
+
+**Ninguna de las dos importa `src/catalogo/`.** El contenedor llega por argumento, así que lo único
+compartido es el dato de entrada y no su lectura. La cuarta regla de
+`tests/arquitectura/imports.test.ts` lo hace cumplir.

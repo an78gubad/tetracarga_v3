@@ -61,13 +61,13 @@ commit, antes** del código que lo hace pasar.
 
 - [ ] T009 [P] Crear `src/dominio/unidades.ts` con los tipos marcados `Milimetros`, `Gramos` y `MilimetrosCuadrados`, todos enteros, para que el compilador no deje sumar milímetros con gramos
 - [ ] T010 [P] Crear `src/dominio/items.ts` con `Item`, `Campo<T>` (`declarado` | `estimado` con su entrada de catálogo | `faltante` con su motivo), `MotivoFaltante` con sus **tres** valores (`sin-entrada-en-catalogo`, `entrada-sin-el-dato`, `valor-fuera-de-rango`), `Marca<T>` y `MarcasItem`
-- [ ] T011 [P] Crear `src/dominio/disposicion.ts` con `Bulto` (identidad `itemId` + `indice`), `Orientacion` (permutación de los tres ejes), `Colocacion`, `Disposicion`, `BultoAfuera` con motivo `'peso' | 'volumen'` e `InformeConsolidacion`
+- [ ] T011 [P] Crear `src/dominio/disposicion.ts` con `Bulto` (identidad `itemId` + `indice`), `Orientacion` (permutación de los tres ejes), `Colocacion`, `Disposicion`, `BultoAfuera` con motivo `'peso' | 'volumen'`, `InformeConsolidacion` y `Contenedor` (medidas interiores y `cargaUtil`), que es lo que el acomodador y el validador reciben **por argumento** en vez de leer del catálogo
 - [ ] T012 Crear `src/catalogo/esquema.ts` que valide cada entrada y **falle** si: falta `fuente` o está vacía, un `id` está repetido, una medida es ≤ 0 o no entera, un `peso` no nulo es ≤ 0, o un sinónimo aparece en dos entradas distintas
 - [ ] T013 Crear `src/catalogo/contenedores.json` con el 20', el 40' y el 40' high cube: medidas interiores, `cargaUtil` (**la carga útil / max payload, no el peso bruto**) y `tara`, los tres de fichas "Container specifications" de Maersk, **sin mezclar navieras**, donde `cargaUtil + tara = peso bruto`; cada entrada nombra su ficha en `fuente`
 - [ ] T014 Crear `src/catalogo/objetos.json` con las entradas de objetos, cada una con su ficha exacta en `fuente` y `sinonimos` para que "tambor", "tacho" y "bidón de 200" lleguen a la misma entrada. `peso: null` es el caso normal (depende del contenido). **Ninguna marca de FR-008 precargada**: hoy ninguna ficha dice "no apilable" ni "este lado arriba". **Si un objeto no tiene ficha, se pregunta al usuario antes de agregarlo**
 - [ ] T015 Crear `src/catalogo/catalogo.ts` que cargue los dos archivos, resuelva nombres y sinónimos, y exponga la verificación de id que **descarta la propuesta entera** cuando el id no existe, sin buscar ni usar una entrada parecida (FR-005, AC-17)
 - [ ] T016 Crear `src/catalogo/catalogo.test.ts`: el esquema rechaza una entrada sin `fuente`, un id repetido y un sinónimo ambiguo; un id inexistente se descarta sin caer en la entrada más parecida (AC-17)
-- [ ] T017 [P] Crear `tests/arquitectura/imports.test.ts` que recorra `src/acomodador/` y `src/validador/` con la API de compilador de TypeScript y **falle** si una carpeta importa de la otra, o si un import de `src/dominio/` no es `import type` (RF-08, Principio II)
+- [ ] T017 [P] Crear `tests/arquitectura/imports.test.ts` que recorra el árbol con la API de compilador de TypeScript y **falle** si: (a) `src/acomodador/` importa de `src/validador/` o al revés; (b) un import de `src/dominio/` desde esas dos carpetas no es `import type`; (c) algo de `src/` importa de `server/` —el Principio V custodiado por delante, no solo por el test de bundle—; (d) `src/acomodador/` o `src/validador/` importan de `src/catalogo/`: el contenedor llega por argumento, así que un error de lectura del catálogo no lo pueden cometer los dos igual (RF-08, Principios II y V)
 
 **Checkpoint**: los tipos y el catálogo están firmes; el test de arquitectura ya custodia la frontera.
 
@@ -98,8 +98,8 @@ renderizar nada.
 
 ### Completado desde el catálogo
 
-- [ ] T029 [US1] Crear `src/interpretacion/unidades.ts` que convierta a milímetros y gramos enteros: longitudes en mm, cm, m y pulgadas; pesos en g, kg y toneladas; sin unidad, una longitud está en centímetros y un peso en kilos; `"AxBxC"` se lee largo × ancho × alto; un peso declarado para todo el ítem se divide por la cantidad. **La conversión la hace el código, nunca el modelo**
-- [ ] T030 [P] [US1] Crear `src/interpretacion/unidades.test.ts` cubriendo cada unidad aceptada, el default de centímetros y kilos, y el peso total dividido por la cantidad
+- [ ] T029 [US1] Crear `src/interpretacion/convertir.ts` que convierta a milímetros y gramos enteros: longitudes en mm, cm, m y pulgadas; pesos en g, kg y toneladas; sin unidad, una longitud está en centímetros y un peso en kilos; `"AxBxC"` se lee largo × ancho × alto; un peso declarado para todo el ítem se divide por la cantidad. **La conversión la hace el código, nunca el modelo** (FR-002)
+- [ ] T030 [P] [US1] Crear `src/interpretacion/convertir.test.ts` cubriendo cada unidad aceptada, el default de centímetros y kilos, y el peso total dividido por la cantidad (FR-002)
 - [ ] T031 [US1] Crear `src/interpretacion/completar.ts`: completa medidas y peso faltantes **únicamente** desde el catálogo, marca cada dato completado como `estimado` indicando qué entrada usó, y resuelve la capacidad en litros como **clave de búsqueda** y no como medida ("tambor de 200 litros" no da medidas: da una entrada)
 - [ ] T032 [US1] Crear `src/interpretacion/faltantes.ts` que asigne los tres motivos y **bloquee la consolidación de la lista entera** mientras algún campo esté faltante. La cantidad nunca se completa: si falta, se pregunta (FR-004)
 - [ ] T033 [P] [US1] Crear `src/interpretacion/interpretacion.test.ts`: AC-01 (dos ítems, 40 y 15, cajas de 600×400×300 mm y 12 kg), AC-02 (medidas del catálogo marcadas como estimadas indicando la entrada), AC-03 (sin entrada: campos vacíos con motivo, cero valores escritos, consolidación bloqueada), AC-18 (medidas estimadas y peso faltante con otro motivo en el mismo ítem), AC-22 (sin cantidad: se pide y bloquea), AC-11 (una frase de corrido con varios ítems, sin pedir que se reformatee)
@@ -132,6 +132,11 @@ entró y qué quedó afuera con su motivo.
 **Independent Test**: con listas de ítems armadas a mano y los 10 escenarios, sin pasar por la
 interpretación: para cada carga, el informe y que ninguna disposición dispare el validador.
 
+**Qué parte es independiente de US1**: T043 a T068 —el acomodador, el validador y los escenarios—
+no necesitan nada de US1: se prueban con listas armadas a mano. Las tres tareas de interfaz de esta
+fase, **T065, T069 y T070, sí** necesitan `src/App.tsx`, que se crea en T038. Con una sola persona
+no cambia nada; con dos, T043-T068 arrancan sin esperar a US1.
+
 **⚠️ Test primero, en su propio commit**: todas las tareas de `src/acomodador/` y `src/validador/`
 de esta fase. El commit del test dice que falla hasta el siguiente.
 
@@ -146,30 +151,30 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 - [ ] T049 [US2] Crear `src/acomodador/orden.test.ts`: los no apilables van **al final**; después, volumen decreciente; a igual volumen, primero el que **aguanta más peso encima** (CONTEXTO.md, ya medido: no hay que re-investigarlo)
 - [ ] T050 [US2] Crear `src/acomodador/orden.ts` con ese orden de colocación
 - [ ] T051 [US2] Crear `src/acomodador/acomodar.test.ts`: AC-07 (excede volumen: coloca lo que entra, el resto con motivo "volumen"), AC-15 (excede peso: los colocados no superan la carga útil, el resto con motivo "peso"), AC-23 (excede por volumen **y** por peso: el motivo que se informa es **"peso"**), AC-13 (usa medidas interiores y carga útil de la entrada elegida, y recalcula al cambiar de contenedor)
-- [ ] T052 [US2] Crear `src/acomodador/acomodar.ts` en aritmética entera, con el origen en la esquina del fondo abajo a la izquierda, x el largo hacia la puerta, y el ancho, z el alto, e intervalos semiabiertos `[inicio, inicio + medida)` para que dos bultos pegados no se superpongan
+- [ ] T052 [US2] Crear `src/acomodador/acomodar.ts` con la firma `acomodar(items: Item[], contenedor: Contenedor): Disposicion` —el contenedor entra por argumento, no se lee del catálogo—, en aritmética entera, con el origen en la esquina del fondo abajo a la izquierda, x el largo hacia la puerta, y el ancho, z el alto, e intervalos semiabiertos `[inicio, inicio + medida)` para que dos bultos pegados no se superpongan
 - [ ] T053 [US2] Crear `src/acomodador/informe.ts` con el aprovechamiento de **volumen** (Σ cajas envolventes de los colocados ÷ volumen interior, en mm³ enteros) y de **peso** (Σ pesos colocados ÷ carga útil, en gramos), los bultos afuera **no** entran en ningún numerador (research.md §8)
-- [ ] T054 [P] [US2] Crear `src/acomodador/determinismo.test.ts`: la misma entrada dos veces da la misma disposición bulto por bulto —posición, orientación y orden de colocación—, **sin tolerancia** (AC-21)
+- [ ] T054 [P] [US2] Crear `src/acomodador/determinismo.test.ts`: la misma entrada dos veces da la misma disposición bulto por bulto —posición, orientación y orden de colocación—, **sin tolerancia** (FR-009, AC-21)
 
 ### Validador (cuentas escritas de nuevo, sin importar nada del acomodador)
 
 - [ ] T055 [US2] Crear `src/validador/solapamiento.test.ts`: hay superposición solo si los intervalos se solapan en **más de 0 mm** en los tres ejes; compartir cara, arista o vértice **no** es superposición
 - [ ] T056 [US2] Crear `src/validador/solapamiento.ts`
-- [ ] T057 [US2] Crear `src/validador/limites.test.ts`: ningún bulto sale del contenedor, con sus propias constantes de medidas
+- [ ] T057 [US2] Crear `src/validador/limites.test.ts`: ningún bulto sale del contenedor, con el contenedor recibido por argumento y uno de prueba inventado en el test, sin leer el catálogo
 - [ ] T058 [US2] Crear `src/validador/limites.ts`
 - [ ] T059 [US2] Crear `src/validador/apoyo.test.ts`: el 80% de apoyo sobre el piso o sobre bultos **cargados antes en la secuencia**, verificado sobre **cada prefijo** y no solo sobre la disposición final (AC-24)
 - [ ] T060 [US2] Crear `src/validador/apoyo.ts` con su propio 80% y su propio cálculo de área: **no importa nada de `src/acomodador/`**
 - [ ] T061 [US2] Crear `src/validador/peso.test.ts`: la carga máxima total no se supera, y el reparto por la pila se verifica con la cuenta propia del validador
 - [ ] T062 [US2] Crear `src/validador/peso.ts` con su propia fórmula de reparto
-- [ ] T063 [US2] Crear `src/validador/validar.test.ts`: una disposición con superposición, una con un bulto flotando y una que excede la carga útil son rechazadas
-- [ ] T064 [US2] Crear `src/validador/validar.ts` que junte las cuatro verificaciones y devuelva el motivo del rechazo
+- [ ] T063 [US2] Crear `src/validador/validar.test.ts`: una disposición con superposición, una con un bulto flotando y una que excede la carga útil son rechazadas (FR-010)
+- [ ] T064 [US2] Crear `src/validador/validar.ts` con la firma `validar(disposicion: Disposicion, contenedor: Contenedor): ResultadoValidacion` —el mismo contenedor que recibió el acomodador, por argumento— que junte las cuatro verificaciones y devuelva el motivo del rechazo (FR-010)
 - [ ] T065 [US2] Hacer bloqueante la validación en `src/App.tsx`: una disposición que no pasa **no se renderiza ni se guarda** (FR-011)
 
 ### Escenarios e interfaz
 
 - [ ] T066 [P] [US2] Crear `escenarios/escenarios.ts` con los 10 escenarios de referencia, todos los campos en `declarado` para que no dependan del catálogo ni del modelo, cubriendo carga mixta, frágiles, tambores y cajas, no apilables y sobrecarga de peso
 - [ ] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011)
-- [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y reporte el p95 contra el objetivo de 5 s para hasta 200 bultos (SC-007), anotando el número en `eval/ultimo-informe.md`
-- [ ] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, que recalcule al cambiar (AC-13)
+- [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
+- [ ] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, usando las medidas interiores y la carga útil (max payload, no el peso bruto) de la entrada elegida, y que recalcule al cambiar (FR-007, AC-13)
 - [ ] T070 [US2] Crear `src/interfaz/InformeConsolidacion.tsx` con los dos aprovechamientos, los colocados y los que quedaron afuera **cada uno con su motivo** (FR-012)
 
 **Checkpoint**: se responde "¿entra?" con un informe defendible, y ninguna disposición imposible
@@ -216,7 +221,7 @@ eliminan ítems, se ponen las marcas y se verifica que la disposición las respe
 
 - [ ] T082 [US4] Crear `src/interfaz/EdicionItem.tsx` para editar, agregar y eliminar ítems y campos antes de consolidar; editar un campo `estimado` lo pasa a `declarado` y **dispara el recálculo** de la disposición (FR-006, AC-12)
 - [ ] T083 [P] [US4] Crear `src/interfaz/EdicionItem.test.tsx`: un campo estimado editado pierde la marca y queda declarado (AC-12); no hay transición hacia `estimado` desde la edición
-- [ ] T084 [US4] Crear `src/interfaz/MarcasItem.tsx` con las tres marcas: no apilable y orientación obligatoria **precargadas del catálogo cuando la entrada las trae, señaladas como tales y editables**; peso máximo admitido encima **siempre declarado por el usuario**, nunca precargado (FR-008)
+- [ ] T084 [US4] Crear `src/interfaz/EditorDeMarcas.tsx` —no `MarcasItem.tsx`, que chocaría con el tipo `MarcasItem`— con las tres marcas: no apilable y orientación obligatoria **precargadas del catálogo cuando la entrada las trae, señaladas como tales y editables**; peso máximo admitido encima **siempre declarado por el usuario**, nunca precargado (FR-008)
 - [ ] T085 [US4] Crear `src/interpretacion/fusionar.ts`: una segunda descripción **agrega sus ítems al final**; los que ya estaban conservan sus valores, el estado de cada campo, sus marcas y su color. **No** se reemplaza la lista, **no** se fusionan ítems por parecido de nombre y **no** se reinterpreta lo cargado (FR-025)
 - [ ] T086 [P] [US4] Crear `src/interpretacion/fusionar.test.ts`: con un campo corregido a mano y una marca cargada, una segunda descripción agrega al final y el ítem corregido conserva valor, marca y color (FR-025)
 - [ ] T087 [US4] Crear `src/acomodador/marcas.test.ts`: AC-04 (ningún bulto queda apoyado sobre un no apilable), AC-05 (con orientación obligatoria, el alto declarado coincide con el alto final, quedando solo las 2 rotaciones horizontales), AC-06 (sobre un ítem que admite 50 kg no se apoyan más de 50 kg, **contando lo que se propaga por toda la pila**)
@@ -231,6 +236,8 @@ eliminan ítems, se ponen las marcas y se verifica que la disposición las respe
 ## Phase 7: Polish & Cross-Cutting
 
 - [ ] T091 Calibrar los 10 escenarios de `escenarios/escenarios.ts` a ~115% de lo que entra —salvo los que miden sobrecarga de peso, que traen ~115% de la carga útil— y verificar que **ningún tipo de ítem por separado alcance** para llenar el contenedor. Calibrados a 115% del volumen interno quedaban tipos enteros afuera (CONTEXTO.md)
+- [ ] T091b Correr `escenarios/tiempo.test.ts` **sobre los escenarios ya calibrados** por T091 y anotar el p95 en `eval/ultimo-informe.md` con la fecha y el comando. Antes de calibrar, el número nace viejo (SC-007)
+- [ ] T091c Medir SC-001 una vez a mano: de descripción tipeada a disposición visible en 3D, cronometrando que sean menos de dos minutos sin cargar ninguna planilla, y anotarlo en `eval/ultimo-informe.md`
 - [ ] T092 Registrar `escenarios/linea-base.json` con las 10 disposiciones, **una única vez**, según [contracts/linea-base.md](./contracts/linea-base.md)
 - [ ] T093 Crear `escenarios/linea-base.test.ts` que recalcule y compare bulto por bulto —identidad `(itemId, indice)`, posición, orientación y orden de colocación— **sin tolerancia**, rompiendo el build ante cualquier diferencia. **Sin snapshots de Vitest**: `vitest -u` reescribiría la línea base sin que nadie lo decida. Entra en el **mismo commit** que T092: un test que pasa porque el archivo falta es un `.skip` disfrazado (AC-14, SC-008, FR-018)
 - [ ] T094 [P] Correr `npm run eval` y escribir `eval/ultimo-informe.md` con SC-002 a SC-005 **declarando la concurrencia** con la que se midió el p95, más la fecha y el comando de cada número
@@ -260,7 +267,7 @@ existe**, y su test tampoco.
 - **Phase 1 (Setup)**: sin dependencias.
 - **Phase 2 (Foundational)**: depende de Setup. **Bloquea todas las historias.**
 - **Phase 3 (US1)**: depende de Foundational.
-- **Phase 4 (US2)**: depende de Foundational. **No depende de US1**: se prueba con listas armadas a mano.
+- **Phase 4 (US2)**: depende de Foundational. T043-T068 **no dependen de US1**: se prueban con listas armadas a mano. T065, T069 y T070 son interfaz y dependen de T038 (US1).
 - **Phase 5 (US3)**: depende de **US2**. Necesita una disposición calculada.
 - **Phase 6 (US4)**: depende de US1 (una lista que editar) y de US2 (una disposición que respete las marcas).
 - **Phase 7 (Polish)**: depende de US4, por lo de la línea base.
