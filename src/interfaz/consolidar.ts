@@ -36,5 +36,10 @@ export function consolidar(items: readonly Item[], contenedorId: string | null):
   const veredicto = validar(disposicion, contenedor, items)
   if (!veredicto.valida) return { fase: 'rechazada', motivo: veredicto.motivo }
 
-  return { fase: 'lista', informe: informeDe(disposicion, items, contenedor) }
+  return {
+    fase: 'lista',
+    informe: informeDe(disposicion, items, contenedor),
+    disposicion,
+    contenedor,
+  }
 }

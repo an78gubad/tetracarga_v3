@@ -195,19 +195,19 @@ navegación, colores, control deslizante y fluidez con 200 bultos.
 **Depende de US2**: necesita una disposición calculada. El spec lo dice explícitamente; no es una
 historia independiente y no se finge que lo sea.
 
-- [ ] T071 [US3] Crear `src/vista3d/paleta.ts` con los 12 colores, la conversión sRGB → OKLab y el umbral de distancia **declarado como constante al lado de la paleta** (research.md §9)
-- [ ] T072 [US3] Crear `src/vista3d/paleta.test.ts` que falle si **algún par** de los 12 queda por debajo del umbral (SC-015)
-- [ ] T073 [US3] Generar la paleta, medir la distancia mínima entre pares y **declarar el umbral con el número medido**, anotándolo en `eval/ultimo-informe.md` con el comando. Si los 12 colores no alcanzan un umbral razonable, **se informa y lo decide el usuario**: no se afloja el umbral hasta que el test pase, ni se cambia la cantidad de colores, que la fija el PRD
-- [ ] T074 [US3] Crear `src/vista3d/instanciado.ts` con una malla instanciada por tipo de ítem, y **aristas por instancia** para que dos bultos del mismo tipo se distingan dentro de una pila sin tocar el color —que es lo que mide SC-015 (research.md §10)
-- [ ] T075 [US3] Crear `src/vista3d/color-por-item.ts` que ate el color al **ítem** y no a su posición en la lista, de modo que eliminar un ítem no corra los colores de los demás (AC-09, FR-013)
-- [ ] T076 [P] [US3] Crear `src/vista3d/color-por-item.test.ts`: consolidar dos veces conserva el color de cada tipo, también después de eliminar otro ítem (AC-09)
-- [ ] T077 [US3] Crear `src/vista3d/recorrido.ts`: en la posición k se ven **exactamente** los primeros k bultos de la secuencia, con k=0 mostrando el contenedor vacío (FR-014, AC-08)
-- [ ] T078 [P] [US3] Crear `src/vista3d/recorrido.test.ts`: para todo k, el prefijo tiene exactamente k bultos y **ninguno flotando** —cada bulto elevado del prefijo tiene su 80% de apoyo dentro del mismo prefijo (AC-08, AC-24)
-- [ ] T079 [US3] Crear `src/vista3d/Escena.tsx` con la cámara navegable —girar, acercar y desplazar— y las paredes del contenedor
-- [ ] T080 [US3] Crear `src/interfaz/Avisos.tsx` con los dos avisos: colores reciclados cuando hay más de 12 tipos (FR-013) y rendimiento no garantizado por encima de 200 bultos, **sin dejar de mostrar la disposición ni recortar la carga** (FR-024)
+- [X] T071 [US3] Crear `src/vista3d/paleta.ts` con los 12 colores, la conversión sRGB → OKLab y el umbral de distancia **declarado como constante al lado de la paleta** (research.md §9)
+- [X] T072 [US3] Crear `src/vista3d/paleta.test.ts` que falle si **algún par** de los 12 queda por debajo del umbral (SC-015)
+- [X] T073 [US3] Generar la paleta, medir la distancia mínima entre pares y **declarar el umbral con el número medido**, anotándolo en `eval/ultimo-informe.md` con el comando. Si los 12 colores no alcanzan un umbral razonable, **se informa y lo decide el usuario**: no se afloja el umbral hasta que el test pase, ni se cambia la cantidad de colores, que la fija el PRD
+- [X] T074 [US3] Crear `src/vista3d/instanciado.ts` con una malla instanciada por tipo de ítem, y **aristas por instancia** para que dos bultos del mismo tipo se distingan dentro de una pila sin tocar el color —que es lo que mide SC-015 (research.md §10)
+- [X] T075 [US3] Crear `src/vista3d/color-por-item.ts` que ate el color al **ítem** y no a su posición en la lista, de modo que eliminar un ítem no corra los colores de los demás (AC-09, FR-013)
+- [X] T076 [P] [US3] Crear `src/vista3d/color-por-item.test.ts`: consolidar dos veces conserva el color de cada tipo, también después de eliminar otro ítem (AC-09)
+- [X] T077 [US3] Crear `src/vista3d/recorrido.ts`: en la posición k se ven **exactamente** los primeros k bultos de la secuencia, con k=0 mostrando el contenedor vacío (FR-014, AC-08)
+- [X] T078 [P] [US3] Crear `src/vista3d/recorrido.test.ts`: para todo k, el prefijo tiene exactamente k bultos y **ninguno flotando** —cada bulto elevado del prefijo tiene su 80% de apoyo dentro del mismo prefijo (AC-08, AC-24)
+- [X] T079 [US3] Crear `src/vista3d/Escena.tsx` con la cámara navegable —girar, acercar y desplazar— y las paredes del contenedor
+- [X] T080 [US3] Crear `src/interfaz/Avisos.tsx` con los dos avisos: colores reciclados cuando hay más de 12 tipos (FR-013) y rendimiento no garantizado por encima de 200 bultos, **sin dejar de mostrar la disposición ni recortar la carga** (FR-024)
 - [ ] T081 [US3] Medir SC-009 **en el navegador**: 200 bultos en 12 tipos, 10 segundos de órbita continua en Chrome de escritorio, reportando el **mínimo sostenido** y no el promedio, y anotando CPU, GPU, resolución y versión de Chrome en `eval/ultimo-informe.md` (research.md §15)
 
-- [ ] T080b [US3] Agregar en `src/vista3d/Escena.tsx` el caso de FR-028 en que el navegador no puede inicializar la vista 3D: se informa y **el informe de FR-012 sigue estando disponible**, en vez de perder la consolidación entera (FR-028)
+- [X] T080b [US3] Agregar en `src/vista3d/Escena.tsx` el caso de FR-028 en que el navegador no puede inicializar la vista 3D: se informa y **el informe de FR-012 sigue estando disponible**, en vez de perder la consolidación entera (FR-028)
 
 **Checkpoint**: un número se volvió una instrucción de carga.
 

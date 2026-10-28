@@ -5,7 +5,12 @@
  * Nunca una pantalla en blanco: cuando no hay nada que mostrar se dice por qué.
  */
 
-import type { InformeConsolidacion as Informe, MotivoRechazo } from '../dominio/disposicion'
+import type {
+  Contenedor,
+  Disposicion,
+  InformeConsolidacion as Informe,
+  MotivoRechazo,
+} from '../dominio/disposicion'
 
 /** Qué significa cada rechazo del validador, en palabras del usuario. */
 const POR_QUE_SE_RECHAZO: Readonly<Record<MotivoRechazo, string>> = {
@@ -25,7 +30,13 @@ export type EstadoConsolidacion =
   | { readonly fase: 'calculando' }
   /** FR-011: no se renderiza ni se guarda. Pero sí se dice por qué (FR-028). */
   | { readonly fase: 'rechazada'; readonly motivo: MotivoRechazo }
-  | { readonly fase: 'lista'; readonly informe: Informe }
+  | {
+      readonly fase: 'lista'
+      readonly informe: Informe
+      /** La disposición ya validada: la vista 3D solo dibuja lo que pasó el validador. */
+      readonly disposicion: Disposicion
+      readonly contenedor: Contenedor
+    }
 
 function Porcentaje({ valor }: { valor: number }) {
   return <strong>{valor.toFixed(1)}%</strong>

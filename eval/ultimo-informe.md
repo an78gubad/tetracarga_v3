@@ -39,3 +39,44 @@ consolidación puede caer, y la disposición se muestra igual.
 **No se optimizó nada por ahora**, y es a propósito: mejorar el aprovechamiento o la velocidad
 por encima de la línea base está fuera de alcance, y el margen en el rango garantizado es amplio.
 Si alguna vez molesta, lo que hay que atacar es el recorrido de candidatas, no el reparto de peso.
+
+
+## Paleta de 12 colores (SC-015, FR-013)
+
+**Fecha**: 2026-10-28
+**Comando**: optimización de la paleta en OKLCh y `npx vitest run src/vista3d/paleta`
+
+| | Valor |
+|---|---|
+| Métrica | Distancia euclídea en **OKLab** |
+| Umbral **exigido** | **0,15** |
+| Distancia mínima **medida** | **0,1848** |
+| Margen | 23% por encima del umbral |
+| Pares por debajo del umbral | **0** |
+
+### Cómo salió el número
+
+El umbral **no se eligió y después se verificó**: se generaron 12 colores optimizando la
+distancia mínima entre todos los 66 pares, variando tono, luminancia y croma por color en OKLCh.
+Una primera búsqueda por patrones dio 0,1658; un ascenso de colina sobre los tres parámetros de
+cada color lo llevó a **0,1848**.
+
+Recién con ese número medido se declaró el umbral en 0,15: redondo, con 23% de margen, y
+alrededor de **7 veces la diferencia apenas perceptible** en OKLab, que ronda 0,02. O sea que
+los colores no están "apenas distinguibles": están claramente distintos.
+
+### Por qué OKLab y no CIEDE2000
+
+CIEDE2000 es más preciso pero su fórmula es larga y llena de casos especiales: implementarla a
+mano para un test agrega más superficie de error que la que resuelve, y el proyecto no agrega
+dependencias. ΔE76 en CIELAB se descartó por lo contrario: es el que más miente en azules y
+saturados, justo donde una paleta de 12 aprieta.
+
+### Lo que este número NO dice
+
+**No dice que la paleta sea segura para quien no distingue colores.** La distancia en OKLab
+modela visión tricromática normal. La accesibilidad por color sigue abierta en
+`checklists/vista3d.md` CHK006, y no está en el PRD.
+
+Tampoco dice nada del **contraste contra el fondo** ni contra las paredes del contenedor: el
+umbral mide distancia entre pares de la paleta, nada más (CHK005).
