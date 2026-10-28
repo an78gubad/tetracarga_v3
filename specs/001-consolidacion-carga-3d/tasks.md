@@ -152,7 +152,7 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 - [X] T050 [US2] Crear `src/acomodador/orden.ts` con ese orden de colocación
 - [X] T051 [US2] Crear `src/acomodador/acomodar.test.ts`: AC-07 (excede volumen: coloca lo que entra, el resto con motivo "volumen"), AC-15 (excede peso: los colocados no superan la carga útil, el resto con motivo "peso"), AC-23 (excede por volumen **y** por peso: el motivo que se informa es **"peso"**), AC-13 (usa medidas interiores y carga útil de la entrada elegida, y recalcula al cambiar de contenedor)
 - [X] T052 [US2] Crear `src/acomodador/acomodar.ts` con la firma `acomodar(items: Item[], contenedor: Contenedor): Disposicion` —el contenedor entra por argumento, no se lee del catálogo—, en aritmética entera, con el origen en la esquina del fondo abajo a la izquierda, x el largo hacia la puerta, y el ancho, z el alto, e intervalos semiabiertos `[inicio, inicio + medida)` para que dos bultos pegados no se superpongan
-- [ ] T053 [US2] Crear `src/acomodador/informe.ts` con el aprovechamiento de **volumen** (Σ cajas envolventes de los colocados ÷ volumen interior, en mm³ enteros) y de **peso** (Σ pesos colocados ÷ carga útil, en gramos), los bultos afuera **no** entran en ningún numerador (research.md §8)
+- [X] T053 [US2] Crear `src/acomodador/informe.ts` con el aprovechamiento de **volumen** (Σ cajas envolventes de los colocados ÷ volumen interior, en mm³ enteros) y de **peso** (Σ pesos colocados ÷ carga útil, en gramos), los bultos afuera **no** entran en ningún numerador (research.md §8)
 - [X] T054 [P] [US2] Crear `src/acomodador/determinismo.test.ts`: la misma entrada dos veces da la misma disposición bulto por bulto —posición, orientación y orden de colocación—, **sin tolerancia**; y **la misma carga con los ítems en otro orden en la lista da la misma disposición** (FR-009, AC-21)
 
 ### Validador (cuentas escritas de nuevo, sin importar nada del acomodador)
@@ -167,17 +167,17 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 - [X] T062 [US2] Crear `src/validador/peso.ts` con su propia fórmula de reparto
 - [X] T063 [US2] Crear `src/validador/validar.test.ts`: una disposición con superposición, una con un bulto flotando y una que excede la carga útil son rechazadas (FR-010)
 - [X] T064 [US2] Crear `src/validador/validar.ts` con la firma `validar(disposicion: Disposicion, contenedor: Contenedor): ResultadoValidacion` —el mismo contenedor que recibió el acomodador, por argumento— que junte las cuatro verificaciones y devuelva el motivo del rechazo (FR-010)
-- [ ] T065 [US2] Hacer bloqueante la validación en `src/App.tsx`: una disposición que no pasa **no se renderiza ni se guarda** (FR-011)
+- [X] T065 [US2] Hacer bloqueante la validación en `src/App.tsx`: una disposición que no pasa **no se renderiza ni se guarda** (FR-011)
 
 ### Escenarios e interfaz
 
 - [X] T066 [P] [US2] Crear `escenarios/escenarios.ts` con los 10 escenarios de referencia, todos los campos en `declarado` para que no dependan del catálogo ni del modelo, cubriendo carga mixta, frágiles, tambores y cajas, no apilables y sobrecarga de peso
 - [X] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011, SC-006)
-- [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos, medido **de a una consolidación por vez, con 10 corridas por escenario** (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
-- [ ] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, usando las medidas interiores y la carga útil (max payload, no el peso bruto) de la entrada elegida, y que recalcule al cambiar (FR-007, AC-13)
-- [ ] T070 [US2] Crear `src/interfaz/InformeConsolidacion.tsx` con los dos aprovechamientos, los colocados y los que quedaron afuera **cada uno con su motivo** (FR-012)
+- [X] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos, medido **de a una consolidación por vez, con 10 corridas por escenario** (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
+- [X] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, usando las medidas interiores y la carga útil (max payload, no el peso bruto) de la entrada elegida, y que recalcule al cambiar (FR-007, AC-13)
+- [X] T070 [US2] Crear `src/interfaz/InformeConsolidacion.tsx` con los dos aprovechamientos, los colocados y los que quedaron afuera **cada uno con su motivo** (FR-012)
 
-- [ ] T070b [US2] Agregar en `src/interfaz/InformeConsolidacion.tsx` los estados sin disposición de FR-028: lista de ítems vacía; ningún bulto colocado, con todos los motivos a la vista; y disposición rechazada por el validador, informando el rechazo y conservando la lista intacta. **Nunca una pantalla en blanco** (FR-028)
+- [X] T070b [US2] Agregar en `src/interfaz/InformeConsolidacion.tsx` los estados sin disposición de FR-028: lista de ítems vacía; ningún bulto colocado, con todos los motivos a la vista; y disposición rechazada por el validador, informando el rechazo y conservando la lista intacta. **Nunca una pantalla en blanco** (FR-028)
 
 **Checkpoint**: se responde "¿entra?" con un informe defendible, y ninguna disposición imposible
 llega a la pantalla.
