@@ -11,46 +11,46 @@ completado desde el catálogo, esquema de ítems y evaluación de precisión, an
 
 ## Completitud de requerimientos
 
-- [ ] CHK001 ¿Está definido el conjunto de unidades que el sistema acepta (mm, cm, m, pulgadas, kg, g, toneladas, litros), si FR-002 solo fija el default de centímetros para una medida sin unidad? [Gap, Spec §FR-002]
+- [x] CHK001 ¿Está definido el conjunto de unidades que el sistema acepta (mm, cm, m, pulgadas, kg, g, toneladas, litros), si FR-002 solo fija el default de centímetros para una medida sin unidad? [Gap, Spec §FR-002]
 - [ ] CHK002 ¿Está definida la regla de redondeo cuando el peso declarado para todo el ítem no se divide exacto por la cantidad, sabiendo que FR-021 exige peso > 0? [Gap, Spec §FR-002]
-- [ ] CHK003 ¿Está definido cómo una capacidad declarada en litros ("tambores de 200 litros") llega a una entrada del catálogo, es decir si la capacidad es una clave de búsqueda? [Gap, Spec §FR-003]
-- [ ] CHK004 ¿Está definido el conjunto de campos que tiene que traer una entrada del catálogo de objetos, incluidos los nombres o sinónimos por los que se la puede referir? [Gap, Spec §FR-019]
-- [ ] CHK005 ¿Está definido un tercer motivo de campo faltante para el número fuera de rango de FR-021, si FR-004 solo enumera "no está en el catálogo" y "la entrada no trae ese dato"? [Gap, Spec §FR-004]
-- [ ] CHK006 ¿Está definido con un número el tope de longitud de la respuesta que FR-017 manda acotar, como sí lo están los 2.000 caracteres de la descripción? [Clarity, Spec §FR-017]
+- [x] CHK003 ¿Está definido cómo una capacidad declarada en litros ("tambores de 200 litros") llega a una entrada del catálogo, es decir si la capacidad es una clave de búsqueda? [Gap, Spec §FR-003]
+- [x] CHK004 ¿Está definido el conjunto de campos que tiene que traer una entrada del catálogo de objetos, incluidos los nombres o sinónimos por los que se la puede referir? [Gap, Spec §FR-019]
+- [x] CHK005 ¿Está definido un tercer motivo de campo faltante para el número fuera de rango de FR-021, si FR-004 solo enumera "no está en el catálogo" y "la entrada no trae ese dato"? [Gap, Spec §FR-004]
+- [x] CHK006 ¿Está definido con un número el tope de longitud de la respuesta que FR-017 manda acotar, como sí lo están los 2.000 caracteres de la descripción? [Clarity, Spec §FR-017]
 - [ ] CHK007 ¿Está definida la espera entre los reintentos de FR-016, en particular ante un límite de velocidad del proveedor dentro de un presupuesto de 10 s? [Gap, Spec §FR-016]
-- [ ] CHK008 ¿Está definido desde qué momento corre el presupuesto de 10 s: el envío del usuario o la recepción en el intermediario? [Clarity, Spec §FR-016]
+- [x] CHK008 ¿Está definido desde qué momento corre el presupuesto de 10 s: el envío del usuario o la recepción en el intermediario? [Clarity, Spec §FR-016]
 - [ ] CHK009 ¿Está definido si el reintento que FR-026 le ofrece al usuario abre un presupuesto nuevo de 10 s y si cuenta contra el límite por IP de FR-023? [Gap, Spec §FR-026]
 - [ ] CHK010 ¿Está definido qué tiene que nombrar la marca de dato estimado para ser auditable —si incluye la versión del catálogo además de la entrada? [Gap, Spec §FR-003]
 - [ ] CHK011 ¿Hay requerimientos sobre qué se registra de las descripciones que escribe el usuario y por cuánto tiempo? [Gap, Privacidad]
 
 ## Claridad y falta de ambigüedad
 
-- [ ] CHK012 ¿Está definido el alcance de "descartar la propuesta entera" de FR-005: solo la asociación de catálogo de ese ítem, el ítem completo, o la respuesta completa? [Ambigüedad, Spec §FR-005]
-- [ ] CHK013 ¿Está definido si FR-003 completa campo por campo o la entrada completa, dado que AC-18 describe medidas completadas y peso faltante en el mismo ítem? [Clarity, Spec §FR-003]
-- [ ] CHK014 ¿Está definido qué significa "bloquear la consolidación" en FR-004, y si bloquea toda la lista o solo el ítem afectado? [Clarity, Spec §FR-004]
+- [x] CHK012 ¿Está definido el alcance de "descartar la propuesta entera" de FR-005: solo la asociación de catálogo de ese ítem, el ítem completo, o la respuesta completa? [Ambigüedad, Spec §FR-005]
+- [x] CHK013 ¿Está definido si FR-003 completa campo por campo o la entrada completa, dado que AC-18 describe medidas completadas y peso faltante en el mismo ítem? [Clarity, Spec §FR-003]
+- [x] CHK014 ¿Está definido qué significa "bloquear la consolidación" en FR-004, y si bloquea toda la lista o solo el ítem afectado? [Clarity, Spec §FR-004]
 - [ ] CHK015 ¿Está definida la lectura de medidas cuando la descripción rotula los ejes en un orden distinto al "AxBxC" ("60 de alto por 40 por 30")? [Ambigüedad, Spec §FR-002]
-- [ ] CHK016 ¿Está declarado que el modelo recibe los ids del catálogo para poder proponerlos, o queda como supuesto sin escribir? [Supuesto, Spec §FR-005]
+- [x] CHK016 ¿Está declarado que el modelo recibe los ids del catálogo para poder proponerlos, o queda como supuesto sin escribir? [Supuesto, Spec §FR-005]
 
 ## Consistencia y conflictos
 
-- [ ] CHK017 ¿Son compatibles FR-017 (descartar entera la respuesta fuera de esquema y tratarla como vacía) y FR-021 con el escenario 8 de la historia 1, que después de los reintentos deja "la cantidad faltante" de un ítem que nunca se mostró? [Conflicto, Spec §FR-017]
-- [ ] CHK018 ¿Está dicho explícitamente que una respuesta fuera de esquema es transitoria y por lo tanto se reintenta, o hay que inferirlo encadenando FR-017 con FR-016? [Consistencia, Spec §FR-017]
-- [ ] CHK019 ¿Es consistente el descarte de la respuesta entera con una descripción de muchos ítems en la que uno solo trae un número fuera de rango? [Consistencia, Spec §FR-017]
-- [ ] CHK020 ¿Son consistentes los estados de campo (declarado, estimado, faltante) entre FR-003, FR-004, FR-006 y la entidad Ítem, sin estados intermedios sin nombre? [Consistencia, Spec §Key Entities]
-- [ ] CHK021 ¿Es consistente FR-025 —los ítems nuevos van al final y los viejos conservan su color— con la regla de asignación de colores de FR-013? [Consistencia, Spec §FR-025]
+- [x] CHK017 ¿Son compatibles FR-017 (descartar entera la respuesta fuera de esquema y tratarla como vacía) y FR-021 con el escenario 8 de la historia 1, que después de los reintentos deja "la cantidad faltante" de un ítem que nunca se mostró? [Conflicto, Spec §FR-017]
+- [x] CHK018 ¿Está dicho explícitamente que una respuesta fuera de esquema es transitoria y por lo tanto se reintenta, o hay que inferirlo encadenando FR-017 con FR-016? [Consistencia, Spec §FR-017]
+- [x] CHK019 ¿Es consistente el descarte de la respuesta entera con una descripción de muchos ítems en la que uno solo trae un número fuera de rango? [Consistencia, Spec §FR-017]
+- [x] CHK020 ¿Son consistentes los estados de campo (declarado, estimado, faltante) entre FR-003, FR-004, FR-006 y la entidad Ítem, sin estados intermedios sin nombre? [Consistencia, Spec §Key Entities]
+- [x] CHK021 ¿Es consistente FR-025 —los ítems nuevos van al final y los viejos conservan su color— con la regla de asignación de colores de FR-013? [Consistencia, Spec §FR-025]
 
 ## Calidad de los criterios de aceptación
 
-- [ ] CHK022 ¿Está definido qué cuenta como campo "extraído correctamente" en SC-003: coincidencia exacta tras normalizar unidades, o con tolerancia? [Medibilidad, Spec §SC-003]
+- [x] CHK022 ¿Está definido qué cuenta como campo "extraído correctamente" en SC-003: coincidencia exacta tras normalizar unidades, o con tolerancia? [Medibilidad, Spec §SC-003]
 - [ ] CHK023 ¿Está definida la repetibilidad de la evaluación de SC-003 a SC-005 sobre un proveedor no determinístico —cuántas corridas, y si el número reportado es de una corrida o un promedio? [Medibilidad, Spec §SC-003]
 - [ ] CHK024 ¿Está definido el criterio de "entrada correcta del catálogo" de SC-005 para los casos en que dos entradas podrían corresponder? [Medibilidad, Spec §SC-005]
-- [ ] CHK025 ¿Alcanzan las etiquetas que describe la entidad "Caso del dataset" para calcular SC-003, SC-004 y SC-005 sin que el evaluador tenga que interpretar? [Medibilidad, Spec §Key Entities]
+- [x] CHK025 ¿Alcanzan las etiquetas que describe la entidad "Caso del dataset" para calcular SC-003, SC-004 y SC-005 sin que el evaluador tenga que interpretar? [Medibilidad, Spec §Key Entities]
 
 ## Cobertura de escenarios y casos borde
 
-- [ ] CHK026 ¿Hay requerimientos para la descripción que no contiene ninguna carga reconocible: texto vacío o ajeno al dominio? [Cobertura, Gap]
+- [x] CHK026 ¿Hay requerimientos para la descripción que no contiene ninguna carga reconocible: texto vacío o ajeno al dominio? [Cobertura, Gap]
 - [ ] CHK027 ¿Hay requerimientos para la cota superior de la cantidad por ítem y de la cantidad de ítems de una respuesta? [Cobertura, Edge Case]
-- [ ] CHK028 ¿Hay requerimientos para el ítem que el usuario agrega a mano con FR-006 sin pasar por el modelo —qué estado tienen sus campos y si puede quedar estimado? [Cobertura, Gap]
+- [x] CHK028 ¿Hay requerimientos para el ítem que el usuario agrega a mano con FR-006 sin pasar por el modelo —qué estado tienen sus campos y si puede quedar estimado? [Cobertura, Gap]
 
 ## Notes
 
@@ -59,3 +59,20 @@ completado desde el catálogo, esquema de ítems y evaluación de precisión, an
 - `/speckit-implement` reads checklist checkbox state as a gate and must not modify markers
 - `checklists/requirements.md` has a separate built-in lifecycle maintained by `/speckit-specify` and `/speckit-clarify`
 - Un ítem marcado `[x]` dice que el requerimiento está bien escrito, no que esté implementado
+
+## Lo que queda sin tildar (revisión del 2026-10-28)
+
+Los 19 tildados están respondidos: por el spec (FR-004 con sus tres motivos, FR-017 y FR-021 ya
+sin conflicto, SC-003 con su criterio) o por los contratos y `research.md`. Quedan nueve:
+
+| Ítem | Qué falta exactamente |
+|---|---|
+| CHK002 | La **regla de redondeo** cuando el peso declarado para todo el ítem no se divide exacto por la cantidad. Con pesos en gramos enteros, 12,5 kg entre 3 necesita una regla |
+| CHK007 | La **espera entre reintentos**, sobre todo ante un 429 dentro de un presupuesto de 10 s |
+| CHK009 | Si el reintento que el usuario pide **abre un presupuesto nuevo** y si cuenta contra el límite por IP |
+| CHK010 | Si la marca de dato estimado nombra la **versión del catálogo** además de la entrada |
+| CHK011 | Qué se **registra** de las descripciones del usuario y por cuánto tiempo |
+| CHK015 | Cómo se leen las medidas cuando la descripción **rotula los ejes** fuera del orden "AxBxC" |
+| CHK023 | **Cuántas corridas** tiene la evaluación sobre un proveedor no determinístico, y si el número que se reporta es de una corrida o un promedio. SC-007 ya lo declara; SC-003 a SC-005 no |
+| CHK024 | Qué es la "**entrada correcta**" de SC-005 cuando dos entradas del catálogo podrían corresponder |
+| CHK027 | La cota superior de la **cantidad de ítems** de una respuesta |

@@ -11,9 +11,9 @@
 
 ## Completitud de requerimientos
 
-- [ ] CHK001 ¿Está declarado el umbral de distancia perceptual y la métrica con la que se mide (por ejemplo CIEDE2000), que SC-015 da por "declarado junto a la paleta"? [Gap, Spec §FR-013]
+- [x] CHK001 ¿Está declarado el umbral de distancia perceptual y la métrica con la que se mide (por ejemplo CIEDE2000), que SC-015 da por "declarado junto a la paleta"? [Gap, Spec §FR-013]
 - [ ] CHK002 ¿Está definido un criterio medible para que dos bultos del mismo tipo se distingan dentro de una pila, equivalente al que FR-013 fija para los pares de la paleta? [Medibilidad, Spec §FR-013]
-- [ ] CHK003 ¿Están definidos como requerimiento los controles que exige "3D navegable" —girar, acercar, desplazar—, y no solo en la narrativa de la historia 3? [Gap, Spec §FR-013]
+- [x] CHK003 ¿Están definidos como requerimiento los controles que exige "3D navegable" —girar, acercar, desplazar—, y no solo en la narrativa de la historia 3? [Gap, Spec §FR-013]
 - [ ] CHK004 ¿Está definida la regla de asignación de color a ítem —cuál de los 12 le toca a cada uno— para que la vista sea tan determinística como la disposición? [Gap, Spec §FR-013]
 - [ ] CHK005 ¿Está definido el contraste mínimo de los colores contra el fondo y contra el contenedor, además de la distancia entre pares de la paleta? [Gap, Spec §FR-013]
 - [ ] CHK006 ¿Hay requerimientos de accesibilidad para quien no distingue colores, si el tipo de ítem se comunica únicamente por color? [Gap, Accesibilidad]
@@ -23,30 +23,30 @@
 
 ## Claridad y falta de ambigüedad
 
-- [ ] CHK010 ¿Están definidos la posición inicial del recorrido de FR-014 y el extremo k=0? [Edge Case, Spec §FR-014]
+- [x] CHK010 ¿Están definidos la posición inicial del recorrido de FR-014 y el extremo k=0? [Edge Case, Spec §FR-014]
 - [ ] CHK011 ¿Está claro si "Chrome de escritorio" es solo el objetivo de medición de SC-009 o también el alcance de soporte, dado que ni los requerimientos ni Out of Scope hablan de otros navegadores ni del teléfono? [Ambigüedad, Spec §Assumptions]
-- [ ] CHK012 ¿Está definido si el recorrido de FR-014 muestra el orden de colocación que produce la consolidación o un orden de carga propio de la vista? [Clarity, Spec §FR-014]
+- [x] CHK012 ¿Está definido si el recorrido de FR-014 muestra el orden de colocación que produce la consolidación o un orden de carga propio de la vista? [Clarity, Spec §FR-014]
 
 ## Consistencia de requerimientos
 
-- [ ] CHK013 ¿Es consistente el tope de 12 colores de FR-013 con la cantidad de tipos distintos que puede producir una descripción de 2.000 caracteres? [Consistencia, Spec §FR-013]
+- [x] CHK013 ¿Es consistente el tope de 12 colores de FR-013 con la cantidad de tipos distintos que puede producir una descripción de 2.000 caracteres? [Consistencia, Spec §FR-013]
 - [ ] CHK014 ¿Es consistente SC-009 —12 tipos como caso peor— con el supuesto declarado de que el costo de dibujo crece con la cantidad de tipos y no de bultos, y está ese supuesto puesto a prueba? [Supuesto, Spec §Dependencies and Risks]
 - [ ] CHK015 ¿Son consistentes los 5 s de SC-007 y los dos minutos de SC-001 respecto de si el tiempo de render entra en el presupuesto? [Consistencia, Spec §SC-007]
-- [ ] CHK016 ¿Es consistente la obligación de FR-024 de mostrar siempre la disposición con la de SC-009 de sostener 30 fps, en cuanto a qué cede primero por encima de 200 bultos? [Consistencia, Spec §FR-024]
+- [x] CHK016 ¿Es consistente la obligación de FR-024 de mostrar siempre la disposición con la de SC-009 de sostener 30 fps, en cuanto a qué cede primero por encima de 200 bultos? [Consistencia, Spec §FR-024]
 
 ## Calidad de los criterios de aceptación
 
-- [ ] CHK017 ¿Declara SC-009 la máquina de referencia —CPU, GPU, resolución— sin la cual un número de fps no es reproducible? [Medibilidad, Spec §SC-009]
-- [ ] CHK018 ¿Están definidos el estado de la cámara y la duración de la medición de SC-009 (órbita continua o vista fija), y si los 30 fps son promedio o mínimo? [Medibilidad, Spec §SC-009]
-- [ ] CHK019 ¿Se puede verificar SC-015 sobre la paleta sin que el evaluador tenga que elegir la métrica de distancia? [Medibilidad, Spec §SC-015]
-- [ ] CHK020 ¿Está definido con qué se mide la fluidez —"la herramienta de rendimiento del navegador"— de modo que dos personas obtengan el mismo número? [Medibilidad, Spec §SC-009]
+- [x] CHK017 ¿Declara SC-009 la máquina de referencia —CPU, GPU, resolución— sin la cual un número de fps no es reproducible? [Medibilidad, Spec §SC-009]
+- [x] CHK018 ¿Están definidos el estado de la cámara y la duración de la medición de SC-009 (órbita continua o vista fija), y si los 30 fps son promedio o mínimo? [Medibilidad, Spec §SC-009]
+- [x] CHK019 ¿Se puede verificar SC-015 sobre la paleta sin que el evaluador tenga que elegir la métrica de distancia? [Medibilidad, Spec §SC-015]
+- [x] CHK020 ¿Está definido con qué se mide la fluidez —"la herramienta de rendimiento del navegador"— de modo que dos personas obtengan el mismo número? [Medibilidad, Spec §SC-009]
 
 ## Cobertura de escenarios y casos borde
 
-- [ ] CHK021 ¿Hay requerimientos para la disposición vacía —ningún bulto colocado— en la vista 3D? [Cobertura, Gap]
+- [x] CHK021 ¿Hay requerimientos para la disposición vacía —ningún bulto colocado— en la vista 3D? [Cobertura, Gap]
 - [ ] CHK022 ¿Hay requerimientos sobre el bulto que queda afuera: se representa de alguna forma en la vista o solo en el informe de FR-012? [Cobertura, Gap]
 - [ ] CHK023 ¿Hay requerimientos de degradación para cargas muy por encima de 200 bultos, más allá del aviso, que impidan que la vista deje de responder? [Cobertura, Edge Case]
-- [ ] CHK024 ¿Hay requerimientos para el entorno que no soporta la vista 3D —sin aceleración de hardware o sin contexto disponible? [Cobertura, Exception Flow]
+- [x] CHK024 ¿Hay requerimientos para el entorno que no soporta la vista 3D —sin aceleración de hardware o sin contexto disponible? [Cobertura, Exception Flow]
 - [ ] CHK025 ¿Hay requerimientos para lo que muestra la vista mientras la consolidación está en curso, equivalentes al estado de carga que FR-026 exige para la interpretación? [Cobertura, Gap]
 - [ ] CHK026 ¿Está cubierto qué pasa con la vista y con la posición del recorrido cuando el usuario edita la lista con FR-006 y la disposición se recalcula? [Cobertura, Gap]
 
@@ -57,3 +57,33 @@
 - `/speckit-implement` reads checklist checkbox state as a gate and must not modify markers
 - `checklists/requirements.md` has a separate built-in lifecycle maintained by `/speckit-specify` and `/speckit-clarify`
 - Un ítem marcado `[x]` dice que el requerimiento está bien escrito, no que esté implementado
+
+## Lo que queda sin tildar (revisión del 2026-10-28)
+
+Los 12 tildados están respondidos: por el spec (FR-013 con su paleta, FR-024, FR-028) o por
+`research.md` §9, §10 y §15 y las tareas. Es el checklist con más pendientes, y no por casualidad:
+la vista 3D es lo más incierto del proyecto. Quedan catorce.
+
+**A medias** —la decisión existe pero está incompleta:
+
+| Ítem | Qué falta |
+|---|---|
+| CHK007 | Las paredes del contenedor están definidas; **medidas e identificación del bulto**, no |
+| CHK008 | El aviso de colores reciclados está mandado; su **contenido y su lugar**, no |
+| CHK009 | El umbral del aviso de FR-024 es 200; el **texto del aviso**, no |
+| CHK014 | SC-009 mide el caso peor, pero el **supuesto** de que el costo de dibujo crece con los tipos y no con los bultos no está puesto a prueba |
+
+**Abiertos**:
+
+| Ítem | Qué falta |
+|---|---|
+| CHK002 | Un **criterio medible** para que dos bultos del mismo tipo se distingan dentro de una pila, equivalente al umbral que FR-013 fija entre colores |
+| CHK004 | La **regla de asignación** de color a ítem: cuál de los 12 le toca a cada uno |
+| CHK005 | El **contraste mínimo** de los colores contra el fondo y contra el contenedor |
+| CHK006 | **Accesibilidad**: si hay un canal además del color para quien no los distingue |
+| CHK011 | Si "Chrome de escritorio" es el **alcance de soporte** o solo el objetivo de medición |
+| CHK015 | Si el **tiempo de render** entra en los presupuestos de SC-007 y SC-001 |
+| CHK022 | Si el bulto que queda afuera se **representa en la vista** o solo en el informe |
+| CHK023 | **Degradación** para cargas muy por encima de 200 bultos, más allá del aviso |
+| CHK025 | Qué muestra la vista **mientras la consolidación está en curso** |
+| CHK026 | Qué pasa con la vista y con la posición del recorrido **al recalcular** tras una edición |
