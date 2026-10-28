@@ -9,11 +9,21 @@
  * al 115% del *volumen interno* quedaban tipos enteros afuera, porque el acomodador llena entre
  * el 50% y el 80% (CONTEXTO.md). La calibración fina es T091; esto es el punto de partida.
  *
- * **Estado de la calibración**: las cantidades están puestas para que cada escenario desborde y
- * para que ningún tipo quede con cero colocados, que es lo que hace falta para usarlos como
- * fixtures. La calibración fina al ~115% es **T091**, y va después de US4 a propósito: US4
- * extiende el orden de colocación para respetar las marcas, y eso cambia qué entra. Calibrar
- * ahora sería calibrar dos veces.
+ * **Calibrados el 2026-10-28 con el acomodador completo** (T091). Los números medidos están en
+ * `eval/ultimo-informe.md`.
+ *
+ * Tres escenarios no llegan al 1,15x y la razón es del problema, no de la calibración:
+ *
+ *   - `no-apilables` (1,02x): los no apilables van al final, así que cuanto más desborda el
+ *     escenario, menos piso les queda. Con 340 cajas las bobinas quedan en cero.
+ *   - `con-bulto-gigante` (1,01x): el exceso lo aportan los 3 bultos que no entran en ninguna
+ *     orientación, que es justo lo que el escenario mide. Subir las cajas pondría a ese tipo
+ *     por encima de su techo individual.
+ *   - `tambores-y-cajas` (1,08x): mismo efecto que el primero, más suave.
+ *
+ * El acomodo no es monótono: en `carga-mixta`, pasar de 465 a 510 bultos de carga baja los
+ * colocados de 459 a 445, y a 495 los baja a 372, porque las cajas grandes tapizan el piso y
+ * desplazan a las chicas. Por eso las cantidades salieron de probar y medir, no de una fórmula.
  *
  * **No se recalibran para que un número salga mejor.**
  */
@@ -91,9 +101,9 @@ function escenario(
 
 export const ESCENARIOS: readonly EscenarioReferencia[] = [
   escenario('carga-mixta', 'tres tamaños de caja, el caso más común', 'volumen', CONTENEDORES['40hc'], [
-    { id: 'cajas-grandes', cantidad: 95, largo: 1200, ancho: 800, alto: 600, peso: 80_000 },
-    { id: 'cajas-medianas', cantidad: 200, largo: 600, ancho: 400, alto: 400, peso: 25_000 },
-    { id: 'cajas-chicas', cantidad: 300, largo: 400, ancho: 300, alto: 250, peso: 9_000 },
+    { id: 'cajas-grandes', cantidad: 80, largo: 1200, ancho: 800, alto: 600, peso: 80_000 },
+    { id: 'cajas-medianas', cantidad: 180, largo: 600, ancho: 400, alto: 400, peso: 25_000 },
+    { id: 'cajas-chicas', cantidad: 250, largo: 400, ancho: 300, alto: 250, peso: 9_000 },
   ]),
 
   escenario('tambores-y-cajas', 'no apilables mezclados con apilables', 'volumen', CONTENEDORES['40'], [
@@ -102,14 +112,14 @@ export const ESCENARIOS: readonly EscenarioReferencia[] = [
   ]),
 
   escenario('fragiles', 'topes de peso encima bajos, que ponen techo a la pila', 'volumen', CONTENEDORES['40hc'], [
-    { id: 'fragiles-grandes', cantidad: 60, largo: 800, ancho: 600, alto: 700, peso: 40_000, pesoMaximoEncima: 30_000 },
-    { id: 'fragiles-chicos', cantidad: 120, largo: 400, ancho: 400, alto: 350, peso: 12_000, pesoMaximoEncima: 8_000 },
-    { id: 'robustas', cantidad: 150, largo: 600, ancho: 400, alto: 300, peso: 18_000 },
+    { id: 'fragiles-grandes', cantidad: 50, largo: 800, ancho: 600, alto: 700, peso: 40_000, pesoMaximoEncima: 30_000 },
+    { id: 'fragiles-chicos', cantidad: 100, largo: 400, ancho: 400, alto: 350, peso: 12_000, pesoMaximoEncima: 8_000 },
+    { id: 'robustas', cantidad: 125, largo: 600, ancho: 400, alto: 300, peso: 18_000 },
   ]),
 
   escenario('heladeras', 'frágiles altos que son el grueso de la carga', 'volumen', CONTENEDORES['40hc'], [
     { id: 'heladeras', cantidad: 45, largo: 700, ancho: 700, alto: 1800, peso: 75_000, pesoMaximoEncima: 5_000, orientacionObligatoria: true },
-    { id: 'accesorios', cantidad: 900, largo: 400, ancho: 300, alto: 200, peso: 6_000 },
+    { id: 'accesorios', cantidad: 650, largo: 400, ancho: 300, alto: 200, peso: 6_000 },
   ]),
 
   // Este escenario tiene una ventana de calibración angosta y es inherente: los no apilables
@@ -120,8 +130,8 @@ export const ESCENARIOS: readonly EscenarioReferencia[] = [
     { id: 'cajas', cantidad: 310, largo: 500, ancho: 400, alto: 300, peso: 15_000 },
   ]),
 
-  escenario('sobrecarga-peso', 'alrededor del 115% de la carga útil: 330 x 98 kg contra 28,3 t', 'peso', CONTENEDORES['20'], [
-    { id: 'bolsones', cantidad: 330, largo: 600, ancho: 400, alto: 400, peso: 98_000 },
+  escenario('sobrecarga-peso', 'alrededor del 115% de la carga útil: 250 x 130 kg = 32,5 t contra 28,3 t', 'peso', CONTENEDORES['20'], [
+    { id: 'bolsones', cantidad: 250, largo: 600, ancho: 400, alto: 400, peso: 130_000 },
   ]),
 
   escenario('sobrecarga-peso-mixta', 'sobrecarga de peso con dos tipos: 33,4 t contra 28,87', 'peso', CONTENEDORES['40'], [
