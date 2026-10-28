@@ -21,6 +21,7 @@ import {
 import type { Contenedor, Disposicion } from '../dominio/disposicion'
 import type { Item } from '../dominio/items'
 import { aristasDelContenedor, mallasDe } from './instanciado'
+import { informeDe, medirFps, type Medicion } from './medidor-fps'
 
 export type EscenaProps = {
   readonly disposicion: Disposicion
@@ -33,7 +34,11 @@ export type EscenaProps = {
 export function Escena({ disposicion, items, contenedor, hasta }: EscenaProps) {
   const lienzo = useRef<HTMLCanvasElement | null>(null)
   const mostrarHasta = useRef<((k: number) => void) | null>(null)
+  /** Para el medidor de SC-009: ubica la cámara en un ángulo absoluto. */
+  const ubicarEnAngulo = useRef<((angulo: number) => void) | null>(null)
   const [sin3D, setSin3D] = useState<string | null>(null)
+  const [medicion, setMedicion] = useState<Medicion | null>(null)
+  const [midiendo, setMidiendo] = useState(false)
 
   useEffect(() => {
     const canvas = lienzo.current
@@ -137,6 +142,10 @@ export function Escena({ disposicion, items, contenedor, hasta }: EscenaProps) {
 
     ajustarTamanio()
     ubicarCamara()
+    ubicarEnAngulo.current = (angulo: number) => {
+      giro = angulo
+      ubicarCamara()
+    }
 
     let vivo = true
     function dibujar() {
@@ -157,6 +166,7 @@ export function Escena({ disposicion, items, contenedor, hasta }: EscenaProps) {
       mallas.liberar()
       render.dispose()
       mostrarHasta.current = null
+      ubicarEnAngulo.current = null
     }
   }, [disposicion, items, contenedor, hasta])
 
@@ -177,11 +187,53 @@ export function Escena({ disposicion, items, contenedor, hasta }: EscenaProps) {
     )
   }
 
+  const bultos = disposicion.secuencia.length
+  const tipos = new Set(disposicion.secuencia.map((c) => c.bulto.itemId)).size
+
+  async function medir() {
+    const canvas = lienzo.current
+    const girar = ubicarEnAngulo.current
+    if (canvas === null || girar === null) return
+    setMidiendo(true)
+    setMedicion(await medirFps(canvas, girar))
+    setMidiendo(false)
+  }
+
   return (
-    <canvas
-      ref={lienzo}
-      style={{ width: '100%', height: '60vh', display: 'block', background: '#f4f4f5' }}
-      aria-label="Vista 3D de la carga en el contenedor"
-    />
+    <>
+      <canvas
+        ref={lienzo}
+        style={{ width: '100%', height: '60vh', display: 'block', background: '#f4f4f5' }}
+        aria-label="Vista 3D de la carga en el contenedor"
+      />
+      <p>
+        Girar: arrastrar · Acercar: rueda · Desplazar: arrastrar con el botón derecho
+      </p>
+
+      {/* El medidor de SC-009 solo existe en desarrollo: no es parte del producto. */}
+      {import.meta.env.DEV ? (
+        <section>
+          <button type="button" onClick={() => void medir()} disabled={midiendo}>
+            {midiendo ? 'Midiendo 10 segundos…' : `Medir fps (SC-009) con ${bultos} bultos en ${tipos} tipos`}
+          </button>
+          {medicion !== null ? (
+            <>
+              <p>
+                Mínimo sostenido: <strong>{medicion.fpsMinimoSostenido} fps</strong>{' '}
+                {medicion.fpsMinimoSostenido >= 30 ? '— cumple SC-009' : '— NO cumple SC-009'} ·
+                promedio {medicion.fpsPromedio} fps · GPU {medicion.maquina.gpu}
+              </p>
+              <textarea
+                readOnly
+                rows={14}
+                style={{ width: '100%', fontFamily: 'monospace' }}
+                value={informeDe(medicion, bultos, tipos)}
+                aria-label="Informe para pegar en eval/ultimo-informe.md"
+              />
+            </>
+          ) : null}
+        </section>
+      ) : null}
+    </>
   )
 }
