@@ -36,6 +36,16 @@
   el proveedor falla o se agota el presupuesto de 10 s? → A: Estado de carga visible, sin
   cancelar; ante falla se conserva la descripción intacta, se informa que la falla es del
   proveedor y se ofrece reintentar, sin tocar la lista ya cargada.
+- Q: ¿El esquema de ítems se valida sobre la respuesta entera o ítem por ítem? → A: Híbrido. La
+  forma de la respuesta —que sea una lista de ítems con los campos esperados— se valida entera: si
+  no cumple, se descarta completa, se trata como respuesta vacía y se reintenta. El rango de cada
+  valor —cantidad entera ≥ 1, medidas y peso > 0— se valida ítem por ítem: el campo fuera de rango
+  queda faltante con ese motivo y se pregunta, sin descartar los demás ítems ni reintentar.
+- Q: Cuando un bulto apoya sobre dos o más bultos, ¿cómo se reparte entre ellos el peso que se
+  propaga hacia abajo? → A: En proporción al área de contacto de cada apoyo, acumulándose por toda
+  la pila, y en aritmética entera: pesos en gramos, áreas en milímetros cuadrados y la parte de
+  cada apoyo redondeada hacia arriba. Sin punto flotante, para que el acomodador y el validador
+  lleguen al mismo número por separado.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -79,8 +89,9 @@ necesidad de consolidar ni de renderizar nada.
    interpreta, **entonces** la propuesta se descarta entera, en lugar de completarse con algo
    parecido. (AC-17)
 8. **Dado** "-5 cajas de 60x40x30", **cuando** se interpreta, **entonces** la cantidad no queda
-   en 5 ni en -5: el valor no cumple el esquema de ítems y, si vuelve igual, la cantidad queda
-   faltante y el sistema la pide. (AC-27)
+   en 5 ni en -5: el valor queda fuera del rango del esquema de ítems, la cantidad queda faltante
+   con ese motivo y el sistema la pide, sin descartar los demás ítems de la respuesta y sin
+   reintentar. (AC-27)
 9. **Dada** una descripción tipeada y un proveedor que falla en los 3 intentos o agota el
    presupuesto de 10 s, **cuando** se interpreta, **entonces** la descripción sigue intacta en el
    campo, el mensaje dice que la falla es del proveedor, se puede reintentar y la lista ya cargada
@@ -193,8 +204,11 @@ respeta.
 
 - **Descripción demasiado larga**: con 2.001 caracteres, el pedido se rechaza con un mensaje que
   dice el límite y no se le pasa ninguna llamada al proveedor del modelo. (AC-25)
-- **Respuesta que no cumple el esquema de ítems**: no se muestra ningún ítem de esa respuesta y se
-  trata como una respuesta vacía. (AC-26)
+- **Respuesta cuya forma no cumple el esquema de ítems**: no se muestra ningún ítem de esa
+  respuesta y se trata como una respuesta vacía, con reintento. (AC-26)
+- **Respuesta bien formada con un valor fuera de rango**: solo ese campo queda faltante; los demás
+  campos del ítem y los demás ítems de la respuesta entran a la lista, sin reintento. (AC-27,
+  FR-021)
 - **Respuesta vacía del proveedor**: se vuelve a preguntar hasta 2 veces —3 intentos en total—
   dentro del presupuesto de 10 s; agotado el presupuesto se informa la falla. (AC-20, FR-016)
 - **Límite de velocidad del proveedor**: se reintenta. **Credenciales inválidas o saldo agotado**:
@@ -209,6 +223,8 @@ respeta.
   "peso". (AC-23)
 - **Un solo bulto que no entra en ninguna orientación en el contenedor elegido**: queda afuera con
   su motivo, sin romper la consolidación del resto. (RF-09)
+- **Bulto apoyado sobre varios bultos a la vez**: el peso que baja se reparte entre los apoyos en
+  proporción al área de contacto de cada uno, redondeando hacia arriba. (FR-027, AC-06)
 - **Eliminar un ítem de la lista**: los colores de los demás tipos no se corren. (AC-09)
 - **Más de 12 tipos de ítem**: los colores se reciclan en el mismo orden y la vista avisa que hay
   tipos que comparten color; la lista los sigue identificando por nombre. (FR-013)
@@ -222,7 +238,8 @@ respeta.
   límites de rendimiento dejan de estar garantizados; no se rechaza ni se recorta la carga.
   (FR-024)
 - **Número fuera de rango en la descripción**: "-5 cajas", "0 cajas" o una cantidad no entera no
-  se toman como dato declarado ni se salvan por su valor absoluto. (AC-27)
+  se toman como dato declarado, no se salvan por su valor absoluto y no descartan los demás ítems
+  de la respuesta. (AC-27)
 - **Repositorio recién clonado y sin variables de entorno**: la aplicación arranca siguiendo el
   README o dice exactamente qué variable falta, sin que haya que leer código. (AC-28)
 - **Ráfaga de pedidos desde la misma IP**: a partir del límite se rechazan sin llamar al
@@ -246,8 +263,9 @@ respeta.
   indicando qué entrada del catálogo usó. MUST NOT completar ningún dato con un valor que no
   salga del catálogo.
 - **FR-004** (RF-03): Lo que el sistema no puede completar MUST preguntárselo al usuario,
-  distinguiendo si el ítem no está en el catálogo o si la entrada existe pero no trae ese dato, y
-  MUST bloquear la consolidación hasta que el dato esté. La cantidad nunca se completa: si falta,
+  distinguiendo tres motivos: el ítem no está en el catálogo, la entrada existe pero no trae ese
+  dato, o el valor que vino está fuera del rango que fija FR-021. MUST bloquear la consolidación
+  hasta que el dato esté. La cantidad nunca se completa: si falta,
   se pregunta.
 - **FR-005** (RF-03, AC-17): El sistema MUST verificar contra el catálogo toda entrada propuesta
   para un ítem; si el id propuesto no existe, MUST descartar la propuesta entera y MUST NOT
@@ -265,14 +283,15 @@ respeta.
 - **FR-009** (RF-07, AC-21): El sistema MUST calcular la disposición de forma determinística y
   sin intervención del modelo de lenguaje: la misma entrada da la misma disposición bulto por
   bulto —posición, orientación y orden de colocación—, sin tolerancia. Las longitudes son enteras
-  en milímetros, el origen está en la esquina del fondo abajo a la izquierda, x es el largo hacia
-  la puerta, y el ancho y z el alto, y la orientación dice qué medida del bulto queda sobre cada
-  eje.
+  en milímetros y los pesos enteros en gramos —el usuario los declara en kilos por FR-002—, el
+  origen está en la esquina del fondo abajo a la izquierda, x es el largo hacia la puerta, y el
+  ancho y z el alto, y la orientación dice qué medida del bulto queda sobre cada eje.
 - **FR-010** (RF-08): El sistema MUST validar toda disposición antes de mostrarla: sin
   superposiciones entre bultos, dentro de los límites del contenedor, con al menos el 80% de la
   base de cada bulto elevado apoyada sobre el piso o sobre bultos cargados antes en la secuencia,
-  sin superar la carga máxima total y respetando las marcas de FR-008. La validación MUST llevar
-  sus propias cuentas, sin compartir código ni constantes con el cálculo de la disposición.
+  sin superar la carga máxima total y respetando las marcas de FR-008 —el peso admitido encima se
+  mide con el reparto de FR-027—. La validación MUST llevar sus propias cuentas, sin compartir
+  código ni constantes con el cálculo de la disposición.
 - **FR-011** (RNF-03): La validación de FR-010 MUST ser bloqueante: una disposición que no pasa
   MUST NOT renderizarse ni guardarse, y cualquier violación detectada sobre los escenarios de
   referencia MUST hacer fallar el build.
@@ -302,8 +321,10 @@ respeta.
   escribir otra implementación de esa interfaz.
 - **FR-017** (RNF-09): El intermediario MUST rechazar, sin llamar al proveedor, las descripciones
   de más de 2.000 caracteres, con un mensaje que dice el límite; MUST acotar la longitud de la
-  respuesta que le pide al modelo; y MUST descartar entera toda respuesta que no cumpla el
-  esquema de ítems, tratándola como una respuesta vacía.
+  respuesta que le pide al modelo; y MUST descartar entera toda respuesta cuya forma no
+  cumpla el esquema de ítems —que no sea una lista de ítems con los campos esperados—,
+  tratándola como una respuesta vacía. Un valor fuera del rango que fija FR-021 MUST NOT
+  descartar la respuesta: se resuelve ítem por ítem por FR-021.
 - **FR-018** (RNF-05): Las disposiciones de los 10 escenarios de referencia MUST quedar
   congeladas en un archivo versionado junto a ellos, registrado una única vez cuando los
   escenarios estén cerrados. La suite MUST recalcularlas y compararlas bulto por bulto
@@ -319,9 +340,11 @@ respeta.
   implementación de prueba de la interfaz del modelo. La evaluación de precisión que llama al
   proveedor real MUST correr aparte.
 - **FR-021** (RNF-09, AC-27): El esquema de ítems MUST exigir cantidad entera ≥ 1 y medidas y
-  peso > 0. Un número fuera de rango MUST NOT tomarse como dato declarado y MUST NOT corregirse
-  por su signo ni por su valor absoluto: cae por FR-017 y, si al reintentar vuelve igual, el
-  campo queda faltante y se pregunta por FR-004.
+  peso > 0. El rango MUST validarse ítem por ítem: un valor fuera de rango MUST NOT tomarse como
+  dato declarado, MUST NOT corregirse por su signo ni por su valor absoluto, MUST NOT descartar
+  los demás ítems de la respuesta y MUST NOT disparar un reintento. Ese campo queda faltante con
+  el motivo de valor fuera de rango y se pregunta por FR-004; el resto del ítem y los demás ítems
+  entran a la lista.
 - **FR-022** (RNF-10): El proyecto MUST poder clonarse y correrse siguiendo solo el README, sin
   leer código: el README MUST dar los comandos de desarrollo, de tests y de la evaluación de
   precisión, y MUST existir un archivo de ejemplo que nombre todas las variables de entorno que
@@ -343,6 +366,15 @@ respeta.
   o se agota el presupuesto de 10 s de FR-016— la interfaz MUST conservar la descripción tipeada
   intacta, MUST informar que la falla es del proveedor y no un error de interpretación, MUST
   ofrecer reintentar y MUST NOT tocar la lista de ítems ya cargada.
+- **FR-027** (RF-06, RF-08, AC-06): El peso que un bulto apoya sobre los que tiene debajo MUST
+  repartirse entre sus apoyos en proporción al área con que cada uno lo toca, y MUST propagarse
+  hacia abajo acumulándose por toda la pila: lo que recibe un bulto es su parte del peso de los
+  que apoyan sobre él, incluido lo que esos a su vez reciben de más arriba. El reparto MUST
+  calcularse en aritmética entera —pesos en gramos, áreas de contacto en milímetros cuadrados— y
+  la parte de cada apoyo MUST redondearse hacia arriba, de modo que la suma de las partes nunca
+  sea menor que el peso repartido. MUST NOT intervenir el punto flotante en ningún paso. El
+  cálculo de la disposición (FR-009) y la validación (FR-010) MUST llegar al mismo número por
+  separado, sin compartir código ni constantes.
 
 ### Key Entities *(include if feature involves data)*
 
