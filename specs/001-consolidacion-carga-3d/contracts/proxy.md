@@ -71,6 +71,8 @@ reales. No busca patrones genéricos como `sk-`: dan falsos positivos con el có
 
 - IP: primer valor de `x-forwarded-for`; `remoteAddress` como respaldo.
 - Ventanas deslizantes de 1 minuto y 1 hora, en memoria del proceso.
+- El reintento que pide el usuario tras una falla **cuenta**: es un pedido nuevo que va a llamar al
+  proveedor. Si no contara, el tope tendría un agujero del tamaño de alguien apretando "reintentar".
 - **Deuda declarada**: el contador se reinicia con cada arranque en frío y no se comparte entre
   instancias, así que el tope efectivo es más laxo que el declarado. El PRD ya lo acepta; el total
   se acota con el tope de gasto configurado en el proveedor.

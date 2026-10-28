@@ -70,6 +70,10 @@ La implementación traduce lo que devuelve el proveedor a `transitoria: boolean`
 `server/modelo/reintentos.ts` envuelve a la implementación y es el dueño del presupuesto:
 
 - Hasta **3 intentos** en total (2 reintentos), solo sobre `transitoria: true`.
+- Espera **500 ms antes del segundo intento y 1.500 ms antes del tercero**. Un 429 reintentado al
+  instante vuelve a fallar igual; una espera larga se come el presupuesto.
+- Si lo que queda del presupuesto no alcanza para la espera **más** un intento, corta sin esperar:
+  dormir 1,5 s para descubrir después que no hay tiempo de llamar no tiene sentido.
 - **10 s** de presupuesto total, medido punta a punta desde que entra el pedido al intermediario.
 - Si el presupuesto se agota en medio de un intento, se corta: no se arranca uno nuevo.
 - Agotado el presupuesto o los intentos, devuelve `falla` y **no** se reintenta más (FR-016).

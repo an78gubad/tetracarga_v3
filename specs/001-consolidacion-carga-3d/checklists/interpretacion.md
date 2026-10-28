@@ -12,14 +12,14 @@ completado desde el catálogo, esquema de ítems y evaluación de precisión, an
 ## Completitud de requerimientos
 
 - [x] CHK001 ¿Está definido el conjunto de unidades que el sistema acepta (mm, cm, m, pulgadas, kg, g, toneladas, litros), si FR-002 solo fija el default de centímetros para una medida sin unidad? [Gap, Spec §FR-002]
-- [ ] CHK002 ¿Está definida la regla de redondeo cuando el peso declarado para todo el ítem no se divide exacto por la cantidad, sabiendo que FR-021 exige peso > 0? [Gap, Spec §FR-002]
+- [x] CHK002 ¿Está definida la regla de redondeo cuando el peso declarado para todo el ítem no se divide exacto por la cantidad, sabiendo que FR-021 exige peso > 0? [Gap, Spec §FR-002]
 - [x] CHK003 ¿Está definido cómo una capacidad declarada en litros ("tambores de 200 litros") llega a una entrada del catálogo, es decir si la capacidad es una clave de búsqueda? [Gap, Spec §FR-003]
 - [x] CHK004 ¿Está definido el conjunto de campos que tiene que traer una entrada del catálogo de objetos, incluidos los nombres o sinónimos por los que se la puede referir? [Gap, Spec §FR-019]
 - [x] CHK005 ¿Está definido un tercer motivo de campo faltante para el número fuera de rango de FR-021, si FR-004 solo enumera "no está en el catálogo" y "la entrada no trae ese dato"? [Gap, Spec §FR-004]
 - [x] CHK006 ¿Está definido con un número el tope de longitud de la respuesta que FR-017 manda acotar, como sí lo están los 2.000 caracteres de la descripción? [Clarity, Spec §FR-017]
-- [ ] CHK007 ¿Está definida la espera entre los reintentos de FR-016, en particular ante un límite de velocidad del proveedor dentro de un presupuesto de 10 s? [Gap, Spec §FR-016]
+- [x] CHK007 ¿Está definida la espera entre los reintentos de FR-016, en particular ante un límite de velocidad del proveedor dentro de un presupuesto de 10 s? [Gap, Spec §FR-016]
 - [x] CHK008 ¿Está definido desde qué momento corre el presupuesto de 10 s: el envío del usuario o la recepción en el intermediario? [Clarity, Spec §FR-016]
-- [ ] CHK009 ¿Está definido si el reintento que FR-026 le ofrece al usuario abre un presupuesto nuevo de 10 s y si cuenta contra el límite por IP de FR-023? [Gap, Spec §FR-026]
+- [x] CHK009 ¿Está definido si el reintento que FR-026 le ofrece al usuario abre un presupuesto nuevo de 10 s y si cuenta contra el límite por IP de FR-023? [Gap, Spec §FR-026]
 - [ ] CHK010 ¿Está definido qué tiene que nombrar la marca de dato estimado para ser auditable —si incluye la versión del catálogo además de la entrada? [Gap, Spec §FR-003]
 - [ ] CHK011 ¿Hay requerimientos sobre qué se registra de las descripciones que escribe el usuario y por cuánto tiempo? [Gap, Privacidad]
 
@@ -28,7 +28,7 @@ completado desde el catálogo, esquema de ítems y evaluación de precisión, an
 - [x] CHK012 ¿Está definido el alcance de "descartar la propuesta entera" de FR-005: solo la asociación de catálogo de ese ítem, el ítem completo, o la respuesta completa? [Ambigüedad, Spec §FR-005]
 - [x] CHK013 ¿Está definido si FR-003 completa campo por campo o la entrada completa, dado que AC-18 describe medidas completadas y peso faltante en el mismo ítem? [Clarity, Spec §FR-003]
 - [x] CHK014 ¿Está definido qué significa "bloquear la consolidación" en FR-004, y si bloquea toda la lista o solo el ítem afectado? [Clarity, Spec §FR-004]
-- [ ] CHK015 ¿Está definida la lectura de medidas cuando la descripción rotula los ejes en un orden distinto al "AxBxC" ("60 de alto por 40 por 30")? [Ambigüedad, Spec §FR-002]
+- [x] CHK015 ¿Está definida la lectura de medidas cuando la descripción rotula los ejes en un orden distinto al "AxBxC" ("60 de alto por 40 por 30")? [Ambigüedad, Spec §FR-002]
 - [x] CHK016 ¿Está declarado que el modelo recibe los ids del catálogo para poder proponerlos, o queda como supuesto sin escribir? [Supuesto, Spec §FR-005]
 
 ## Consistencia y conflictos
@@ -63,16 +63,12 @@ completado desde el catálogo, esquema de ítems y evaluación de precisión, an
 ## Lo que queda sin tildar (revisión del 2026-10-28)
 
 Los 19 tildados están respondidos: por el spec (FR-004 con sus tres motivos, FR-017 y FR-021 ya
-sin conflicto, SC-003 con su criterio) o por los contratos y `research.md`. Quedan nueve:
+sin conflicto, SC-003 con su criterio) o por los contratos y `research.md`. Quedan cinco (las otras cuatro se cerraron el 2026-10-28 con el redondeo hacia arriba, la espera entre reintentos, el reintento que cuenta contra el límite por IP y el rótulo explícito de los ejes):
 
 | Ítem | Qué falta exactamente |
 |---|---|
-| CHK002 | La **regla de redondeo** cuando el peso declarado para todo el ítem no se divide exacto por la cantidad. Con pesos en gramos enteros, 12,5 kg entre 3 necesita una regla |
-| CHK007 | La **espera entre reintentos**, sobre todo ante un 429 dentro de un presupuesto de 10 s |
-| CHK009 | Si el reintento que el usuario pide **abre un presupuesto nuevo** y si cuenta contra el límite por IP |
 | CHK010 | Si la marca de dato estimado nombra la **versión del catálogo** además de la entrada |
 | CHK011 | Qué se **registra** de las descripciones del usuario y por cuánto tiempo |
-| CHK015 | Cómo se leen las medidas cuando la descripción **rotula los ejes** fuera del orden "AxBxC" |
 | CHK023 | **Cuántas corridas** tiene la evaluación sobre un proveedor no determinístico, y si el número que se reporta es de una corrida o un promedio. SC-007 ya lo declara; SC-003 a SC-005 no |
 | CHK024 | Qué es la "**entrada correcta**" de SC-005 cuando dos entradas del catálogo podrían corresponder |
 | CHK027 | La cota superior de la **cantidad de ítems** de una respuesta |

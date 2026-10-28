@@ -57,6 +57,21 @@
   escenario.
 - Q: ¿Qué cuenta como campo "extraído correctamente" en la evaluación? → A: Coincidencia exacta
   después de convertir a milímetros y gramos enteros, sin tolerancia.
+- Q: ¿Cómo se redondea cuando el peso declarado para todo el ítem no se divide exacto por la
+  cantidad? → A: Hacia arriba, al gramo. La suma de los unitarios puede quedar unos gramos por
+  encima del total declarado, y ese es el lado seguro: un redondeo puede dejar un bulto afuera,
+  nunca meter uno que no entraba.
+- Q: ¿Cuánto se espera entre reintentos? → A: 500 ms después del primer fallo y 1.500 ms después
+  del segundo; si lo que queda del presupuesto no alcanza para la espera más un intento, se corta
+  sin esperar.
+- Q: ¿El reintento que pide el usuario abre un presupuesto nuevo, y cuenta contra el límite por
+  IP? → A: Las dos cosas. Es un pedido nuevo que va a llamar al proveedor, así que cuenta; y el
+  presupuesto arranca de cero, porque heredar los 10 s ya gastados lo haría fallar antes de
+  empezar.
+- Q: ¿Cómo se leen las medidas cuando la descripción rotula los ejes fuera del orden "AxBxC"? →
+  A: El rótulo explícito manda sobre la posición, y los ejes sin rótulo se reparten en el orden
+  largo-ancho-alto entre los que quedaron libres. Si los rótulos son ambiguos o se contradicen, el
+  campo queda faltante y se pregunta: no se adivina.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -267,8 +282,13 @@ respeta.
   ítem.
 - **FR-002** (RF-02): El sistema MUST convertir esa descripción en una lista de ítems con nombre,
   cantidad, largo, ancho, alto y peso unitario en kilos. Una medida sin unidad está en
-  centímetros, "AxBxC" se lee largo × ancho × alto, y un peso declarado para todo el ítem se
-  divide por la cantidad.
+  centímetros y un peso sin unidad en kilos. "AxBxC" se lee largo × ancho × alto; cuando la
+  descripción **rotula** un eje de forma explícita ("60 de alto por 40 por 30"), el rótulo MUST
+  mandar sobre la posición y los ejes sin rótulo se reparten en el orden largo-ancho-alto entre
+  los que quedaron libres. Si los rótulos son ambiguos o se contradicen, el campo MUST quedar
+  faltante y preguntarse por FR-004: no se adivina. Un peso declarado para todo el ítem se divide
+  por la cantidad y MUST redondearse **hacia arriba, al gramo**, de modo que la suma de los
+  unitarios nunca quede por debajo del total declarado.
 - **FR-003** (RF-03): El sistema MUST completar las medidas y el peso faltantes únicamente desde
   el catálogo versionado en el repositorio, marcando cada dato completado como estimado e
   indicando qué entrada del catálogo usó. MUST NOT completar ningún dato con un valor que no
@@ -327,8 +347,11 @@ respeta.
   un intermediario propio.
 - **FR-016** (RNF-08): El acceso al modelo MUST pasar por una interfaz propia que distinga una
   falla del proveedor de un error de interpretación y reintente las fallas transitorias hasta 2
-  veces —3 intentos en total— dentro de un presupuesto total de 10 s medido punta a punta; agotado
-  el presupuesto MUST cortar e informar una falla del proveedor, sin más reintentos. Un límite de
+  veces —3 intentos en total— dentro de un presupuesto total de 10 s medido punta a punta,
+  esperando **500 ms antes del segundo intento y 1.500 ms antes del tercero**: un límite de
+  velocidad reintentado al instante vuelve a fallar igual. Si lo que queda del presupuesto no
+  alcanza para la espera más un intento, MUST cortar sin esperar. Agotado el presupuesto MUST
+  cortar e informar una falla del proveedor, sin más reintentos. Un límite de
   velocidad y una respuesta vacía son transitorios; credenciales
   inválidas o saldo agotado no lo son y MUST NOT reintentarse. Cambiar de proveedor MUST ser
   escribir otra implementación de esa interfaz.
@@ -378,7 +401,10 @@ respeta.
   que está trabajando; no hace falta poder cancelarla. Cuando el intento falla —el proveedor falla
   o se agota el presupuesto de 10 s de FR-016— la interfaz MUST conservar la descripción tipeada
   intacta, MUST informar que la falla es del proveedor y no un error de interpretación, MUST
-  ofrecer reintentar y MUST NOT tocar la lista de ítems ya cargada.
+  ofrecer reintentar y MUST NOT tocar la lista de ítems ya cargada. El reintento que pide el
+  usuario MUST contar contra el límite por IP de FR-023, porque es un pedido nuevo que va a llamar
+  al proveedor, y MUST abrir un presupuesto nuevo de 10 s: heredar el ya gastado lo haría fallar
+  antes de empezar.
 - **FR-027** (RF-06, RF-08, AC-06): El peso que un bulto apoya sobre los que tiene debajo MUST
   repartirse entre sus apoyos en proporción al área con que cada uno lo toca, y MUST propagarse
   hacia abajo acumulándose por toda la pila: lo que recibe un bulto es su parte del peso de los
