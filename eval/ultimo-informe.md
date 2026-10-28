@@ -149,3 +149,36 @@ modelo se desboque.
 dio 346: la variación entre llamadas pesa más que la cantidad de ítems. Por eso el techo no se
 calculó como "tokens por ítem × tope de ítems", que era el plan original de research.md §2: ese
 cálculo habría dado un número con cara de preciso sobre una proporcionalidad que no existe.
+
+
+## SC-001 — de la descripción a la vista 3D (T091c)
+
+**Fecha**: 2026-10-28 · **Medido a mano por el usuario**, cronometrando el recorrido completo
+
+| Criterio | Objetivo | Medido |
+|---|---|---|
+| SC-001, de descripción tipeada a disposición visible en 3D | < 2 minutos | **7 segundos** ✅ |
+
+Diecisiete veces de margen, y el número es consistente con las partes medidas por separado: la
+interpretación tiene una mediana de 3,2 s, la consolidación de un escenario de este tamaño tarda
+milisegundos, y el render es inmediato. No hay ninguna parte escondida que explique la diferencia
+con los dos minutos del objetivo: el objetivo era holgado.
+
+## T097 — lo que ningún test cubre, verificado a ojo
+
+**Fecha**: 2026-10-28 · **Verificado a mano por el usuario** en Chrome de escritorio, sobre
+`?escenario=sc009`: 200 bultos en 12 tipos
+
+| Qué | Resultado |
+|---|---|
+| Los 12 colores se distinguen entre sí en pantalla | ✅ |
+| Dos bultos del mismo tipo se separan a la vista dentro de una pila | ✅ |
+| El control deslizante no muestra ningún bulto flotando en ningún paso | ✅ |
+
+El tercero es el que más importaba: si hubiera fallado, significaría que el validador aprueba
+disposiciones que el ojo desmiente, y habría un bug entre la geometría y lo que se dibuja. Que
+coincidan es la confirmación de que el 80% de apoyo y la propiedad de prefijo de AC-24 describen
+lo que de verdad se ve.
+
+El segundo cierra la deuda declarada sobre la distinción dentro de la pila: las aristas por bulto
+funcionan. Sigue sin criterio automatizado, y sigue siendo la decisión correcta.
