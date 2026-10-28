@@ -171,8 +171,8 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 
 ### Escenarios e interfaz
 
-- [ ] T066 [P] [US2] Crear `escenarios/escenarios.ts` con los 10 escenarios de referencia, todos los campos en `declarado` para que no dependan del catálogo ni del modelo, cubriendo carga mixta, frágiles, tambores y cajas, no apilables y sobrecarga de peso
-- [ ] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011, SC-006)
+- [X] T066 [P] [US2] Crear `escenarios/escenarios.ts` con los 10 escenarios de referencia, todos los campos en `declarado` para que no dependan del catálogo ni del modelo, cubriendo carga mixta, frágiles, tambores y cajas, no apilables y sobrecarga de peso
+- [X] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011, SC-006)
 - [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos, medido **de a una consolidación por vez, con 10 corridas por escenario** (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
 - [ ] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, usando las medidas interiores y la carga útil (max payload, no el peso bruto) de la entrada elegida, y que recalcule al cambiar (FR-007, AC-13)
 - [ ] T070 [US2] Crear `src/interfaz/InformeConsolidacion.tsx` con los dos aprovechamientos, los colocados y los que quedaron afuera **cada uno con su motivo** (FR-012)

@@ -61,34 +61,42 @@ function seSuperponen(a: Caja, b: Caja): boolean {
 }
 
 /**
- * Recalcula la carga que recibe cada bulto y verifica los topes (FR-027, AC-06).
+ * El grafo de apoyos: por cada bulto, los índices de los que lo sostienen.
+ *
+ * Se calcula una vez por bulto a colocar y se reusa para todas las posiciones candidatas. Sin
+ * esto, cada candidata recalculaba los apoyos de toda la pila —O(n²) por candidata— y un
+ * escenario de 225 bultos con topes de peso tardaba 14 segundos.
+ */
+type Apoyos = readonly (readonly number[])[]
+
+/**
+ * Verifica los topes de peso de toda la estructura (FR-027, AC-06, AC-04).
  *
  * Se resuelve de arriba hacia abajo —por z decreciente— porque así, cuando se procesa un bulto,
  * la carga que él mismo recibe ya está completa: lo que está encima siempre tiene z mayor.
+ *
+ * **Recalcula entero, no incrementalmente**, y es a propósito: el redondeo hacia arriba no es
+ * lineal, así que sumar deltas daría un número distinto del que calcula el validador, y las dos
+ * implementaciones tienen que coincidir.
  */
-function pesosRespetados(puestos: readonly Puesto[]): boolean {
-  const recibido = new Map<number, number>()
+function pesosRespetados(puestos: readonly Puesto[], apoyos: Apoyos): boolean {
+  const recibido = new Array<number>(puestos.length).fill(0)
   const porZDescendente = [...puestos.keys()].sort((i, j) => puestos[j]!.z - puestos[i]!.z)
 
   for (const i of porZDescendente) {
-    const arriba = puestos[i]!
-    const soportes = puestos
-      .map((p, j) => ({ p, j }))
-      .filter(({ p }) => areaContacto(arriba, p) > 0)
-
+    const soportes = apoyos[i]!
     if (soportes.length === 0) continue
 
     // Un no apilable no admite NADA encima (AC-04).
-    for (const { p } of soportes) if (p.noApilable) return false
+    for (const j of soportes) if (puestos[j]!.noApilable) return false
 
-    const total = (arriba.peso + (recibido.get(i) ?? 0)) as Gramos
-    const areas = soportes.map(({ p }) => areaContacto(arriba, p) as MilimetrosCuadrados)
+    const total = (puestos[i]!.peso + recibido[i]!) as Gramos
+    const areas = soportes.map((j) => areaContacto(puestos[i]!, puestos[j]!) as MilimetrosCuadrados)
     const partes = repartirPorArea(total, areas)
 
-    for (const [k, { j }] of soportes.entries()) {
-      const nuevo = (recibido.get(j) ?? 0) + partes[k]!
-      recibido.set(j, nuevo)
-      if (nuevo > puestos[j]!.topeEncima) return false
+    for (const [k, j] of soportes.entries()) {
+      recibido[j] = recibido[j]! + partes[k]!
+      if (recibido[j]! > puestos[j]!.topeEncima) return false
     }
   }
 
@@ -112,6 +120,7 @@ function candidatos(puestos: readonly Puesto[]): readonly Punto[] {
 export function acomodar(items: readonly Item[], contenedor: Contenedor): Disposicion {
   const ordenados = ordenarParaColocar(items)
   const puestos: Puesto[] = []
+  const apoyos: number[][] = []
   const afuera: { bulto: Bulto; motivo: MotivoAfuera }[] = []
   let pesoColocado = 0
 
@@ -134,12 +143,18 @@ export function acomodar(items: readonly Item[], contenedor: Contenedor): Dispos
         continue
       }
 
-      const colocado = buscarLugar(bulto, item, orientaciones, peso, tope, puestos, contenedor)
+      const colocado = buscarLugar(bulto, item, orientaciones, peso, tope, puestos, apoyos, contenedor)
       if (colocado === undefined) {
         afuera.push({ bulto, motivo: 'volumen' })
         continue
       }
+      // Los apoyos del recién puesto se calculan una vez, acá, y no por cada candidata.
+      const soportes: number[] = []
+      for (let j = 0; j < puestos.length; j++) {
+        if (areaContacto(colocado, puestos[j]!) > 0) soportes.push(j)
+      }
       puestos.push(colocado)
+      apoyos.push(soportes)
       pesoColocado += peso
     }
   }
@@ -162,6 +177,7 @@ function buscarLugar(
   peso: number,
   topeEncima: number,
   puestos: readonly Puesto[],
+  apoyos: Apoyos,
   contenedor: Contenedor,
 ): Puesto | undefined {
   const noApilable = item.marcas.noApilable.valor
@@ -179,7 +195,13 @@ function buscarLugar(
       if (soportesDe(caja, puestos).some((s) => (s as Puesto).noApilable)) continue
 
       const tentativo: Puesto = { ...caja, bulto, orientacion, peso, topeEncima, noApilable }
-      if (!pesosRespetados([...puestos, tentativo])) continue
+      // Los apoyos de lo ya puesto no cambian al probar candidatas: solo se agregan los del
+      // tentativo, que es lo único nuevo.
+      const soportesDelTentativo: number[] = []
+      for (let j = 0; j < puestos.length; j++) {
+        if (areaContacto(caja, puestos[j]!) > 0) soportesDelTentativo.push(j)
+      }
+      if (!pesosRespetados([...puestos, tentativo], [...apoyos, soportesDelTentativo])) continue
 
       return tentativo
     }
