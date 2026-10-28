@@ -12,7 +12,7 @@ antes de `/speckit-plan`
 
 ## Completitud de requerimientos
 
-- [ ] CHK001 ¿Está definido qué cuenta como "lo que llega al navegador" en FR-015 y SC-010: bundle, mapas de origen, respuestas de red y mensajes de error incluidos? [Clarity, Spec §FR-015]
+- [x] CHK001 ¿Está definido qué cuenta como "lo que llega al navegador" en FR-015 y SC-010: bundle, mapas de origen, respuestas de red y mensajes de error incluidos? [Clarity, Spec §FR-015]
 - [x] CHK002 ¿Está definido cómo se determina la IP de FR-023 cuando el intermediario corre detrás de un proxy o de una CDN? [Gap, Spec §FR-023]
 - [x] CHK003 ¿Está definida la unidad con la que se cuentan los 2.000 caracteres: puntos de código, grafemas o bytes? [Clarity, Spec §FR-017]
 - [x] CHK004 ¿Está enumerado el conjunto de resultados distinguibles que devuelve el intermediario —descripción demasiado larga, límite por IP, falla del proveedor, error de interpretación, respuesta fuera de esquema— que FR-026 necesita para informar la causa? [Gap, Spec §FR-026]
@@ -25,7 +25,7 @@ antes de `/speckit-plan`
 
 - [x] CHK009 ¿Está definido si los mensajes de error del proveedor se le pasan al cliente, y cómo eso convive con la prohibición de exponer la URL del proveedor? [Ambigüedad, Spec §FR-015]
 - [x] CHK010 ¿Está expresado en términos verificables que cambiar de proveedor sea "escribir otra implementación de esa interfaz"? [Medibilidad, Spec §FR-016]
-- [ ] CHK011 ¿Está definido el contenido mínimo del mensaje que "dice el límite" en FR-017 y en FR-023? [Clarity, Spec §FR-017]
+- [x] CHK011 ¿Está definido el contenido mínimo del mensaje que "dice el límite" en FR-017 y en FR-023? [Clarity, Spec §FR-017]
 
 ## Consistencia de requerimientos
 
@@ -37,7 +37,7 @@ antes de `/speckit-plan`
 ## Calidad de los criterios de aceptación
 
 - [x] CHK016 ¿Está dicho contra qué artefacto se mide SC-010, de modo que el criterio no dependa de un build viejo? [Medibilidad, Spec §SC-010]
-- [ ] CHK017 ¿Es medible SC-013 —"una persona que clona el repositorio por primera vez"— con un criterio objetivo, o depende del juicio de quien lo prueba? [Medibilidad, Spec §SC-013]
+- [x] CHK017 ¿Es medible SC-013 —"una persona que clona el repositorio por primera vez"— con un criterio objetivo, o depende del juicio de quien lo prueba? [Medibilidad, Spec §SC-013]
 - [x] CHK018 ¿Está definido cómo se cuentan las "cero llamadas al proveedor" de SC-014 sin acceso a los registros del proveedor? [Medibilidad, Spec §SC-014]
 - [x] CHK019 ¿Declara SC-002 un valor concreto de concurrencia para el p95, como exige su propio texto? [Medibilidad, Spec §SC-002]
 
@@ -69,8 +69,6 @@ Los 18 tildados están respondidos: por el spec (FR-020, SC-002 con su concurren
 
 | Ítem | Qué falta |
 |---|---|
-| CHK001 | "Lo que llega al navegador" cubre el bundle y los mensajes de error; los **mapas de origen**, no |
-| CHK017 | `quickstart.md` da el procedimiento de SC-013, pero "como si fuera la primera vez" sigue siendo **juicio de quien lo prueba** |
 
 **Abiertos**:
 
@@ -79,6 +77,11 @@ Los 18 tildados están respondidos: por el spec (FR-020, SC-002 con su concurren
 | CHK005 | Si algo **restringe quién puede llamar** al intermediario además del límite por IP |
 | CHK006 | Un requerimiento que exija configurar el **tope de gasto** del proveedor, que los riesgos dan por puesto |
 | CHK007 | Qué **registra** el intermediario, y si la descripción del usuario queda en los registros |
-| CHK011 | El **contenido mínimo** del mensaje que "dice el límite" |
 | CHK020 | Cuánto más laxo queda el tope por IP: **cuántas instancias** puede haber |
 | CHK021 | La **ráfaga concurrente** desde una misma IP dentro de la misma ventana |
+
+**Cerrados por la implementación el 2026-10-28**:
+
+- CHK001 — el test de bundle mira los mapas de origen Y construye en NODE_ENV=production, que es lo que antes faltaba
+- CHK011 — manejador.ts arma los mensajes con el límite adentro, y los tests verifican que lo digan
+- CHK017 — tests/readme.test.ts vuelve medible la parte mecánica, y declara que si el texto se entiende lo sigue juzgando una persona

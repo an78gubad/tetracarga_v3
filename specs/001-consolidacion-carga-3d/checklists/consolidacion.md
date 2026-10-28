@@ -28,7 +28,7 @@ validación bloqueante y línea base congelada, antes de pasar a `/speckit-plan`
 - [x] CHK012 ¿Está definido qué cuenta como "la misma entrada" para el determinismo de FR-009 —en particular si reordenar la lista de ítems sin cambiar su contenido tiene que dar la misma disposición? [Ambigüedad, Spec §FR-009]
 - [x] CHK013 ¿Está claro que "orientación obligatoria" fija únicamente el eje vertical, que es lo único que mide AC-05 ("su altura declarada coincide con su altura final"), y no la rotación en el plano horizontal? [Clarity, Spec §FR-008]
 - [ ] CHK014 ¿Está definido qué motivo corresponde a un bulto que no entra en ninguna orientación en el contenedor vacío, si FR-012 solo ofrece "peso" y "volumen"? [Ambigüedad, Spec §FR-012]
-- [ ] CHK015 ¿Está definido si el recálculo que dispara FR-006 recalcula la disposición entera, de modo que el resultado no dependa del historial de ediciones? [Gap, Spec §FR-006]
+- [x] CHK015 ¿Está definido si el recálculo que dispara FR-006 recalcula la disposición entera, de modo que el resultado no dependa del historial de ediciones? [Gap, Spec §FR-006]
 - [x] CHK016 ¿Está definida la representación canónica de posición y orientación con la que se congela la línea base, para que la comparación "sin tolerancia" sea inequívoca? [Clarity, Spec §FR-018]
 
 ## Consistencia de requerimientos
@@ -69,6 +69,9 @@ deudas declaradas) o por `plan.md`, `research.md`, `data-model.md` y los contrat
 |---|---|
 | CHK005 | Si la secuencia de carga tiene que ser **ejecutable en el depósito** —que ningún bulto quede tapado por otro puesto antes—. El 80% de apoyo evita que floten, no que se bloqueen |
 | CHK014 | **Qué motivo** lleva un bulto que no entra en ninguna orientación ni en el contenedor vacío. FR-012 solo ofrece "peso" y "volumen", y ninguno lo describe |
-| CHK015 | Si el recálculo de FR-006 rehace la disposición **entera**, para que el resultado no dependa del historial de ediciones |
 | CHK026 | La **cota superior** de la cantidad por ítem. FR-021 no la fija y FR-024 prohíbe recortar la carga |
 | CHK028 | El bulto que por sus **marcas de FR-008** no puede colocarse en ninguna posición, aunque quepa por volumen y por peso. Es el mismo hueco que CHK014 |
+
+**Cerrados por la implementación el 2026-10-28**:
+
+- CHK015 — consolidar.ts rehace la disposición entera con useMemo sobre items y contenedor

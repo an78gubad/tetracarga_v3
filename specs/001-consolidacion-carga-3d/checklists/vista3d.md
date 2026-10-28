@@ -14,12 +14,12 @@
 - [x] CHK001 ¿Está declarado el umbral de distancia perceptual y la métrica con la que se mide (por ejemplo CIEDE2000), que SC-015 da por "declarado junto a la paleta"? [Gap, Spec §FR-013]
 - [ ] CHK002 ¿Está definido un criterio medible para que dos bultos del mismo tipo se distingan dentro de una pila, equivalente al que FR-013 fija para los pares de la paleta? [Medibilidad, Spec §FR-013]
 - [x] CHK003 ¿Están definidos como requerimiento los controles que exige "3D navegable" —girar, acercar, desplazar—, y no solo en la narrativa de la historia 3? [Gap, Spec §FR-013]
-- [ ] CHK004 ¿Está definida la regla de asignación de color a ítem —cuál de los 12 le toca a cada uno— para que la vista sea tan determinística como la disposición? [Gap, Spec §FR-013]
+- [x] CHK004 ¿Está definida la regla de asignación de color a ítem —cuál de los 12 le toca a cada uno— para que la vista sea tan determinística como la disposición? [Gap, Spec §FR-013]
 - [ ] CHK005 ¿Está definido el contraste mínimo de los colores contra el fondo y contra el contenedor, además de la distancia entre pares de la paleta? [Gap, Spec §FR-013]
 - [ ] CHK006 ¿Hay requerimientos de accesibilidad para quien no distingue colores, si el tipo de ítem se comunica únicamente por color? [Gap, Accesibilidad]
 - [ ] CHK007 ¿Está definido qué más muestra la vista además de los bultos: paredes del contenedor, medidas, identificación del bulto? [Gap, Spec §FR-013]
-- [ ] CHK008 ¿Están definidos el contenido y el lugar del aviso de colores reciclados cuando hay más de 12 tipos? [Clarity, Spec §FR-013]
-- [ ] CHK009 ¿Están definidos el contenido del aviso de FR-024 y el umbral exacto a partir del cual aparece? [Clarity, Spec §FR-024]
+- [x] CHK008 ¿Están definidos el contenido y el lugar del aviso de colores reciclados cuando hay más de 12 tipos? [Clarity, Spec §FR-013]
+- [x] CHK009 ¿Están definidos el contenido del aviso de FR-024 y el umbral exacto a partir del cual aparece? [Clarity, Spec §FR-024]
 
 ## Claridad y falta de ambigüedad
 
@@ -47,8 +47,8 @@
 - [ ] CHK022 ¿Hay requerimientos sobre el bulto que queda afuera: se representa de alguna forma en la vista o solo en el informe de FR-012? [Cobertura, Gap]
 - [ ] CHK023 ¿Hay requerimientos de degradación para cargas muy por encima de 200 bultos, más allá del aviso, que impidan que la vista deje de responder? [Cobertura, Edge Case]
 - [x] CHK024 ¿Hay requerimientos para el entorno que no soporta la vista 3D —sin aceleración de hardware o sin contexto disponible? [Cobertura, Exception Flow]
-- [ ] CHK025 ¿Hay requerimientos para lo que muestra la vista mientras la consolidación está en curso, equivalentes al estado de carga que FR-026 exige para la interpretación? [Cobertura, Gap]
-- [ ] CHK026 ¿Está cubierto qué pasa con la vista y con la posición del recorrido cuando el usuario edita la lista con FR-006 y la disposición se recalcula? [Cobertura, Gap]
+- [x] CHK025 ¿Hay requerimientos para lo que muestra la vista mientras la consolidación está en curso, equivalentes al estado de carga que FR-026 exige para la interpretación? [Cobertura, Gap]
+- [x] CHK026 ¿Está cubierto qué pasa con la vista y con la posición del recorrido cuando el usuario edita la lista con FR-006 y la disposición se recalcula? [Cobertura, Gap]
 
 ## Notes
 
@@ -69,8 +69,6 @@ la vista 3D es lo más incierto del proyecto. Quedan catorce.
 | Ítem | Qué falta |
 |---|---|
 | CHK007 | Las paredes del contenedor están definidas; **medidas e identificación del bulto**, no |
-| CHK008 | El aviso de colores reciclados está mandado; su **contenido y su lugar**, no |
-| CHK009 | El umbral del aviso de FR-024 es 200; el **texto del aviso**, no |
 | CHK014 | SC-009 mide el caso peor, pero el **supuesto** de que el costo de dibujo crece con los tipos y no con los bultos no está puesto a prueba |
 
 **Abiertos**:
@@ -78,12 +76,17 @@ la vista 3D es lo más incierto del proyecto. Quedan catorce.
 | Ítem | Qué falta |
 |---|---|
 | CHK002 | Un **criterio medible** para que dos bultos del mismo tipo se distingan dentro de una pila, equivalente al umbral que FR-013 fija entre colores |
-| CHK004 | La **regla de asignación** de color a ítem: cuál de los 12 le toca a cada uno |
 | CHK005 | El **contraste mínimo** de los colores contra el fondo y contra el contenedor |
 | CHK006 | **Accesibilidad**: si hay un canal además del color para quien no los distingue |
 | CHK011 | Si "Chrome de escritorio" es el **alcance de soporte** o solo el objetivo de medición |
 | CHK015 | Si el **tiempo de render** entra en los presupuestos de SC-007 y SC-001 |
 | CHK022 | Si el bulto que queda afuera se **representa en la vista** o solo en el informe |
 | CHK023 | **Degradación** para cargas muy por encima de 200 bultos, más allá del aviso |
-| CHK025 | Qué muestra la vista **mientras la consolidación está en curso** |
-| CHK026 | Qué pasa con la vista y con la posición del recorrido **al recalcular** tras una edición |
+
+**Cerrados por la implementación el 2026-10-28**:
+
+- CHK004 — color-por-item.ts: el color sale del índice de ENTRADA del ítem, con test de que eliminar no corre los demás
+- CHK008 — Avisos.tsx dice el texto y el lugar del aviso de colores compartidos
+- CHK009 — Avisos.tsx dice el texto, y el umbral es 200 en LIMITE_BULTOS_GARANTIZADO
+- CHK025 — InformeConsolidacion.tsx tiene la fase "calculando"
+- CHK026 — recorrido.ts: posicionTrasRecalcular conserva la posición si existe y si no va al final, con test
