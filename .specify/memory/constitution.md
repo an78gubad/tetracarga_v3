@@ -94,7 +94,10 @@ Estas restricciones son la forma en que los principios se hacen cumplir en el á
 - Plan primero, un paso por vez. Si no hay plan vigente, se arma y se acuerda antes de escribir
   código.
 - Cada paso que queda andando se commitea en el momento, con tests y chequeo de tipos en verde.
-  Commits chicos y atómicos.
+  Commits chicos y atómicos. Única excepción: en el acomodador y el validador el test va en su
+  propio commit, antes del código que lo hace pasar, y ese commit queda en rojo hasta el
+  siguiente, que lo pone en verde. Existe para que la historia muestre el test primero; no
+  autoriza dejar la suite en rojo más allá de ese commit ni saltear tests (Principio VI).
 - La historia no se reescribe: nada de `amend`, `reset` sobre lo pusheado, `rebase` ni
   `push --force`. Lo que sale mal se deshace con un commit nuevo.
 - Los identificadores RF/RNF/AC no se renumeran: los tests y los comentarios los citan. Lo nuevo va
@@ -121,4 +124,12 @@ Estas restricciones son la forma en que los principios se hacen cumplir en el á
 - La guía operativa del día a día vive en `AGENTS.md`, `CONTEXTO.md` e `INSTRUCCIONES.md`. Esta
   constitución manda sobre esos tres; lo que no está acá, se resuelve ahí.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28
+## Registro de enmiendas
+
+- **1.1.0** (2026-10-28): se agrega la excepción de commit en rojo para el test primero en el
+  acomodador y el validador, en "Proceso de trabajo y barreras de calidad", y esta sección. Por
+  qué: en la entrega anterior los tests entraban siempre en el mismo commit que la feature, así
+  que la historia no mostraba que el criterio se había fijado antes del código; el acomodador y
+  el validador son los dos módulos donde eso más importa. Aprobada por el usuario.
+
+**Version**: 1.1.0 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28
