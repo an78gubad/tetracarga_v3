@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v7)
+**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v8)
 
 > Trazabilidad: cada requerimiento y criterio de este spec cita el identificador del PRD del que
 > sale (RF/RNF/AC). Los identificadores del PRD no se renumeran. Si algo de este spec contradice
@@ -328,9 +328,12 @@ respeta.
 - **FR-011** (RNF-03): La validación de FR-010 MUST ser bloqueante: una disposición que no pasa
   MUST NOT renderizarse ni guardarse, y cualquier violación detectada sobre los escenarios de
   referencia MUST hacer fallar el build.
-- **FR-012** (RF-09): El sistema MUST informar el aprovechamiento de volumen y de peso, los
-  bultos colocados y los que quedaron afuera, cada uno con su motivo: "peso" si colocarlo
-  superaba la carga máxima; si no, "volumen".
+- **FR-012** (RF-09, AC-30): El sistema MUST informar el aprovechamiento de volumen y de peso,
+  los bultos colocados y los que quedaron afuera, cada uno con su motivo, con esta precedencia:
+  **"peso"** si colocarlo superaba la carga máxima; **"restricción"** si ninguna posición es
+  válida por su tamaño o por sus marcas de FR-008; **"volumen"** si no quedaba lugar. Decir
+  "volumen" de un bulto bloqueado por una marca manda a reservar un contenedor más grande, que no
+  resuelve nada.
 - **FR-013** (RF-10): El sistema MUST renderizar la disposición en 3D navegable y pintar cada
   tipo de ítem con un color fijo, atado al ítem y no a su posición en la lista. Dos tipos
   cualesquiera MUST distinguirse a simple vista y dos bultos del mismo tipo MUST distinguirse uno
@@ -414,6 +417,22 @@ respeta.
   sea menor que el peso repartido. MUST NOT intervenir el punto flotante en ningún paso. El
   cálculo de la disposición (FR-009) y la validación (FR-010) MUST llegar al mismo número por
   separado, sin compartir código ni constantes.
+- **FR-029** (RNF-12, AC-31): El intermediario MUST NOT registrar la descripción que escribe el
+  usuario ni la respuesta del modelo. MUST registrar el código de resultado, la duración y la
+  cantidad de intentos. Lo que la gente escribe dice qué despacha y cuánto: es dato comercial de
+  su empresa, no material de depuración.
+- **FR-030** (RNF-13, AC-32): El intermediario MUST rechazar, sin llamar al proveedor, los pedidos
+  cuyo encabezado de origen no sea el de la aplicación.
+- **FR-031** (RNF-14, AC-33): Por encima de **5.000 bultos** el sistema MUST pedir confirmación
+  antes de consolidar, advirtiendo que va a tardar, y la consolidación MUST NOT bloquear la
+  interfaz. MUST NOT rechazar ni recortar la carga (FR-024).
+- **FR-032** (RNF-15): El README MUST nombrar la configuración del tope de gasto del proveedor
+  como un paso del despliegue. Es lo único que acota el daño en pesos; el límite por IP de FR-023
+  solo acota la velocidad.
+- **FR-033** (RF-10, FR-013): Cada color de la paleta MUST estar a la misma distancia perceptual
+  mínima del color de fondo de la vista que de los otros colores de la paleta, verificado por el
+  mismo test. Un bulto del mismo tono que el fondo se pierde aunque se distinga de los demás
+  bultos.
 - **FR-028** (RF-04, RF-08, RF-09, RF-10): Cuando no hay una disposición que mostrar, el sistema
   MUST decir por qué y MUST NOT dejar la pantalla en blanco. Son cuatro casos: la lista de ítems
   está vacía; ningún bulto pudo colocarse y todos quedan afuera, cada uno con su motivo de FR-012;
@@ -448,13 +467,16 @@ respeta.
 ### Measurable Outcomes
 
 - **SC-001** (Objetivos): Una carga descrita hablando normalmente queda consolidada y visible en
-  3D en menos de dos minutos, sin cargar ninguna planilla.
+  3D en menos de dos minutos, sin cargar ninguna planilla. **Incluye el tiempo de dibujar la vista
+  3D**: mide lo que vive una persona.
 - **SC-002** (RNF-01): La interpretación de una descripción responde en menos de 10 s (p95),
   medido punta a punta y con los reintentos de FR-016 incluidos, sobre todos los pedidos y no solo
   los que salen bien al primer intento. La medición se toma con **5 llamadas en paralelo**: con una
   sola, el p95 queda por debajo del que ve una persona cuando hay otras usando el sistema.
 - **SC-003** (RNF-02 a): Sobre el dataset de 50 descripciones etiquetadas, al menos el 90% de los
-  campos declarados en la descripción se extraen correctamente. "Correctamente" es **coincidencia
+  campos declarados en la descripción se extraen correctamente. La evaluación corre **3 veces** y
+  el número que se reporta es **el peor de los tres**: el proveedor no es determinístico, así que
+  una sola corrida puede dar suerte. "Correctamente" es **coincidencia
   exacta después de convertir a milímetros y gramos enteros, sin tolerancia**: un campo que la
   descripción declara y el sistema marca como estimado cuenta como error, aunque el valor del
   catálogo acierte.
@@ -470,7 +492,10 @@ respeta.
   sistema muestre.
 - **SC-007** (RNF-04): La consolidación de hasta 200 bultos se resuelve en menos de 5 s (p95),
   medida sobre los 10 escenarios **de a una consolidación por vez, con 10 corridas por escenario**.
-  No se mide con concurrencia: el cálculo es local y no compite con otros pedidos.
+  No se mide con concurrencia: el cálculo es local y no compite con otros pedidos. **No incluye el
+  tiempo de dibujar la vista 3D**: mide el acomodador, que es lo que puede explotar porque el
+  acomodo es NP-duro. Si incluyera el render y SC-007 fallara, no se sabría si el problema es el
+  algoritmo o la placa de video.
 - **SC-008** (RNF-05, AC-14): Los 10 escenarios coinciden bulto por bulto con la línea base
   congelada, sin tolerancia.
 - **SC-009** (RNF-06): La vista 3D sostiene al menos 30 fps con 200 bultos repartidos en 12 tipos
@@ -526,6 +551,13 @@ respeta.
 - Mejorar el aprovechamiento de volumen por encima de la línea base registrada.
 - Un límite por IP exacto entre instancias del intermediario: alcanza con contar por instancia
   (FR-023).
+- Accesibilidad para quien no distingue colores: el tipo de ítem se comunica solo por color en la
+  vista 3D, y la lista lo sigue identificando por nombre. Es una decisión, no un olvido: la
+  distancia perceptual de FR-013 modela visión tricromática.
+- Navegadores distintos de Chrome de escritorio, y teléfonos. En otros probablemente ande, pero no
+  se mide ni se garantiza.
+- Representar en la vista 3D los bultos que quedaron afuera: no tienen posición, así que dibujarlos
+  sería inventarles una. Se listan en el informe de FR-012 con su motivo.
 
 ## Dependencies and Risks
 
@@ -547,6 +579,18 @@ respeta.
   dibujo crece con la cantidad de tipos de ítem, no de bultos, y el tope de 200 bultos queda
   alineado con el de la consolidación.
 - **Deuda declarada**: el 80% de apoyo de FR-010 es un criterio propio, sin fuente.
+- **Deuda declarada**: la secuencia de carga no se verifica como ejecutable en el depósito. El 80%
+  de apoyo evita que los bultos floten, pero nada impide que uno quede tapado por otro puesto
+  antes. Exigirlo cambiaría el acomodador y obligaría a volver a congelar la línea base.
+- **Deuda declarada**: que dos bultos del mismo tipo se distingan dentro de una pila (FR-013) se
+  resuelve con aristas por bulto y se verifica a ojo, sin criterio automatizado. Inventar una
+  métrica de "se ven las aristas" sería inventar un número que no mide lo que importa.
+- **Supuesto**: la marca de dato estimado nombra la entrada del catálogo y no su versión. El
+  catálogo está versionado en el repositorio y no hay persistencia, así que una consolidación no
+  sobrevive a un cambio de catálogo.
+- **Supuesto**: la entrada correcta de SC-005 es siempre única, porque el esquema del catálogo
+  rechaza que un sinónimo pertenezca a dos entradas. La ambigüedad no puede existir por
+  construcción.
 - **Deuda declarada**: el aprovechamiento de volumen no se compara contra ningún óptimo; FR-018
   detecta que cambió, no si es bueno.
 - **Deuda declarada**: el límite de FR-023 cuenta en la memoria de cada instancia y se reinicia

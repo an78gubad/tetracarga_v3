@@ -1,4 +1,4 @@
-# PRD-001v7: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
+# PRD-001v8: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
 
 ## Contexto y Problema
 Antes de exportar hay que responder si la mercadería entra en un contenedor y cómo acomodarla.
@@ -43,7 +43,10 @@ dónde salió cada dato completado.
   bultos cargados antes en la secuencia, sin superar la carga máxima total y respetando RF-06. El
   validador no comparte código con el acomodador, ni siquiera constantes.
 - RF-09: Informar el aprovechamiento de volumen y de peso, los bultos colocados y los que quedaron
-  afuera, cada uno con su motivo: peso si colocarlo superaba la carga máxima; si no, volumen.
+  afuera, cada uno con su motivo, en este orden de precedencia: **peso** si colocarlo superaba la
+  carga máxima; **restricción** si ninguna posición es válida por su tamaño o por sus marcas de
+  RF-06; **volumen** si no quedaba lugar. Decir "volumen" de un bulto bloqueado por una marca
+  manda a reservar un contenedor más grande, que no resuelve nada.
 - RF-10: Renderizar la disposición en 3D navegable, permitir recorrer la secuencia de carga bulto
   por bulto, y pintar cada tipo de ítem con un color fijo, atado al ítem y no a su posición en la
   lista. Dos tipos cualesquiera se distinguen a simple vista, y dos bultos del mismo tipo se
@@ -85,6 +88,18 @@ dónde salió cada dato completado.
   todas las variables de entorno que hacen falta, sin valores.
 - RNF-11: El proxy limita los pedidos por IP y rechaza, sin llamar al proveedor, los que exceden
   10 por minuto o 60 por hora, con un mensaje que dice el límite.
+- RNF-12: El proxy no registra la descripción que escribe el usuario, ni la respuesta del modelo.
+  Registra el código de resultado, la duración y la cantidad de intentos. Lo que la gente escribe
+  dice qué despacha y cuánto: es dato comercial de su empresa, no material de depuración.
+- RNF-13: El proxy rechaza los pedidos cuyo origen no sea el de la aplicación. No frena a alguien
+  con una herramienta de línea de comandos, pero sí a una página ajena que quiera gastar el saldo
+  desde el navegador de sus visitantes.
+- RNF-14: Por encima de 5.000 bultos el sistema pide confirmación antes de consolidar, advirtiendo
+  que va a tardar, y la consolidación no bloquea la interfaz. No se rechaza ni se recorta la carga
+  (RNF-04).
+- RNF-15: El despliegue no está completo sin el tope de gasto configurado en el proveedor, y el
+  README lo nombra como un paso. Es lo único que acota el daño en pesos; RNF-11 solo acota la
+  velocidad.
 
 ## Los tres artefactos versionados
 Primer entregable: sin ellos, RNF-02 y RNF-05 son decorativos.
@@ -169,6 +184,15 @@ Primer entregable: sin ellos, RNF-02 y RNF-05 son decorativos.
 - AC-29 (RNF-11): Dadas 10 interpretaciones de la misma IP dentro de un minuto, cuando llega la
   número 11, entonces el proxy la rechaza con un mensaje que dice el límite y la implementación
   del modelo no recibe ninguna llamada.
+- AC-30 (RF-09): Dado un bulto que no entra en ninguna orientación en el contenedor vacío, o uno
+  cuyas marcas de RF-06 lo bloquean en toda posición, cuando se consolida, entonces queda afuera
+  con el motivo "restricción" y no con "volumen".
+- AC-31 (RNF-12): Dada una interpretación, cuando se registra lo que pasó, entonces la descripción
+  del usuario no aparece en ningún registro.
+- AC-32 (RNF-13): Dado un pedido con un origen distinto del de la aplicación, cuando llega al
+  proxy, entonces se rechaza sin llamar al proveedor.
+- AC-33 (RNF-14): Dada una carga de más de 5.000 bultos, cuando se pide consolidar, entonces el
+  sistema pide confirmación, y al confirmar la interfaz sigue respondiendo mientras calcula.
 
 ## Stack
 TypeScript en todo el proyecto sobre Node 22 LTS, React con Vite, Three.js con geometría
@@ -186,6 +210,13 @@ proveedor inicial, detrás de la interfaz de RNF-08.
 - Centro de gravedad y distribución de peso.
 - Agregar o editar entradas del catálogo desde la interfaz; el catálogo se toca en el repositorio.
 - Mejorar el aprovechamiento de volumen por encima de la línea base registrada.
+- Accesibilidad para quien no distingue colores: el tipo de ítem se comunica solo por color en la
+  vista 3D. La lista lo sigue identificando por nombre, así que la información existe. Es una
+  decisión, no un olvido: la distancia perceptual que exige RF-10 modela visión tricromática.
+- Navegadores distintos de Chrome de escritorio, y teléfonos. En otros probablemente ande, pero no
+  se mide ni se garantiza.
+- Representar en la vista 3D los bultos que quedaron afuera: no tienen posición, así que dibujarlos
+  sería inventarles una. Se listan en el informe de RF-09 con su motivo.
 
 ## Deuda declarada
 - El 80% de apoyo de RF-08 es un criterio propio sin fuente.
@@ -194,6 +225,13 @@ proveedor inicial, detrás de la interfaz de RNF-08.
 - El límite por IP de RNF-11 cuenta en la memoria de cada instancia del proxy y se reinicia con
   cada arranque en frío: el tope efectivo es más laxo que el declarado y no frena a un tercero
   distribuido. El total se sigue acotando con el tope de gasto configurado en el proveedor.
+- La secuencia de carga no se verifica como **ejecutable en el depósito**: el 80% de apoyo evita
+  que los bultos floten, pero nada impide que uno quede tapado por otro puesto antes. Exigirlo
+  cambiaría el acomodador y obligaría a volver a congelar la línea base.
+- Que dos bultos del mismo tipo se distingan dentro de una pila (RF-10) se resuelve con aristas por
+  bulto y **se verifica a ojo, sin criterio automatizado**. A diferencia de la distancia entre
+  colores de la paleta, acá inventar una métrica sería inventar un número que no mide lo que
+  importa.
 
 ## Diferido
 Existe solo si todo lo anterior está terminado. No tiene criterios de aceptación y nada depende de
