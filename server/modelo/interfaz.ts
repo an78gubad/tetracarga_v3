@@ -70,6 +70,21 @@ export type ResultadoInterpretacion =
   | { readonly tipo: 'vacia' }
   | { readonly tipo: 'falla'; readonly falla: FallaModelo }
 
+/** Lo que quien llama le impone a un intento. */
+export type OpcionesIntento = {
+  /**
+   * Tope de tiempo para **este** intento, en milisegundos.
+   *
+   * Hace falta porque el presupuesto de FR-016 se mide punta a punta: sin un tope por intento,
+   * una sola llamada lenta se pasa de los 10 s y el presupuesto no se cumple. Medido: el p95
+   * daba 15,5 s y el máximo 23,9 s con un presupuesto de 10.
+   */
+  readonly topeMs?: number
+}
+
 export interface Modelo {
-  interpretar(pedido: PedidoInterpretacion): Promise<ResultadoInterpretacion>
+  interpretar(
+    pedido: PedidoInterpretacion,
+    opciones?: OpcionesIntento,
+  ): Promise<ResultadoInterpretacion>
 }

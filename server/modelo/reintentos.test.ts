@@ -145,3 +145,51 @@ describe('clasificación de los códigos del proveedor', () => {
     expect(clasificar(418).transitoria).toBe(true)
   })
 })
+
+describe('cada intento recibe como tope lo que queda del presupuesto', () => {
+  it('el primer intento recibe casi los 10 s completos', async () => {
+    const topes: (number | undefined)[] = []
+    const modelo: Modelo = {
+      interpretar: (_p, o) => {
+        topes.push(o?.topeMs)
+        return Promise.resolve(respuestas.items({ nombre: 'cajas' }))
+      },
+    }
+    const { reloj } = relojFalso()
+    await interpretarConReintentos(modelo, PEDIDO, reloj)
+    expect(topes[0]).toBe(PRESUPUESTO_MS)
+  })
+
+  it('cada reintento recibe menos, descontando la espera y lo ya gastado', async () => {
+    const topes: (number | undefined)[] = []
+    const { reloj, avanzar } = relojFalso()
+    const modelo: Modelo = {
+      interpretar: (_p, o) => {
+        topes.push(o?.topeMs)
+        avanzar(2_000) // cada intento tarda 2 s
+        return Promise.resolve(respuestas.fallaTransitoria())
+      },
+    }
+    await interpretarConReintentos(modelo, PEDIDO, reloj)
+    // Del presupuesto se descuentan los 2 s de cada intento y las esperas de 500 y 1.500 ms.
+    expect(topes).toEqual([
+      PRESUPUESTO_MS,
+      PRESUPUESTO_MS - 2_000 - 500,
+      PRESUPUESTO_MS - 4_000 - 2_000,
+    ])
+  })
+
+  it('el tope nunca es 0 ni negativo: un intento con tope 0 fallaría al instante', async () => {
+    const topes: (number | undefined)[] = []
+    const { reloj, avanzar } = relojFalso()
+    const modelo: Modelo = {
+      interpretar: (_p, o) => {
+        topes.push(o?.topeMs)
+        avanzar(PRESUPUESTO_MS - 100)
+        return Promise.resolve(respuestas.fallaTransitoria())
+      },
+    }
+    await interpretarConReintentos(modelo, PEDIDO, reloj)
+    for (const t of topes) expect(t).toBeGreaterThan(0)
+  })
+})

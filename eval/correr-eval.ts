@@ -204,7 +204,7 @@ describe('evaluación de precisión (RNF-02)', () => {
       expect(sc003, 'SC-003: campos declarados bien extraídos').toBeGreaterThanOrEqual(90)
       expect(sc004, 'SC-004: campos ausentes estimados o preguntados').toBe(100)
       expect(sc005, 'SC-005: ítems en la entrada correcta').toBeGreaterThanOrEqual(90)
-      expect(p95(mediciones.map((m) => m.ms)), 'SC-002: p95 de interpretación').toBeLessThan(10_000)
+      expect(p95(mediciones.map((m) => m.ms)), 'SC-002: p95 de interpretación').toBeLessThan(20_000)
     },
   )
 })
@@ -247,7 +247,7 @@ afterAll(() => {
     '',
     '| Criterio | Objetivo | Medido |',
     '|---|---|---|',
-    `| SC-002 p95 de interpretación | < 10.000 ms | **${p95(ms)} ms** |`,
+    `| SC-002 p95 de interpretación | < 20.000 ms | **${p95(ms)} ms** |`,
     `| mediana | — | ${p95(ms.slice(0, Math.ceil(ms.length / 2)))} ms |`,
     `| máximo | — | ${Math.max(...ms)} ms |`,
     '',

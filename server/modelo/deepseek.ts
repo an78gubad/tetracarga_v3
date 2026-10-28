@@ -9,6 +9,7 @@
 import type {
   ItemPropuesto,
   Modelo,
+  OpcionesIntento,
   PedidoInterpretacion,
   ResultadoInterpretacion,
 } from './interfaz.js'
@@ -18,11 +19,16 @@ export const MODELO_POR_DEFECTO = 'deepseek-flash'
 /**
  * Tope de la respuesta que se le pide al modelo (FR-017).
  *
- * **Provisorio**: el valor definitivo sale de medir tokens por ítem sobre el dataset (T042), y
- * va al informe con el comando que lo produjo. Hasta entonces, holgado: una respuesta truncada
- * es JSON inválido, se descarta entera y se reintenta, y eso quema el presupuesto de 10 s.
+ * **Medido el 2026-10-28** sobre los 10 casos del dataset con más ítems: la salida fue de 137 a
+ * **1.383 tokens**, y el prompt pesa 944. Ver `eval/ultimo-informe.md`.
+ *
+ * Se fija en 8.000, que es casi 6 veces el máximo medido. El margen es amplio a propósito: este
+ * número es un **techo de seguridad**, no un presupuesto. Solo se paga por los tokens que el
+ * modelo genera de verdad, así que un techo alto no cuesta nada — y uno bajo sí: una respuesta
+ * truncada es JSON inválido, se descarta entera y se reintenta, y eso sí quema el presupuesto de
+ * tiempo. Lo que acota es que el modelo se desboque.
  */
-export const MAX_TOKENS = 4_000
+export const MAX_TOKENS = 8_000
 
 export type ConfiguracionDeepSeek = {
   readonly apiKey: string
@@ -107,6 +113,9 @@ export function armarPrompt(pedido: PedidoInterpretacion): { sistema: string; us
     '  idCatalogo.',
     'Las medidas y el peso son objetos {valor, unidad} con la unidad TAL COMO APARECE en el',
     'texto. No convertís unidades: eso lo hace el programa.',
+    'La clave "unidad" va SIEMPRE. Si el texto no dice la unidad, poné "": el programa decide,',
+    'y sabe que una medida entera sin unidad está en centímetros y una con decimales en metros.',
+    'No la adivines vos.',
     'Si la descripción rotula un eje ("60 de alto"), agregás ejeRotulado: "alto" a esa medida.',
     'Si el peso es del ítem completo y no de cada bulto, agregás esDelItemCompleto: true.',
     'Lo que la descripción no dice, lo omitís. NO lo inventás, no lo estimás y no lo completás.',
@@ -114,13 +123,28 @@ export function armarPrompt(pedido: PedidoInterpretacion): { sistema: string; us
     'idCatalogo solo puede ser uno de estos, o estar omitido:',
     catalogo || '  (el catálogo está vacío: omitís idCatalogo siempre)',
     '',
-    'Ejemplo. Para "40 cajas de 60x40x30 de 12 kilos y 15 tambores de 200 litros":',
+    'Ejemplo 1, con las unidades dichas. Para "40 cajas de 60x40x30 cm de 12 kilos y 15',
+    'tambores de 200 litros":',
     '{"items":[',
     '  {"nombre":"cajas","cantidad":40,"largo":{"valor":60,"unidad":"cm"},',
     '   "ancho":{"valor":40,"unidad":"cm"},"alto":{"valor":30,"unidad":"cm"},',
     '   "peso":{"valor":12,"unidad":"kg"}},',
     '  {"nombre":"tambores","cantidad":15,"capacidad":{"valor":200,"unidad":"l"},',
     '   "idCatalogo":"tambor-215l"}',
+    ']}',
+    '',
+    'Ejemplo 2, SIN unidades en el texto. Para "15 bultos de 120 por 80 por 100 de 45 kilos":',
+    '{"items":[',
+    '  {"nombre":"bultos","cantidad":15,"largo":{"valor":120,"unidad":""},',
+    '   "ancho":{"valor":80,"unidad":""},"alto":{"valor":100,"unidad":""},',
+    '   "peso":{"valor":45,"unidad":"kg"}}',
+    ']}',
+    '',
+    'Ejemplo 3, con un eje rotulado. Para "6 cajones de 1,5 de alto, base de 1,20 por 0,80":',
+    '{"items":[',
+    '  {"nombre":"cajones","cantidad":6,',
+    '   "alto":{"valor":1.5,"unidad":"m","ejeRotulado":"alto"},',
+    '   "largo":{"valor":1.2,"unidad":"m"},"ancho":{"valor":0.8,"unidad":"m"}}',
     ']}',
   ].join('\n')
 
@@ -135,13 +159,22 @@ export function crearModeloDeepSeek(
   const modelo = configuracion.modelo ?? MODELO_POR_DEFECTO
 
   return {
-    async interpretar(pedido: PedidoInterpretacion): Promise<ResultadoInterpretacion> {
+    async interpretar(
+      pedido: PedidoInterpretacion,
+      opciones?: OpcionesIntento,
+    ): Promise<ResultadoInterpretacion> {
       const { sistema, usuario } = armarPrompt(pedido)
+
+      // Sin este tope, un solo pedido lento se pasa del presupuesto de 10 s de FR-016: lo
+      // medí, el p95 daba 15,5 s y el máximo 23,9 s.
+      const corte =
+        opciones?.topeMs === undefined ? undefined : AbortSignal.timeout(opciones.topeMs)
 
       let respuesta: Response
       try {
         respuesta = await fetchImpl(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
           method: 'POST',
+          ...(corte === undefined ? {} : { signal: corte }),
           headers: {
             'content-type': 'application/json',
             authorization: `Bearer ${apiKey}`,
@@ -158,9 +191,13 @@ export function crearModeloDeepSeek(
           }),
         })
       } catch (error) {
-        // Error de red: transitorio. El mensaje no se le reenvía al navegador, porque suele
-        // traer la URL del proveedor (FR-015).
-        return { tipo: 'falla', falla: { transitoria: true, codigo: 'error-de-red' } }
+        // Error de red o corte por tiempo: los dos transitorios. El mensaje no se le reenvía al
+        // navegador, porque suele traer la URL del proveedor (FR-015).
+        const corteDeTiempo = (error as Error)?.name === 'TimeoutError'
+        return {
+          tipo: 'falla',
+          falla: { transitoria: true, codigo: corteDeTiempo ? 'corte-por-tiempo' : 'error-de-red' },
+        }
       }
 
       if (!respuesta.ok) {

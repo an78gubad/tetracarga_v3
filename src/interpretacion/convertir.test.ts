@@ -22,9 +22,32 @@ describe('longitudes a milímetros enteros', () => {
     expect(r.ok && r.valor).toBe(esperado)
   })
 
-  it('sin unidad está en centímetros (FR-002)', () => {
+  it('sin unidad, una medida ENTERA está en centímetros (FR-002)', () => {
     const r = aMilimetros(60)
     expect(r.ok && r.valor).toBe(600)
+  })
+
+  it('sin unidad, una medida CON DECIMALES está en metros', () => {
+    // "1,80 de alto" son 1.800 mm, no 18. Es como habla la gente, y no hay ningún caso real de
+    // "1,80 centímetros" en carga. Lo encontró el eval: el dataset esperaba 1800 y venía 18.
+    const r = aMilimetros(1.8)
+    expect(r.ok && r.valor).toBe(1800)
+  })
+
+  it.each([
+    [1.5, 1500],
+    [0.9, 900],
+    [2.4, 2400],
+    [12.5, 12500],
+  ])('%s sin unidad son %s mm', (valor, esperado) => {
+    const r = aMilimetros(valor)
+    expect(r.ok && r.valor).toBe(esperado)
+  })
+
+  it('la unidad dicha siempre manda sobre la regla', () => {
+    // "1,8 cm" es 18 mm, aunque tenga decimales: la regla solo decide cuando no hay unidad.
+    const r = aMilimetros(1.8, 'cm')
+    expect(r.ok && r.valor).toBe(18)
   })
 
   it('redondea hacia arriba cuando no da entero', () => {

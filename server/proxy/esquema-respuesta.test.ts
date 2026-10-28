@@ -19,9 +19,10 @@ describe('la forma se valida por respuesta entera y la descarta completa (AC-26)
     expect(validarRespuesta([{ cantidad: 3 }]).tipo).toBe('forma-invalida')
   })
 
-  it('una medida que no es {valor, unidad} invalida toda la respuesta', () => {
-    expect(validarRespuesta([{ nombre: 'cajas', largo: 60 }]).tipo).toBe('forma-invalida')
-    expect(validarRespuesta([{ nombre: 'cajas', largo: { valor: 60 } }]).tipo).toBe('forma-invalida')
+  it('una medida que no trae un número invalida toda la respuesta', () => {
+    expect(validarRespuesta([{ nombre: 'cajas', largo: 'sesenta' }]).tipo).toBe('forma-invalida')
+    expect(validarRespuesta([{ nombre: 'cajas', largo: { unidad: 'cm' } }]).tipo).toBe('forma-invalida')
+    expect(validarRespuesta([{ nombre: 'cajas', largo: { valor: 'x', unidad: 'cm' } }]).tipo).toBe('forma-invalida')
   })
 
   it('un idCatalogo que no es texto invalida toda la respuesta', () => {
@@ -31,6 +32,50 @@ describe('la forma se valida por respuesta entera y la descarta completa (AC-26)
   it('la respuesta bien formada pasa', () => {
     const r = validarRespuesta([CAJAS])
     expect(r.tipo).toBe('ok')
+  })
+})
+
+describe('una medida sin unidad es un caso PREVISTO, no un error de forma', () => {
+  // FR-002: "una medida sin unidad está en centímetros" y un peso sin unidad en kilos. El
+  // esquema rechazaba estas formas y era más estricto que el spec: eran 32 de 56 fallas del
+  // primer eval, porque una medida sin unidad descartaba la respuesta entera.
+  it('un número suelto se acepta y se normaliza con la unidad vacía', () => {
+    const r = validarRespuesta([{ nombre: 'cajas', cantidad: 40, largo: 60 }])
+    expect(r.tipo).toBe('ok')
+    if (r.tipo !== 'ok') return
+    expect(r.items[0]).toHaveProperty('largo', { valor: 60, unidad: '' })
+  })
+
+  it('{valor} sin unidad también', () => {
+    const r = validarRespuesta([{ nombre: 'cajas', largo: { valor: 60 } }])
+    expect(r.tipo).toBe('ok')
+    if (r.tipo !== 'ok') return
+    expect(r.items[0]).toHaveProperty('largo', { valor: 60, unidad: '' })
+  })
+
+  it('un peso sin unidad también', () => {
+    const r = validarRespuesta([{ nombre: 'cajas', peso: 12 }])
+    expect(r.tipo).toBe('ok')
+    if (r.tipo !== 'ok') return
+    expect(r.items[0]).toHaveProperty('peso', { valor: 12, unidad: '' })
+  })
+
+  it('el rango se sigue verificando sobre las tres formas', () => {
+    for (const largo of [0, -60, { valor: 0 }, { valor: -60, unidad: 'cm' }]) {
+      const r = validarRespuesta([{ nombre: 'cajas', largo }])
+      expect(r.tipo).toBe('ok')
+      if (r.tipo !== 'ok') continue
+      expect(r.items[0]).not.toHaveProperty('largo')
+      expect(r.descartados[0]?.campo).toBe('largo')
+    }
+  })
+
+  it('una unidad vacía se convierte con el default de FR-002: centímetros', () => {
+    // La conversión la hace src/interpretacion/convertir.ts; acá solo se verifica que la
+    // unidad vacía llegue, que es lo que activa el default.
+    const r = validarRespuesta([{ nombre: 'cajas', largo: 60 }])
+    if (r.tipo !== 'ok') throw new Error('debería ser ok')
+    expect((r.items[0] as { largo: { unidad: string } }).largo.unidad).toBe('')
   })
 })
 

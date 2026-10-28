@@ -1,4 +1,4 @@
-# PRD-001v8: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
+# PRD-001v9: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
 
 ## Contexto y Problema
 Antes de exportar hay que responder si la mercadería entra en un contenedor y cómo acomodarla.
@@ -21,8 +21,10 @@ dónde salió cada dato completado.
 ## Requerimientos Funcionales
 - RF-01: Aceptar una descripción de la carga en lenguaje natural, en un único campo de texto libre.
 - RF-02: Convertir esa descripción en una lista de ítems con nombre, cantidad, largo, ancho, alto y
-  peso unitario en kilos. Una medida sin unidad está en centímetros, "AxBxC" se lee largo × ancho × alto, y
-  un peso declarado para todo el ítem se divide por la cantidad.
+  peso unitario en kilos. Sin unidad, una medida **entera** está en centímetros ("60x40x30") y una
+  **con decimales** está en metros ("1,80 de alto"): es como habla la gente, y no hay ningún caso
+  real de "1,80 centímetros" en carga. "AxBxC" se lee largo × ancho × alto, y un peso declarado
+  para todo el ítem se divide por la cantidad.
 - RF-03: Completar medidas y peso faltantes únicamente desde el catálogo versionado en el
   repositorio, marcando cada dato estimado e indicando qué entrada usó. Lo que no puede completar
   se lo pregunta al usuario, distinguiendo si el ítem no está en el catálogo o si la entrada existe
@@ -53,7 +55,8 @@ dónde salió cada dato completado.
   distinguen uno de otro dentro de una pila.
 
 ## Requerimientos No Funcionales
-- RNF-01: La interpretación responde en < 10 s (p95). La medición declara su concurrencia.
+- RNF-01: La interpretación responde en < 20 s (p95), con los reintentos incluidos. La medición
+  declara su concurrencia. Eran 10 s y se subió después de medir: ver Deuda declarada.
 - RNF-02: Sobre el dataset de 50 descripciones etiquetadas, en tres métricas que no se promedian
   entre sí:
   - (a) campos declarados en la descripción y extraídos correctamente: ≥ 90%;
@@ -232,6 +235,16 @@ proveedor inicial, detrás de la interfaz de RNF-08.
   bulto y **se verifica a ojo, sin criterio automatizado**. A diferencia de la distancia entre
   colores de la paleta, acá inventar una métrica sería inventar un número que no mide lo que
   importa.
+- **El p95 de RNF-01 lo fija el proveedor, no el código.** Medido el 2026-10-28 con 150 llamadas:
+  `deepseek-flash` da mediana 3,2 s y p95 16,5 s, con el 13% de las llamadas por encima de 10 s;
+  `deepseek-v4-pro` es peor, mediana 9,2 s y p95 22,6 s con el 45% por encima. Los 10 s originales
+  no eran alcanzables con ninguno de los dos, así que RNF-01 pasó a 20 s. **La mediana sigue siendo
+  3,2 s**: lo que el número tolera es el peor 5%, no la espera habitual. Si algún día el proveedor
+  mejora su cola, el requerimiento puede volver a bajar; si empeora, hay que volver a medir antes
+  de culpar al código.
+- Un decimal sin unidad se lee en metros por heurística, no por certeza. "1,2 x 0,8 x 1 metro" con
+  la unidad dicha una sola vez al final puede hacer que el "1" entero se lea en centímetros. El
+  caso común está cubierto; este no.
 
 ## Diferido
 Existe solo si todo lo anterior está terminado. No tiene criterios de aceptación y nada depende de

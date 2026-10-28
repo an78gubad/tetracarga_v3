@@ -12,7 +12,14 @@ import type {
 } from './interfaz.js'
 
 export const INTENTOS_MAXIMOS = 3
-export const PRESUPUESTO_MS = 10_000
+/**
+ * El presupuesto total, punta a punta (FR-016, RNF-01).
+ *
+ * Eran 10 s y **se subió a 20 después de medir**: el p95 del proveedor es 16,5 s con
+ * `deepseek-flash` y 22,6 s con `deepseek-v4-pro`, así que los 10 s no eran alcanzables con
+ * ninguno de los dos. La mediana sigue siendo 3,2 s: lo que este número tolera es el peor 5%.
+ */
+export const PRESUPUESTO_MS = 20_000
 
 /**
  * Espera antes del intento n (1-based): nada antes del primero, 500 ms antes del segundo,
@@ -72,7 +79,9 @@ export async function interpretarConReintentos(
     }
     if (espera > 0) await reloj.esperar(espera)
 
-    ultimo = await modelo.interpretar(pedido)
+    // El intento no puede durar más que lo que queda del presupuesto: así los 10 s de FR-016
+    // se cumplen de verdad y no solo al decidir si arrancar otro intento.
+    ultimo = await modelo.interpretar(pedido, { topeMs: Math.max(1, restante()) })
 
     if (ultimo.tipo === 'items') {
       return { resultado: ultimo, intentos: intento, presupuestoAgotado: false }

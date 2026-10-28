@@ -36,15 +36,38 @@ function esObjeto(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v)
 }
 
-/** Una medida o un peso: `{valor, unidad}`. La forma, no el rango. */
+/**
+ * Una medida o un peso. La **forma**, no el rango.
+ *
+ * Se aceptan tres formas, y las tres son legítimas según FR-002:
+ *
+ *   - `{valor, unidad}` — la que pide el prompt.
+ *   - `{valor}` sin unidad — **FR-002 dice que una medida sin unidad está en centímetros y un
+ *     peso sin unidad en kilos**, así que la ausencia de unidad es un caso previsto, no un
+ *     error de forma.
+ *   - un número suelto — lo mismo, escrito más corto.
+ *
+ * Esto se corrigió después de medir: el esquema era **más estricto que el spec** y rechazaba
+ * respuestas enteras por una medida sin unidad. Eran 32 de 56 fallas del primer eval.
+ */
 function formaDeValorConUnidad(v: unknown): boolean {
+  if (typeof v === 'number') return true
   if (!esObjeto(v)) return false
-  return typeof v['valor'] === 'number' && typeof v['unidad'] === 'string'
+  if (typeof v['valor'] !== 'number') return false
+  return v['unidad'] === undefined || typeof v['unidad'] === 'string'
+}
+
+/** Lleva las tres formas aceptadas a `{valor, unidad}`, con la unidad vacía si no vino. */
+function normalizarValor(v: unknown): Record<string, unknown> {
+  if (typeof v === 'number') return { valor: v, unidad: '' }
+  const objeto = v as Record<string, unknown>
+  return { ...objeto, unidad: typeof objeto['unidad'] === 'string' ? objeto['unidad'] : '' }
 }
 
 /** El rango de FR-021: medidas y peso > 0. */
 function rangoValido(v: unknown): boolean {
-  return esObjeto(v) && typeof v['valor'] === 'number' && Number.isFinite(v['valor']) && v['valor'] > 0
+  const n = typeof v === 'number' ? v : esObjeto(v) ? v['valor'] : undefined
+  return typeof n === 'number' && Number.isFinite(n) && n > 0
 }
 
 export function validarRespuesta(items: readonly unknown[]): ResultadoValidacion {
@@ -89,13 +112,13 @@ export function validarRespuesta(items: readonly unknown[]): ResultadoValidacion
     for (const campo of EJES) {
       const v = crudo[campo]
       if (v === undefined) continue
-      if (rangoValido(v)) item[campo] = v as ValorConUnidad
+      if (rangoValido(v)) item[campo] = normalizarValor(v) as unknown as ValorConUnidad
       else descartados.push({ nombreItem, campo, motivo: 'valor-fuera-de-rango' })
     }
 
     const peso = crudo['peso']
     if (peso !== undefined) {
-      if (rangoValido(peso)) item['peso'] = peso
+      if (rangoValido(peso)) item['peso'] = normalizarValor(peso)
       else descartados.push({ nombreItem, campo: 'peso', motivo: 'valor-fuera-de-rango' })
     }
 

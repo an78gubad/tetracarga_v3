@@ -47,8 +47,20 @@ const A_GRAMOS: Readonly<Record<string, number>> = {
   toneladas: 1_000_000,
 }
 
-export const UNIDAD_LONGITUD_POR_DEFECTO = 'cm'
+/**
+ * Sin unidad, una longitud **entera** está en centímetros y una **con decimales** en metros.
+ *
+ * "60x40x30" son centímetros; "1,80 de alto" son metros. Es como habla la gente, y no hay ningún
+ * caso real de "1,80 centímetros" en carga (FR-002).
+ *
+ * Es una **heurística**, no una certeza: "1,2 x 0,8 x 1 metro", con la unidad dicha una sola vez
+ * al final, puede hacer que el "1" entero se lea en centímetros. Queda como deuda declarada.
+ */
 export const UNIDAD_PESO_POR_DEFECTO = 'kg'
+
+export function unidadDeLongitudPorDefecto(valor: number): 'cm' | 'm' {
+  return Number.isInteger(valor) ? 'cm' : 'm'
+}
 
 function normalizar(unidad: string | undefined, porDefecto: string): string {
   const u = (unidad ?? '').trim().toLowerCase().replace(/\.$/, '')
@@ -63,7 +75,7 @@ function haciaArriba(n: number): number {
 }
 
 export function aMilimetros(valor: number, unidad?: string): Conversion<Milimetros> {
-  const factor = A_MILIMETROS[normalizar(unidad, UNIDAD_LONGITUD_POR_DEFECTO)]
+  const factor = A_MILIMETROS[normalizar(unidad, unidadDeLongitudPorDefecto(valor))]
   if (factor === undefined || !Number.isFinite(valor) || valor <= 0) return { ok: false }
   return { ok: true, valor: haciaArriba(valor * factor) as Milimetros }
 }

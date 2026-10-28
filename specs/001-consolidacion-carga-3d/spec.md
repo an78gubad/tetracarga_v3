@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v8)
+**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v9)
 
 > Trazabilidad: cada requerimiento y criterio de este spec cita el identificador del PRD del que
 > sale (RF/RNF/AC). Los identificadores del PRD no se renumeran. Si algo de este spec contradice
@@ -21,9 +21,10 @@
   5 s de SC-007 y los 30 fps de SC-009, y por encima la interfaz avisa que el rendimiento puede
   caer.
 - Q: ¿Cuántas veces reintenta la interfaz del modelo ante una falla transitoria, y el tope de 10 s
-  (p95) incluye esos reintentos? → A: 2 reintentos (3 intentos en total) y un presupuesto total de
-  10 s medido punta a punta; si se agota, se corta y se informa falla del proveedor, sin más
-  reintentos.
+  (p95) incluye esos reintentos? → A: 2 reintentos (3 intentos en total) y un presupuesto total
+  medido punta a punta; si se agota, se corta y se informa falla del proveedor, sin más
+  reintentos. **El presupuesto era de 10 s y pasó a 20 s** después de medir la latencia del
+  proveedor: ver la clarificación del p95 más abajo.
 - Q: ¿Cuántos tipos de ítem distintos tiene que poder pintar la vista 3D con colores
   distinguibles, y cómo se verifica que "se distinguen a simple vista"? → A: Paleta fija de 12
   colores, con una distancia perceptual mínima entre todos los pares verificada por un test
@@ -33,7 +34,7 @@
   descripción? → A: Los ítems interpretados se agregan al final de la lista existente; lo que ya
   estaba conserva sus valores, sus marcas y su color, y lo que sobra se elimina con FR-006.
 - Q: ¿Qué muestra la interfaz mientras interpreta, y qué pasa con la descripción tipeada cuando
-  el proveedor falla o se agota el presupuesto de 10 s? → A: Estado de carga visible, sin
+  el proveedor falla o se agota el presupuesto? → A: Estado de carga visible, sin
   cancelar; ante falla se conserva la descripción intacta, se informa que la falla es del
   proveedor y se ofrece reintentar, sin tocar la lista ya cargada.
 - Q: ¿El esquema de ítems se valida sobre la respuesta entera o ítem por ítem? → A: Híbrido. La
@@ -66,8 +67,14 @@
   sin esperar.
 - Q: ¿El reintento que pide el usuario abre un presupuesto nuevo, y cuenta contra el límite por
   IP? → A: Las dos cosas. Es un pedido nuevo que va a llamar al proveedor, así que cuenta; y el
-  presupuesto arranca de cero, porque heredar los 10 s ya gastados lo haría fallar antes de
-  empezar.
+  presupuesto arranca de cero, porque heredar el ya gastado lo haría fallar antes de empezar.
+- Q: El p95 de 10 s de RNF-01 no se alcanzaba con ninguno de los dos modelos de DeepSeek. ¿Qué se
+  hace? → A: Subir el presupuesto a 20 s y dejar el tema anotado. Medido: flash da mediana 3,2 s y
+  p95 16,5 s; v4-pro es peor, 9,2 s y 22,6 s. La mediana sigue siendo 3,2 s, así que lo que el
+  número tolera es el peor 5%, no la espera habitual.
+- Q: "1,80 de alto" sin unidad, ¿son centímetros como dice FR-002, o metros como dice la gente? →
+  A: Sin unidad, una medida entera está en centímetros y una con decimales en metros. No hay
+  ningún caso real de "1,80 centímetros" en carga.
 - Q: ¿Cómo se leen las medidas cuando la descripción rotula los ejes fuera del orden "AxBxC"? →
   A: El rótulo explícito manda sobre la posición, y los ejes sin rótulo se reparten en el orden
   largo-ancho-alto entre los que quedaron libres. Si los rótulos son ambiguos o se contradicen, el
@@ -119,7 +126,7 @@ necesidad de consolidar ni de renderizar nada.
    con ese motivo y el sistema la pide, sin descartar los demás ítems de la respuesta y sin
    reintentar. (AC-27)
 9. **Dada** una descripción tipeada y un proveedor que falla en los 3 intentos o agota el
-   presupuesto de 10 s, **cuando** se interpreta, **entonces** la descripción sigue intacta en el
+   presupuesto de 20 s, **cuando** se interpreta, **entonces** la descripción sigue intacta en el
    campo, el mensaje dice que la falla es del proveedor, se puede reintentar y la lista ya cargada
    queda igual. (FR-026)
 
@@ -236,7 +243,7 @@ respeta.
   campos del ítem y los demás ítems de la respuesta entran a la lista, sin reintento. (AC-27,
   FR-021)
 - **Respuesta vacía del proveedor**: se vuelve a preguntar hasta 2 veces —3 intentos en total—
-  dentro del presupuesto de 10 s; agotado el presupuesto se informa la falla. (AC-20, FR-016)
+  dentro del presupuesto de 20 s; agotado el presupuesto se informa la falla. (AC-20, FR-016)
 - **Límite de velocidad del proveedor**: se reintenta. **Credenciales inválidas o saldo agotado**:
   no se reintenta y se informa. (AC-20)
 - **Falla del proveedor tras agotar los reintentos**: la descripción tipeada no se pierde y la
@@ -282,7 +289,9 @@ respeta.
   ítem.
 - **FR-002** (RF-02): El sistema MUST convertir esa descripción en una lista de ítems con nombre,
   cantidad, largo, ancho, alto y peso unitario en kilos. Una medida sin unidad está en
-  centímetros y un peso sin unidad en kilos. "AxBxC" se lee largo × ancho × alto; cuando la
+  centímetros **si es entera** y en **metros si tiene decimales** —"60x40x30" son centímetros,
+  "1,80 de alto" son metros: es como habla la gente, y no hay ningún caso real de "1,80
+  centímetros" en carga—, y un peso sin unidad está en kilos. "AxBxC" se lee largo × ancho × alto; cuando la
   descripción **rotula** un eje de forma explícita ("60 de alto por 40 por 30"), el rótulo MUST
   mandar sobre la posición y los ejes sin rótulo se reparten en el orden largo-ancho-alto entre
   los que quedaron libres. Si los rótulos son ambiguos o se contradicen, el campo MUST quedar
@@ -350,9 +359,10 @@ respeta.
   un intermediario propio.
 - **FR-016** (RNF-08): El acceso al modelo MUST pasar por una interfaz propia que distinga una
   falla del proveedor de un error de interpretación y reintente las fallas transitorias hasta 2
-  veces —3 intentos en total— dentro de un presupuesto total de 10 s medido punta a punta,
+  veces —3 intentos en total— dentro de un presupuesto total de 20 s medido punta a punta,
   esperando **500 ms antes del segundo intento y 1.500 ms antes del tercero**: un límite de
-  velocidad reintentado al instante vuelve a fallar igual. Si lo que queda del presupuesto no
+  velocidad reintentado al instante vuelve a fallar igual. Cada intento MUST llevar como tope de
+  tiempo lo que queda del presupuesto: sin eso, una sola llamada lenta se pasa del total. Si lo que queda del presupuesto no
   alcanza para la espera más un intento, MUST cortar sin esperar. Agotado el presupuesto MUST
   cortar e informar una falla del proveedor, sin más reintentos. Un límite de
   velocidad y una respuesta vacía son transitorios; credenciales
@@ -402,11 +412,11 @@ respeta.
   Quitar lo que sobra se hace con FR-006.
 - **FR-026** (RF-01, RNF-08): Mientras una interpretación está en curso la interfaz MUST mostrar
   que está trabajando; no hace falta poder cancelarla. Cuando el intento falla —el proveedor falla
-  o se agota el presupuesto de 10 s de FR-016— la interfaz MUST conservar la descripción tipeada
+  o se agota el presupuesto de 20 s de FR-016— la interfaz MUST conservar la descripción tipeada
   intacta, MUST informar que la falla es del proveedor y no un error de interpretación, MUST
   ofrecer reintentar y MUST NOT tocar la lista de ítems ya cargada. El reintento que pide el
   usuario MUST contar contra el límite por IP de FR-023, porque es un pedido nuevo que va a llamar
-  al proveedor, y MUST abrir un presupuesto nuevo de 10 s: heredar el ya gastado lo haría fallar
+  al proveedor, y MUST abrir un presupuesto nuevo de 20 s: heredar el ya gastado lo haría fallar
   antes de empezar.
 - **FR-027** (RF-06, RF-08, AC-06): El peso que un bulto apoya sobre los que tiene debajo MUST
   repartirse entre sus apoyos en proporción al área con que cada uno lo toca, y MUST propagarse
@@ -469,7 +479,7 @@ respeta.
 - **SC-001** (Objetivos): Una carga descrita hablando normalmente queda consolidada y visible en
   3D en menos de dos minutos, sin cargar ninguna planilla. **Incluye el tiempo de dibujar la vista
   3D**: mide lo que vive una persona.
-- **SC-002** (RNF-01): La interpretación de una descripción responde en menos de 10 s (p95),
+- **SC-002** (RNF-01): La interpretación de una descripción responde en menos de **20 s** (p95),
   medido punta a punta y con los reintentos de FR-016 incluidos, sobre todos los pedidos y no solo
   los que salen bien al primer intento. La medición se toma con **5 llamadas en paralelo**: con una
   sola, el p95 queda por debajo del que ve una persona cuando hay otras usando el sistema.

@@ -1,234 +1,151 @@
 # Último informe de evaluación
 
-## Medición preliminar del acomodador
+**Fecha**: 2026-10-28T21:04:16.391Z
+**Comando**: `npm run eval`
+**Modelo**: `deepseek-flash`
+**Concurrencia**: 5 llamadas en paralelo
+**Corridas**: 3; se reporta **la peor**, no el promedio
+**Casos medidos**: 150 (50 por corrida)
 
-**Fecha**: 2026-10-28
-**Comando**: test de medición temporal sobre `src/acomodador/acomodar.ts`, con `vitest run`
-**Qué no es**: esta **no** es la medición oficial de SC-007, que se toma sobre los 10 escenarios
-de referencia ya calibrados (T068 y T091b). Es una medición del algoritmo para saber si el
-diseño aguanta antes de seguir construyendo sobre él.
-
-### Tiempo de consolidación
-
-Carga mixta de tres tamaños, de a una consolidación por vez.
-
-| Contenedor | Bultos | Colocados | Afuera | Tiempo |
-|---|---|---|---|---|
-| chico (2×1×1 m) | 50 | 18 | 32 | 11 ms |
-| chico | 100 | 18 | 82 | 8 ms |
-| chico | 200 | 18 | 182 | 15 ms |
-| 40' high cube | **200** | 200 | 0 | **139 ms** |
-| 40' high cube | 400 | 400 | 0 | 783 ms |
-| 40' high cube | 800 | 800 | 0 | 4.536 ms |
-
-### Qué dicen estos números
-
-**SC-007 se cumple con holgura en el rango garantizado.** El objetivo es menos de 5 s para hasta
-200 bultos y la medición da 139 ms: 36 veces de margen.
-
-**El caso caro no es el que parecía.** La sobrecarga —200 bultos en un contenedor donde entran
-18— es *barata*: 15 ms. Cuando el contenedor se llena quedan pocas posiciones candidatas, así
-que cada rechazo se resuelve rápido. El caso caro es el opuesto: **muchos bultos que sí entran**,
-porque cada uno agrega tres candidatas nuevas que todos los siguientes tienen que recorrer.
-
-**El crecimiento es de alrededor de n^2,5**: 139 → 783 → 4.536 ms al duplicar de 200 a 400 a 800.
-Extrapolando, el límite de 5 s se cruzaría cerca de los 900 bultos. Eso es consistente con lo que
-FR-024 ya decide: por encima de 200 no hay tope duro, pero la interfaz avisa que el tiempo de
-consolidación puede caer, y la disposición se muestra igual.
-
-**No se optimizó nada por ahora**, y es a propósito: mejorar el aprovechamiento o la velocidad
-por encima de la línea base está fuera de alcance, y el margen en el rango garantizado es amplio.
-Si alguna vez molesta, lo que hay que atacar es el recorrido de candidatas, no el reparto de peso.
-
-
-## Paleta de 12 colores (SC-015, FR-013)
-
-**Fecha**: 2026-10-28
-**Comando**: optimización de la paleta en OKLCh y `npx vitest run src/vista3d/paleta`
-
-| | Valor |
-|---|---|
-| Métrica | Distancia euclídea en **OKLab** |
-| Umbral **exigido** | **0,15** |
-| Distancia mínima **medida** | **0,1848** |
-| Margen | 23% por encima del umbral |
-| Pares por debajo del umbral | **0** |
-
-### Cómo salió el número
-
-El umbral **no se eligió y después se verificó**: se generaron 12 colores optimizando la
-distancia mínima entre todos los 66 pares, variando tono, luminancia y croma por color en OKLCh.
-Una primera búsqueda por patrones dio 0,1658; un ascenso de colina sobre los tres parámetros de
-cada color lo llevó a **0,1848**.
-
-Recién con ese número medido se declaró el umbral en 0,15: redondo, con 23% de margen, y
-alrededor de **7 veces la diferencia apenas perceptible** en OKLab, que ronda 0,02. O sea que
-los colores no están "apenas distinguibles": están claramente distintos.
-
-### Por qué OKLab y no CIEDE2000
-
-CIEDE2000 es más preciso pero su fórmula es larga y llena de casos especiales: implementarla a
-mano para un test agrega más superficie de error que la que resuelve, y el proyecto no agrega
-dependencias. ΔE76 en CIELAB se descartó por lo contrario: es el que más miente en azules y
-saturados, justo donde una paleta de 12 aprieta.
-
-### Lo que este número NO dice
-
-**No dice que la paleta sea segura para quien no distingue colores.** La distancia en OKLab
-modela visión tricromática normal. La accesibilidad por color sigue abierta en
-`checklists/vista3d.md` CHK006, y no está en el PRD.
-
-Tampoco dice nada del **contraste contra el fondo** ni contra las paredes del contenedor: el
-umbral mide distancia entre pares de la paleta, nada más (CHK005).
-
-
-## Calibración de los 10 escenarios (T091)
-
-**Fecha**: 2026-10-28
-**Comando**: test de medición temporal sobre `escenarios/escenarios.ts`, con `vitest run`
-**Acomodador**: completo, con las tres marcas de RF-06 ya implementadas
-
-| Escenario | Calibrado por | Carga | Colocados | Exceso | Volumen | Peso | Tiempo |
-|---|---|---|---|---|---|---|---|
-| `carga-mixta` | volumen | 510 | 445 | 1.15x | 90.3% | 43.8% | 352 ms |
-| `tambores-y-cajas` | volumen | 490 | 452 | 1.08x | 73.7% | 55.3% | 288 ms |
-| `fragiles` | volumen | 275 | 209 | 1.32x | 36.3% | 16.2% | 1466 ms |
-| `heladeras` | volumen | 695 | 623 | 1.12x | 70.2% | 23.9% | 4996 ms |
-| `no-apilables` | volumen | 320 | 314 | 1.02x | 66.8% | 22.1% | 90 ms |
-| `sobrecarga-peso` | peso | 250 | 217 | 1.15x | 62.8% | **99.7%** | 38 ms |
-| `sobrecarga-peso-mixta` | peso | 490 | 248 | 1.98x | 73.4% | **100.0%** | 51 ms |
-| `un-solo-tipo` | volumen | 690 | 600 | 1.15x | 75.4% | 37.6% | 642 ms |
-| `pallets` | volumen | 52 | 40 | 1.30x | 76.4% | 64.5% | 1 ms |
-| `con-bulto-gigante` | volumen | 243 | 240 | 1.01x | 69.4% | 17.0% | 49 ms |
-
-### Lo que la calibración enseñó
-
-**El acomodo no es monótono.** En `carga-mixta`, pasar la carga de 465 a 510 bultos **baja** los
-colocados de 459 a 445, y a 495 los baja a 372: las cajas grandes tapizan el piso y desplazan a
-las chicas. Por eso las cantidades salieron de probar y medir, no de una fórmula.
-
-**`sobrecarga-peso` no estaba midiendo sobrecarga de peso.** Con 330 bolsones de 98 kg llegaba al
-84,1% de la carga útil: el volumen se agotaba antes que el peso, así que el escenario medía
-volumen con otro nombre. Con 250 bolsones de 130 kg llega al 99,7% y el peso es el que ata.
-
-**El aprovechamiento va de 36,3% a 90,3%.** `CONTEXTO.md` registraba un rango de 50% a 80% medido
-en una versión anterior; esta medición lo ensancha por los dos lados. `fragiles` queda bajo porque
-los topes de peso le ponen techo a las pilas, que es exactamente lo que el escenario mide.
-
-**Tres escenarios no llegan al 1,15x, y la razón es del problema y no de la calibración**:
-`no-apilables` (1,02x) y `tambores-y-cajas` (1,08x) porque los no apilables van al final y cuanto
-más desborda el escenario menos piso les queda —con 340 cajas las bobinas quedan en cero—, y
-`con-bulto-gigante` (1,01x) porque el exceso lo aportan los 3 bultos que no entran en ninguna
-orientación, que es justo lo que mide.
-
-## SC-007 — tiempo de consolidación, sobre los escenarios calibrados (T091b)
-
-**Fecha**: 2026-10-28 · **Comando**: `npm test` (`escenarios/tiempo.test.ts`)
-**Concurrencia**: de a una consolidación por vez, 10 corridas por escenario
+## Precisión (RNF-02)
 
 | Criterio | Objetivo | Medido |
 |---|---|---|
-| SC-007, escenarios de hasta 200 bultos | < 5.000 ms (p95) | **menos de 1 ms** ✅ |
+| SC-003 campos declarados bien extraídos | ≥ 90% | **93.8%** |
+| SC-004 campos ausentes estimados o preguntados | 100% | **100.0%** |
+| SC-005 ítems en la entrada correcta | ≥ 90% | **98.2%** |
 
-El único escenario dentro del rango garantizado por RNF-04 es `pallets`, de 52 bultos: los otros
-nueve traen más de 200 a propósito, y medirlos no verificaría SC-007 porque ahí el PRD no
-garantiza nada.
+Los tres se reportan por separado y **no se promedian entre sí**.
 
-Por encima del rango garantizado, los tiempos de la tabla de arriba: el peor es `heladeras` con
-695 bultos de carga en **4.996 ms**. Consistente con lo que ya se había medido: el límite de 5 s
-se cruza cerca de los 900 bultos, y FR-024 lo cubre avisando sin recortar la carga.
+Por corrida: #1 96.3/100.0/98.2 · #2 98.1/100.0/100.0 · #3 93.8/100.0/98.2
 
-## Línea base congelada (T092, T093)
+## Tiempo (RNF-01)
 
-**Registrada**: 2026-10-28, una única vez
-**Archivo**: `escenarios/linea-base.json` · **3.388 colocaciones** en 10 escenarios
+| Criterio | Objetivo | Medido |
+|---|---|---|
+| SC-002 p95 de interpretación | < 20.000 ms | **12836 ms** |
+| mediana | — | 12836 ms |
+| máximo | — | 20031 ms |
 
-Ninguna disposición se congeló sin que el validador la aprobara primero.
+Medido con 5 llamadas en paralelo. Con una sola, el p95 queda por debajo del
+que ve una persona cuando hay otras usando el sistema.
 
-### Qué detecta y qué no
+## Casos con diferencias (14)
 
-Probé la línea base metiendo cambios a propósito en el acomodador:
+### u08 — unidades
 
-| Cambio | ¿Lo detecta? |
-|---|---|
-| Reordenar las 6 orientaciones | **Sí**, rompe los 10 escenarios |
-| Invertir el desempate por id | No — ese desempate nunca se ejecuta: ningún escenario tiene dos tipos con el mismo volumen **y** el mismo tope |
-| Aflojar el apoyo de 80% a 70% | **No** |
+> 9 rollos de 0,9 m de diámetro y 1,2 m de alto, 400 kg
 
-El tercero es el que importa y vale dejarlo escrito: **en este algoritmo la regla del 80% casi
-nunca es la que decide.** Las posiciones candidatas salen de las esquinas de los bultos ya
-puestos, así que el apoyo tiende a ser total o nulo, y el umbral rara vez queda en el medio. La
-línea base guarda la disposición en conjunto; **la regla del 80% la guardan los tests unitarios**
-de `src/acomodador/apoyo.test.ts` y `src/validador/apoyo.test.ts`, que la prueban en 479, 480 y
-600 mm. Las dos cosas hacen falta y ahora está claro cuál cubre qué.
+- no devolvió ítems: falla
+
+### p02 — peso-total
+
+> 10 bultos de 80x60x50 que entre todos pesan 1 tonelada
+
+- ítem 0 peso: esperaba declarado 100000, vino {"estado":"declarado","valor":1000000}
+
+### p04 — peso-total
+
+> 25 cajas de 50x40x30 con un peso total de 625 kg
+
+- ítem 0 peso: esperaba declarado 25000, vino {"estado":"declarado","valor":625000}
+
+### x01 — fuera-de-rango
+
+> -5 cajas de 60x40x30
+
+- ítem 0 cantidad: tenía que quedar faltante y vino {"estado":"declarado","valor":5}
+
+### u08 — unidades
+
+> 9 rollos de 0,9 m de diámetro y 1,2 m de alto, 400 kg
+
+- ítem 0 largo: esperaba declarado 900, vino {"estado":"faltante","motivo":"sin-entrada-en-catalogo"}
+- ítem 0 ancho: esperaba declarado 900, vino {"estado":"faltante","motivo":"sin-entrada-en-catalogo"}
+
+### p04 — peso-total
+
+> 25 cajas de 50x40x30 con un peso total de 625 kg
+
+- ítem 0 peso: esperaba declarado 25000, vino {"estado":"declarado","valor":625000}
+
+### x01 — fuera-de-rango
+
+> -5 cajas de 60x40x30
+
+- ítem 0 cantidad: tenía que quedar faltante y vino {"estado":"declarado","valor":5}
+
+### u08 — unidades
+
+> 9 rollos de 0,9 m de diámetro y 1,2 m de alto, 400 kg
+
+- ítem 0 largo: esperaba declarado 900, vino {"estado":"faltante","motivo":"sin-entrada-en-catalogo"}
+- ítem 0 ancho: esperaba declarado 900, vino {"estado":"faltante","motivo":"sin-entrada-en-catalogo"}
+
+### r03 — rotulos
+
+> 6 cajones de 1,5 de alto, base de 1,20 por 0,80, 700 kg
+
+- no devolvió ítems: falla
+
+### p01 — peso-total
+
+> 40 cajas de 60x40x30, 500 kilos en total
+
+- ítem 0 peso: esperaba declarado 12500, vino {"estado":"declarado","valor":500000}
+
+### p02 — peso-total
+
+> 10 bultos de 80x60x50 que entre todos pesan 1 tonelada
+
+- ítem 0 peso: esperaba declarado 100000, vino {"estado":"declarado","valor":1000000}
+
+### p03 — peso-total
+
+> 3 cajas de 40x30x20, 10 kilos el total
+
+- ítem 0 peso: esperaba declarado 3334, vino {"estado":"declarado","valor":10000}
+
+### p04 — peso-total
+
+> 25 cajas de 50x40x30 con un peso total de 625 kg
+
+- ítem 0 peso: esperaba declarado 25000, vino {"estado":"declarado","valor":625000}
+
+### x01 — fuera-de-rango
+
+> -5 cajas de 60x40x30
+
+- ítem 0 cantidad: tenía que quedar faltante y vino {"estado":"declarado","valor":5}
 
 
-## AC-16 / SC-012 — la suite pasa sin red y sin credenciales (T095)
+## T042 — `max_tokens`, medido
 
-**Fecha**: 2026-10-28
-**Comando**: clon limpio con `git clone`, `npm install`, y después
-`env -u DEEPSEEK_API_KEY -u DEEPSEEK_BASE_URL -u DEEPSEEK_MODELO HTTP_PROXY=http://127.0.0.1:1 HTTPS_PROXY=http://127.0.0.1:1 npm test`
+**Fecha**: 2026-10-28 · **Comando**: medición directa contra el proveedor sobre los 10 casos del
+dataset con más ítems, leyendo `usage` de la respuesta
 
-| | Resultado |
-|---|---|
-| Clon limpio, sin `.env` | solo `.env.example`, como corresponde |
-| Variables del proveedor | borradas del entorno |
-| Red | cortada con un proxy a un puerto muerto |
-| **Suite** | **435 tests en 32 archivos, todos en verde**, 12 s |
+| Caso | Ítems | Prompt | Salida |
+|---|---|---|---|
+| `d04` | 2 | 917 | **1.383** |
+| `c02` | 2 | 929 | 828 |
+| `s03` | 2 | 936 | 648 |
+| `s05` | 2 | 951 | 531 |
+| `s04` | 1 | 926 | 440 |
+| `s06` | 1 | 921 | 354 |
+| `s09` | 3 | 944 | 346 |
+| `s07` | 1 | 924 | 248 |
+| `s02` | 1 | 920 | 247 |
+| `s01` | 1 | 919 | 137 |
 
-No es una afirmación de diseño: la suite corrió de verdad en esas condiciones.
+**`max_tokens` queda en 8.000**, casi 6 veces el máximo medido.
 
-## SC-013 — correr el proyecto leyendo solo el README (T096)
+El margen es amplio a propósito, y la razón importa: `max_tokens` es un **techo de seguridad, no
+un presupuesto**. Solo se paga por los tokens que el modelo genera de verdad, así que un techo
+alto no cuesta nada; uno bajo sí, porque una respuesta truncada es JSON inválido, se descarta
+entera y se reintenta, y eso quema el presupuesto de tiempo. Lo que el techo acota es que el
+modelo se desboque.
 
-**Fecha**: 2026-10-28 · **Comando**: `npm test` (`tests/readme.test.ts`)
-
-La parte mecánica quedó convertida en test permanente, que es lo que preguntaba
-`intermediario.md` CHK017 —si SC-013 es medible con un criterio objetivo—:
-
-| Verificación | Resultado |
-|---|---|
-| Todo comando que el README menciona existe en `package.json` | ✅ `dev`, `test`, `typecheck`, `eval` |
-| Toda variable que el código lee está en `.env.example` | ✅ las tres de DeepSeek |
-| No hay variables en `.env.example` que nadie lea | ✅ |
-| Ninguna variable lleva prefijo `VITE_` | ✅ |
-| Las carpetas que el README nombra existen | ✅ las 8 |
-
-**Lo que este test no cubre**: si el texto se entiende. Eso lo sigue juzgando una persona, y es
-la parte de SC-013 que queda en el juicio de quien prueba.
-
-
-## SC-009 — fluidez de la vista 3D (T081)
-
-**Fecha**: 2026-10-28T20:35:29Z
-**Comando**: botón "Medir fps" en `?escenario=sc009`, con `npm run dev`
-**Procedimiento**: 10 s de órbita continua, mínimo sostenido sobre ventanas de 500 ms
-**Carga**: 200 bultos en 12 tipos, que es el caso peor de la paleta
-
-| | Valor |
-|---|---|
-| Objetivo | ≥ 30 fps |
-| **Mínimo sostenido** | **59,9 fps** ✅ |
-| Promedio | 60,0 fps |
-| Cuadros medidos | 600 |
-
-**Máquina** (sin esto el número no es reproducible):
-
-- GPU: ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001638) Direct3D11 vs_5_0 ps_5_0, D3D11)
-- Núcleos: 16 · Memoria: 32 GB
-- Resolución: 2298×497 css, 2560×1080 pantalla · relación de píxeles 1,1
-- Navegador: Chrome 156 en Windows 10/11 x64
-
-### Cómo leer este número
-
-**SC-009 se cumple con el doble de margen**, pero el número dice menos de lo que parece: 59,9 de
-mínimo con 60,0 de promedio significa que la medición **tocó el techo de sincronización vertical**
-de la pantalla. La vista no estuvo al límite de la placa en ningún momento; estuvo esperando el
-refresco del monitor.
-
-O sea: el margen real sobre los 30 fps es **mayor** que 2x, y esta medición no dice cuánto. Para
-saberlo habría que desactivar la sincronización vertical o medir con muchos más bultos. Mientras
-el criterio sea 30 fps con 200 bultos, no hace falta.
-
-Vale notar que la placa es **integrada** (Radeon integrada, vía ANGLE sobre Direct3D 11), no una
-dedicada: el caso peor de la paleta sostiene el techo de refresco en hardware modesto, que es la
-mejor señal que podía dar esta medición.
+**La salida no es proporcional a los ítems.** `d04` con 2 ítems dio 1.383 tokens y `s09` con 3
+dio 346: la variación entre llamadas pesa más que la cantidad de ítems. Por eso el techo no se
+calculó como "tokens por ítem × tope de ítems", que era el plan original de research.md §2: ese
+cálculo habría dado un número con cara de preciso sobre una proporcionalidad que no existe.
