@@ -9,8 +9,22 @@ import type {
   Contenedor,
   Disposicion,
   InformeConsolidacion as Informe,
+  MotivoAfuera,
   MotivoRechazo,
 } from '../dominio/disposicion'
+
+/**
+ * Por qué quedó afuera cada bulto, en palabras del usuario.
+ *
+ * "restricción" existe porque decir "volumen" de un bulto bloqueado por una marca mandaría a
+ * reservar un contenedor más grande, que no resuelve nada (FR-012, AC-30).
+ */
+const EXPLICACION_MOTIVO: Readonly<Record<MotivoAfuera, string>> = {
+  peso: 'peso: colocarlo superaba la carga útil del contenedor',
+  restriccion:
+    'restricción: no entra en ninguna orientación, o sus marcas lo bloquean en toda posición. Un contenedor más grande no lo arregla',
+  volumen: 'volumen: no quedaba lugar',
+}
 
 /** Qué significa cada rechazo del validador, en palabras del usuario. */
 const POR_QUE_SE_RECHAZO: Readonly<Record<MotivoRechazo, string>> = {
@@ -105,8 +119,7 @@ export function InformeConsolidacion({ estado }: { readonly estado: EstadoConsol
           <ul>
             {informe.afuera.map((a) => (
               <li key={`${a.bulto.itemId}-${a.bulto.indice}`}>
-                {a.bulto.itemId} #{a.bulto.indice + 1} — por{' '}
-                {a.motivo === 'peso' ? 'peso: colocarlo superaba la carga útil' : 'volumen: no quedaba lugar'}
+                {a.bulto.itemId} #{a.bulto.indice + 1} — por {EXPLICACION_MOTIVO[a.motivo]}
               </li>
             ))}
           </ul>

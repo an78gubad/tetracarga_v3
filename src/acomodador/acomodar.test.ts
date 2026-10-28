@@ -146,10 +146,21 @@ describe('AC-30 — el tercer motivo: "restricción"', () => {
   })
 
   it('"peso" sigue ganando sobre los otros dos (AC-23)', () => {
-    const pesadoYEnorme = itemDe({ id: 'ambos', cantidad: 3, largo: 5000, ancho: 5000, alto: 5000, peso: 900_000 })
+    // Un bulto que por sí solo supera la carga útil Y además no entra por tamaño: el motivo es
+    // "peso", porque la compuerta de peso se mira antes de buscarle lugar.
+    const pesadoYEnorme = itemDe({ id: 'ambos', cantidad: 3, largo: 5000, ancho: 5000, alto: 5000, peso: 1_200_000 })
     const d = acomodar([pesadoYEnorme], CONTENEDOR_CHICO)
-    // No entra por tamaño Y supera la carga útil: manda el peso.
-    expect(d.afuera[1]?.motivo).toBe('peso')
+    expect(d.secuencia).toHaveLength(0)
+    for (const a of d.afuera) expect(a.motivo).toBe('peso')
+  })
+
+  it('cuando nada se colocó, el peso acumulado es 0 y manda la restricción', () => {
+    // Caso que me equivoqué al escribir el test y vale dejar fijado: tres bultos enormes de 900
+    // kg en un contenedor de 1 t. Ninguno entra por tamaño, así que ninguno suma peso, así que
+    // la compuerta de peso nunca se activa y los tres son restricción.
+    const enormes = itemDe({ id: 'enormes', cantidad: 3, largo: 5000, ancho: 5000, alto: 5000, peso: 900_000 })
+    const d = acomodar([enormes], CONTENEDOR_CHICO)
+    for (const a of d.afuera) expect(a.motivo).toBe('restriccion')
   })
 
   it('un bulto bloqueado solo por sus marcas también lleva "restricción"', () => {

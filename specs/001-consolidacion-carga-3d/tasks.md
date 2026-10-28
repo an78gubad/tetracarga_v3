@@ -237,6 +237,22 @@ eliminan ítems, se ponen las marcas y se verifica que la disposición las respe
 
 ---
 
+## Phase 8: Las decisiones desambiguadas (PRD-001v8)
+
+Las dieciséis que el usuario cerró después de terminar las cuatro historias. Cada una cita el
+requerimiento nuevo que la recoge.
+
+- [X] T098 Agregar el tercer motivo "restricción" a `MotivoAfuera`, al acomodador y al informe de la interfaz, con la precedencia peso → restricción → volumen (FR-012, AC-30)
+- [X] T099 Regenerar `escenarios/linea-base.json` porque el cambio de RF-09 cambió los motivos, dejando escrito en el archivo por qué se regeneró (FR-018)
+- [ ] T100 Rechazar en `server/proxy/manejador.ts` los pedidos cuyo origen no sea el de la aplicación (FR-030, AC-32)
+- [ ] T101 Registrar en el intermediario el código de resultado, la duración y los intentos, y **nunca** la descripción del usuario (FR-029, AC-31)
+- [ ] T102 Exigir en `src/vista3d/paleta.ts` la distancia mínima también contra el color de fondo, con test, y declarar el fondo como constante (FR-033)
+- [ ] T103 Pedir confirmación por encima de 5.000 bultos y que la consolidación no bloquee la interfaz (FR-031, AC-33)
+- [ ] T104 Nombrar en el README el tope de gasto del proveedor como paso del despliegue (FR-032)
+- [ ] T105 Correr el eval 3 veces y reportar el peor de los tres (SC-003 a SC-005)
+
+---
+
 ## Phase 7: Polish & Cross-Cutting
 
 - [X] T091 Calibrar los 10 escenarios de `escenarios/escenarios.ts` a ~115% de lo que entra —salvo los que miden sobrecarga de peso, que traen ~115% de la carga útil— y verificar que **ningún tipo de ítem por separado alcance** para llenar el contenedor. Calibrados a 115% del volumen interno quedaban tipos enteros afuera (CONTEXTO.md)

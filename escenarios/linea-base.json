@@ -1,5 +1,7 @@
 {
  "registradaEl": "2026-10-28",
+ "regeneradaEl": "2026-10-28",
+ "porQue": "RF-09 pasó a tener un tercer motivo, \"restricción\", por decisión del usuario (PRD-001v8, AC-30). Los bultos que no entran en ninguna orientación cambiaron de motivo.",
  "escenarios": {
   "carga-mixta": {
    "contenedorId": "40hc",
@@ -43868,17 +43870,17 @@
     {
      "itemId": "gigante",
      "indice": 0,
-     "motivo": "volumen"
+     "motivo": "restriccion"
     },
     {
      "itemId": "gigante",
      "indice": 1,
-     "motivo": "volumen"
+     "motivo": "restriccion"
     },
     {
      "itemId": "gigante",
      "indice": 2,
-     "motivo": "volumen"
+     "motivo": "restriccion"
     }
    ]
   }

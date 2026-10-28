@@ -145,7 +145,11 @@ export function acomodar(items: readonly Item[], contenedor: Contenedor): Dispos
 
       const colocado = buscarLugar(bulto, item, orientaciones, peso, tope, puestos, apoyos, contenedor)
       if (colocado === undefined) {
-        afuera.push({ bulto, motivo: 'volumen' })
+        // "restricción" cuando el bulto no entra ni en el contenedor vacío: ni por tamaño en
+        // ninguna orientación, ni porque sus marcas lo bloqueen en toda posición. Un contenedor
+        // más grande no lo arregla, y decir "volumen" mandaría a buscar uno (FR-012, AC-30).
+        const entraSolo = cabeEnContenedorVacio(item, orientaciones, contenedor)
+        afuera.push({ bulto, motivo: entraSolo ? 'volumen' : 'restriccion' })
         continue
       }
       // Los apoyos del recién puesto se calculan una vez, acá, y no por cada candidata.
