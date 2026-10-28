@@ -161,3 +161,37 @@ puestos, así que el apoyo tiende a ser total o nulo, y el umbral rara vez queda
 línea base guarda la disposición en conjunto; **la regla del 80% la guardan los tests unitarios**
 de `src/acomodador/apoyo.test.ts` y `src/validador/apoyo.test.ts`, que la prueban en 479, 480 y
 600 mm. Las dos cosas hacen falta y ahora está claro cuál cubre qué.
+
+
+## AC-16 / SC-012 — la suite pasa sin red y sin credenciales (T095)
+
+**Fecha**: 2026-10-28
+**Comando**: clon limpio con `git clone`, `npm install`, y después
+`env -u DEEPSEEK_API_KEY -u DEEPSEEK_BASE_URL -u DEEPSEEK_MODELO HTTP_PROXY=http://127.0.0.1:1 HTTPS_PROXY=http://127.0.0.1:1 npm test`
+
+| | Resultado |
+|---|---|
+| Clon limpio, sin `.env` | solo `.env.example`, como corresponde |
+| Variables del proveedor | borradas del entorno |
+| Red | cortada con un proxy a un puerto muerto |
+| **Suite** | **435 tests en 32 archivos, todos en verde**, 12 s |
+
+No es una afirmación de diseño: la suite corrió de verdad en esas condiciones.
+
+## SC-013 — correr el proyecto leyendo solo el README (T096)
+
+**Fecha**: 2026-10-28 · **Comando**: `npm test` (`tests/readme.test.ts`)
+
+La parte mecánica quedó convertida en test permanente, que es lo que preguntaba
+`intermediario.md` CHK017 —si SC-013 es medible con un criterio objetivo—:
+
+| Verificación | Resultado |
+|---|---|
+| Todo comando que el README menciona existe en `package.json` | ✅ `dev`, `test`, `typecheck`, `eval` |
+| Toda variable que el código lee está en `.env.example` | ✅ las tres de DeepSeek |
+| No hay variables en `.env.example` que nadie lea | ✅ |
+| Ninguna variable lleva prefijo `VITE_` | ✅ |
+| Las carpetas que el README nombra existen | ✅ las 8 |
+
+**Lo que este test no cubre**: si el texto se entiende. Eso lo sigue juzgando una persona, y es
+la parte de SC-013 que queda en el juicio de quien prueba.

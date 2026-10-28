@@ -245,8 +245,8 @@ eliminan ítems, se ponen las marcas y se verifica que la disposición las respe
 - [X] T092 Registrar `escenarios/linea-base.json` con las 10 disposiciones, **una única vez**, según [contracts/linea-base.md](./contracts/linea-base.md)
 - [X] T093 Crear `escenarios/linea-base.test.ts` que recalcule y compare bulto por bulto —identidad `(itemId, indice)`, posición, orientación y orden de colocación— **sin tolerancia**, rompiendo el build ante cualquier diferencia. **Sin snapshots de Vitest**: `vitest -u` reescribiría la línea base sin que nadie lo decida. Entra en el **mismo commit** que T092: un test que pasa porque el archivo falta es un `.skip` disfrazado (AC-14, SC-008, FR-018)
 - [ ] T094 [P] Correr `npm run eval` y escribir `eval/ultimo-informe.md` con SC-002 a SC-005, midiendo el p95 de la interpretación con **5 llamadas en paralelo** y dejando esa concurrencia escrita al lado del número, más la fecha y el comando de cada número
-- [ ] T095 [P] Verificar `npm test` en un clon limpio, **sin red y sin `.env`**, y dejar constancia del resultado en `eval/ultimo-informe.md` con la fecha y el comando (AC-16, SC-012)
-- [ ] T096 [P] Recorrer `README.md` como si fuera la primera vez y confirmar que la aplicación arranca sin leer código, con cero nombres de variable que haya que descubrir (SC-013, AC-28)
+- [X] T095 [P] Verificar `npm test` en un clon limpio, **sin red y sin `.env`**, y dejar constancia del resultado en `eval/ultimo-informe.md` con la fecha y el comando (AC-16, SC-012)
+- [X] T096 [P] Recorrer `README.md` como si fuera la primera vez y confirmar que la aplicación arranca sin leer código, con cero nombres de variable que haya que descubrir (SC-013, AC-28)
 - [ ] T097 Verificar a mano en el navegador lo que ningún test cubre sobre `src/vista3d/` (`Escena.tsx`, `paleta.ts`, `recorrido.ts`): que los 12 colores se distingan de verdad en pantalla, que dos bultos de la misma pila se distingan, y que el control deslizante no muestre ningún bulto flotando en ningún paso. La vista 3D se verifica en el navegador, no solo con tests
 
 ---
