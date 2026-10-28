@@ -143,11 +143,11 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 ### Acomodador
 
 - [X] T043 [US2] Crear `src/acomodador/orientacion.test.ts`: las 6 permutaciones de eje están disponibles para un bulto sin marcas (research.md §4)
-- [ ] T044 [US2] Crear `src/acomodador/orientacion.ts` enumerando las 6 permutaciones
+- [X] T044 [US2] Crear `src/acomodador/orientacion.ts` enumerando las 6 permutaciones
 - [X] T045 [US2] Crear `src/acomodador/apoyo.test.ts`: el área de apoyo es la intersección en xy entre la cara inferior y las caras superiores que están **exactamente a la misma z**; pasa con exactamente 80% (el criterio es "al menos"); la comparación es `area_apoyada × 100 ≥ 80 × area_base`, **multiplicando y no dividiendo**, para no redondear
-- [ ] T046 [US2] Crear `src/acomodador/apoyo.ts` con el área de contacto y el 80%
+- [X] T046 [US2] Crear `src/acomodador/apoyo.ts` con el área de contacto y el 80%
 - [X] T047 [US2] Crear `src/acomodador/peso.test.ts`: el reparto entre dos apoyos es proporcional al área de contacto; `ceil` entero como `(a*b + c - 1) / c`; la suma de las partes **nunca** es menor que el peso repartido; la carga se acumula por toda la pila resolviendo en orden inverso al de colocación; **cero punto flotante** (FR-027)
-- [ ] T048 [US2] Crear `src/acomodador/peso.ts` con el reparto entero por área
+- [X] T048 [US2] Crear `src/acomodador/peso.ts` con el reparto entero por área
 - [ ] T049 [US2] Crear `src/acomodador/orden.test.ts`: los no apilables van **al final**; después, volumen decreciente; a igual volumen, primero el que **aguanta más peso encima** (CONTEXTO.md, ya medido: no hay que re-investigarlo)
 - [ ] T050 [US2] Crear `src/acomodador/orden.ts` con ese orden de colocación
 - [ ] T051 [US2] Crear `src/acomodador/acomodar.test.ts`: AC-07 (excede volumen: coloca lo que entra, el resto con motivo "volumen"), AC-15 (excede peso: los colocados no superan la carga útil, el resto con motivo "peso"), AC-23 (excede por volumen **y** por peso: el motivo que se informa es **"peso"**), AC-13 (usa medidas interiores y carga útil de la entrada elegida, y recalcula al cambiar de contenedor)
