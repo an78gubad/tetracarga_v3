@@ -207,3 +207,52 @@ describe('el catálogo del repositorio', () => {
     }
   })
 })
+
+describe('las entradas de objetos', () => {
+  it('trae los cinco objetos con ficha', () => {
+    expect(catalogo.objetos.map((o) => o.id)).toEqual([
+      'tambor-215l',
+      'ibc-1000l',
+      'bidon-20l',
+      'pallet-epal-1',
+      'pallet-arlog',
+    ])
+  })
+
+  it('"tambor de 200 litros" llega al tambor, aunque la ficha diga 215 L (AC-02)', () => {
+    // Así lo dice la gente y así lo usa AC-02; el dato sigue siendo el de la ficha.
+    expect(catalogo.porNombre('tambor de 200 litros')?.id).toBe('tambor-215l')
+    expect(catalogo.porNombre('tambores')?.id).toBe('tambor-215l')
+    expect(catalogo.porNombre('tacho')?.id).toBe('tambor-215l')
+  })
+
+  it('el tambor va por su caja envolvente: largo y ancho son el diámetro', () => {
+    const t = catalogo.entradaObjeto('tambor-215l')!
+    expect(t.largo).toBe(585)
+    expect(t.ancho).toBe(t.largo)
+    expect(t.alto).toBe(877)
+  })
+
+  it('ningún objeto trae peso: el de la carga depende del contenido', () => {
+    // Las fichas publican el peso del envase vacío (14,3 kg el tambor, 51,7 el IBC, 25 el
+    // pallet). Ninguno sirve como peso de la carga, así que se pregunta (CONTEXTO.md).
+    for (const o of catalogo.objetos) {
+      expect(o.peso).toBeNull()
+    }
+  })
+
+  it('los dos pallets traen la base y dejan el alto para preguntar', () => {
+    for (const id of ['pallet-epal-1', 'pallet-arlog']) {
+      const p = catalogo.entradaObjeto(id)!
+      expect(p.largo).toBeGreaterThan(0)
+      expect(p.ancho).toBeGreaterThan(0)
+      expect(p.alto).toBeNull()
+    }
+  })
+
+  it('los objetos que no son pallets sí traen alto', () => {
+    for (const id of ['tambor-215l', 'ibc-1000l', 'bidon-20l']) {
+      expect(catalogo.entradaObjeto(id)!.alto).toBeGreaterThan(0)
+    }
+  })
+})

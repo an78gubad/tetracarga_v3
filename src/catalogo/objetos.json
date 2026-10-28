@@ -1,7 +1,51 @@
 [
   {
+    "id": "tambor-215l",
+    "nombre": "Tambor de acero de 215 L",
+    "sinonimos": [
+      "tambor",
+      "tambores",
+      "tambor de 200 litros",
+      "tambor de 200 l",
+      "tambor de acero",
+      "tacho",
+      "barril"
+    ],
+    "largo": 585,
+    "ancho": 585,
+    "alto": 877,
+    "peso": null,
+    "noApilable": null,
+    "orientacionObligatoria": null,
+    "fuente": "Greif Israel (Pachmas) — Tight Head Steel Drum, cylindric series 216,5 L, SKU 9021640040 y 9021650052 (pachmas.com/info/products/metal_drums/01thcyl/216.htm, consultada 2026-10-28): capacidad 215 L, diámetro máximo 585 mm, alto exterior 877 mm. Es un cilindro: se modela por su caja envolvente, así que largo y ancho son el diámetro. Los 14,3 y 18,1 kg que publica la ficha son del tambor vacío y no sirven como peso de la carga: el peso depende del contenido y se pregunta."
+  },
+  {
+    "id": "ibc-1000l",
+    "nombre": "Contenedor IBC de 1000 L",
+    "sinonimos": ["ibc", "contenedor ibc", "ibc de 1000 litros", "tanque ibc", "bin"],
+    "largo": 1200,
+    "ancho": 1000,
+    "alto": 1160,
+    "peso": null,
+    "noApilable": null,
+    "orientacionObligatoria": null,
+    "fuente": "SCHÜTZ — Packaging-Specification, ECOBULK 1000 ltr. MX1000 Std FSSC, Article-No. 4041970, fechada Aug 31 2020 (cdn.shopify.com/s/files/1/0529/9529/3345/files/4041970.pdf, consultada 2026-10-28): \"Nominal Capacity 1.000 l, Length 1,200 mm, Width 1,000 mm, Height with pallet 1,160 mm\". El alto incluye el pallet de marco de acero. Los 51,7 kg de \"Total weight approx.\" son del IBC vacío: el peso de la carga depende del contenido y se pregunta."
+  },
+  {
+    "id": "bidon-20l",
+    "nombre": "Bidón plástico de 20 L",
+    "sinonimos": ["bidon", "bidón", "bidones", "bidón de 20 litros", "jerrycan", "cuñete"],
+    "largo": 290,
+    "ancho": 246,
+    "alto": 385,
+    "peso": null,
+    "noApilable": null,
+    "orientacionObligatoria": null,
+    "fuente": "Bürkle — HDPE jerrycan 20 l, art. 1427-0020 (buerkle.de/en/hdpe-jerrycan_p1427-0020, consultada 2026-10-28): largo 290 mm, ancho 246 mm, alto con tapa 385 mm, capacidad 20 L. La ficha no publica peso, y de todos modos el de la carga depende del contenido: se pregunta."
+  },
+  {
     "id": "pallet-epal-1",
-    "nombre": "Pallet EPAL 1 (europallet)",
+    "nombre": "Pallet EPAL 1 (europallet) cargado",
     "sinonimos": ["pallet europeo", "europallet", "euro pallet", "epal", "pallet epal"],
     "largo": 800,
     "ancho": 1200,
@@ -9,6 +53,18 @@
     "peso": null,
     "noApilable": null,
     "orientacionObligatoria": null,
-    "fuente": "EPAL — ficha oficial del EPAL Euro pallet (epal-pallets.org/eu-en/load-carriers/epal-euro-pallet, consultada 2026-10-28): largo 800 mm, ancho 1.200 mm, alto 144 mm, peso aprox. 25 kg, carga de trabajo segura 1.500 kg. Largo y ancho se registran como los publica EPAL. El alto queda en null y el peso también: como carga, un pallet va cargado, así que los dos dependen de lo que lleva y se preguntan (CONTEXTO.md). Los 144 mm y los 25 kg son del pallet vacío y no sirven como medida de la carga."
+    "fuente": "EPAL — ficha oficial del EPAL Euro pallet (EPAL 1) (epal-pallets.org/eu-en/load-carriers/epal-euro-pallet, consultada 2026-10-28): largo 800 mm, ancho 1.200 mm, alto 144 mm, peso aprox. 25 kg, carga de trabajo segura 1.500 kg. Largo y ancho se registran como los rotula EPAL. El alto queda en null: como carga un pallet va cargado, así que su alto depende de lo que lleva y se pregunta, igual que el peso. Los 144 mm y los 25 kg son del pallet vacío."
+  },
+  {
+    "id": "pallet-arlog",
+    "nombre": "Pallet ARLOG o universal cargado",
+    "sinonimos": ["pallet", "pallets", "palé", "pallet arlog", "arlog", "pallet universal", "tarima"],
+    "largo": 1200,
+    "ancho": 1000,
+    "alto": null,
+    "peso": null,
+    "noApilable": null,
+    "orientacionObligatoria": null,
+    "fuente": "Intrapal — PALLET ARLOG (intrapal.com.ar/productos/pallet-arlog/, consultada 2026-10-28): largo 1.200 mm, ancho 1.000 mm, alto 145 mm, carga dinámica 2.000 kg, estática 4.000 kg, en estantería 1.500 kg. La base sale de un fabricante porque la IRAM 10016 no es pública (CONTEXTO.md). El alto y el peso quedan en null: como carga va cargado."
   }
 ]
