@@ -3,6 +3,7 @@
 ## Commits
 - Cada paso que queda andando se commitea en el momento: tests y chequeo de tipos en verde, commit con el skill `conventional-commit` y push.
 - Commits chicos y atómicos: un cambio con sentido propio por commit. Un paso del plan suele dar varios.
+- El commit que solo tilda una línea de `PLAN.md` no existe: el tick viaja en el commit del paso que lo completa. En la entrega anterior, 25 de 79 commits eran eso y ensuciaban la historia.
 - La historia no se reescribe: nada de `amend`, `reset` sobre lo pusheado, `rebase` ni `push --force`. Si algo sale mal, se deshace con un commit nuevo (`git revert`).
 
 ## Proceso
