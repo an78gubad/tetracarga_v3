@@ -41,6 +41,23 @@ export const PALETA: readonly string[] = [
 export const CANTIDAD_COLORES = 12
 
 /**
+ * El fondo de la vista 3D, declarado como constante y no suelto en un estilo (FR-033).
+ *
+ * Tiene que estar acá porque entra en la misma verificación que la paleta: un bulto del mismo
+ * tono que el fondo se pierde aunque se distinga de todos los demás bultos.
+ */
+export const COLOR_DE_FONDO = '#f4f4f5'
+
+/**
+ * El color de las aristas del contenedor. Entra en la misma verificación que la paleta.
+ *
+ * Era `#888888` y **el test lo rechazó**: quedaba a 0,1400 del oliva y a 0,1116 del cian, los
+ * dos por debajo del umbral. Un gris oscuro resuelve con margen —0,1816 al color más cercano—
+ * y además se lee mejor como alambre sobre un fondo claro.
+ */
+export const COLOR_DEL_CONTENEDOR = '#2a2a2a'
+
+/**
  * El color de un tipo de ítem. Con más de 12 tipos **los colores se reciclan en el mismo
  * orden** y la vista avisa (FR-013).
  */

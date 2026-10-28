@@ -22,6 +22,7 @@ import type { Contenedor, Disposicion } from '../dominio/disposicion'
 import type { Item } from '../dominio/items'
 import { aristasDelContenedor, mallasDe } from './instanciado'
 import { informeDe, medirFps, type Medicion } from './medidor-fps'
+import { COLOR_DE_FONDO } from './paleta'
 
 export type EscenaProps = {
   readonly disposicion: Disposicion
@@ -203,7 +204,7 @@ export function Escena({ disposicion, items, contenedor, hasta }: EscenaProps) {
     <>
       <canvas
         ref={lienzo}
-        style={{ width: '100%', height: '60vh', display: 'block', background: '#f4f4f5' }}
+        style={{ width: '100%', height: '60vh', display: 'block', background: COLOR_DE_FONDO }}
         aria-label="Vista 3D de la carga en el contenedor"
       />
       <p>

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { aOkLab, distancia, parMasCercano } from './oklab'
 import {
   CANTIDAD_COLORES,
+  COLOR_DEL_CONTENEDOR,
+  COLOR_DE_FONDO,
   DISTANCIA_MINIMA_MEDIDA,
   PALETA,
   UMBRAL_DISTANCIA,
@@ -42,6 +44,27 @@ describe('SC-015 — cero pares por debajo del umbral declarado', () => {
 
   it('todos son #rrggbb válidos', () => {
     for (const color of PALETA) expect(color).toMatch(/^#[0-9a-f]{6}$/)
+  })
+})
+
+describe('FR-033 — cada color también se distingue del fondo y del contenedor', () => {
+  it('ningún color de la paleta está más cerca del fondo que el umbral', () => {
+    // Un bulto del mismo tono que el fondo se pierde aunque se distinga de los demás bultos.
+    const porDebajo = PALETA.filter((c) => distancia(c, COLOR_DE_FONDO) < UMBRAL_DISTANCIA).map(
+      (c) => `${c}: ${distancia(c, COLOR_DE_FONDO).toFixed(4)}`,
+    )
+    expect(porDebajo).toEqual([])
+  })
+
+  it('ninguno está más cerca del color del contenedor que el umbral', () => {
+    const porDebajo = PALETA.filter(
+      (c) => distancia(c, COLOR_DEL_CONTENEDOR) < UMBRAL_DISTANCIA,
+    ).map((c) => `${c}: ${distancia(c, COLOR_DEL_CONTENEDOR).toFixed(4)}`)
+    expect(porDebajo).toEqual([])
+  })
+
+  it('el fondo y el contenedor se distinguen entre sí', () => {
+    expect(distancia(COLOR_DE_FONDO, COLOR_DEL_CONTENEDOR)).toBeGreaterThanOrEqual(UMBRAL_DISTANCIA)
   })
 })
 

@@ -244,9 +244,9 @@ requerimiento nuevo que la recoge.
 
 - [X] T098 Agregar el tercer motivo "restricción" a `MotivoAfuera`, al acomodador y al informe de la interfaz, con la precedencia peso → restricción → volumen (FR-012, AC-30)
 - [X] T099 Regenerar `escenarios/linea-base.json` porque el cambio de RF-09 cambió los motivos, dejando escrito en el archivo por qué se regeneró (FR-018)
-- [ ] T100 Rechazar en `server/proxy/manejador.ts` los pedidos cuyo origen no sea el de la aplicación (FR-030, AC-32)
-- [ ] T101 Registrar en el intermediario el código de resultado, la duración y los intentos, y **nunca** la descripción del usuario (FR-029, AC-31)
-- [ ] T102 Exigir en `src/vista3d/paleta.ts` la distancia mínima también contra el color de fondo, con test, y declarar el fondo como constante (FR-033)
+- [X] T100 Rechazar en `server/proxy/manejador.ts` los pedidos cuyo origen no sea el de la aplicación (FR-030, AC-32)
+- [X] T101 Registrar en el intermediario el código de resultado, la duración y los intentos, y **nunca** la descripción del usuario (FR-029, AC-31)
+- [X] T102 Exigir en `src/vista3d/paleta.ts` la distancia mínima también contra el color de fondo, con test, y declarar el fondo como constante (FR-033)
 - [ ] T103 Pedir confirmación por encima de 5.000 bultos y que la consolidación no bloquee la interfaz (FR-031, AC-33)
 - [ ] T104 Nombrar en el README el tope de gasto del proveedor como paso del despliegue (FR-032)
 - [ ] T105 Correr el eval 3 veces y reportar el peor de los tres (SC-003 a SC-005)

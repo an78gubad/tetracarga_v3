@@ -25,6 +25,7 @@ import type { Colocacion, Disposicion } from '../dominio/disposicion'
 import type { Item } from '../dominio/items'
 import { medidasEn } from '../acomodador/orientacion'
 import { colorDe } from './color-por-item'
+import { COLOR_DEL_CONTENEDOR } from './paleta'
 
 /** Un cubo de 1×1×1 centrado en el origen, escalado por instancia. */
 const CUBO = new BoxGeometry(1, 1, 1)
@@ -133,7 +134,7 @@ export function mallasDe(
 export function aristasDelContenedor(largo: number, ancho: number, alto: number): LineSegments {
   const caja = new BoxGeometry(largo, alto, ancho)
   const geo = new EdgesGeometry(caja)
-  const lineas = new LineSegments(geo, new LineBasicMaterial({ color: 0x888888 }))
+  const lineas = new LineSegments(geo, new LineBasicMaterial({ color: COLOR_DEL_CONTENEDOR }))
   lineas.position.set(largo / 2, alto / 2, ancho / 2)
   caja.dispose()
   return lineas

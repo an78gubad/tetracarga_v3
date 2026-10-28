@@ -181,3 +181,134 @@ describe('de dónde sale la IP', () => {
     expect(ipDelPedido({})).toBe('desconocida')
   })
 })
+
+describe('AC-32 — origen no permitido (FR-030)', () => {
+  const PERMITIDO = 'https://tetracarga.example'
+
+  function conOrigen(origen: string | undefined) {
+    const modelo = crearModeloDePrueba([respuestas.items({ nombre: 'cajas' })])
+    const { reloj } = relojFalso()
+    const deps = {
+      modelo,
+      catalogo: [],
+      contador: crearContadorPorIp(),
+      reloj,
+      origenesPermitidos: [PERMITIDO],
+    }
+    const encabezados: Record<string, string> = { 'x-forwarded-for': '203.0.113.7' }
+    if (origen !== undefined) encabezados['origin'] = origen
+    return { modelo, deps, pedido: { cuerpo: { descripcion: '40 cajas' }, encabezados } }
+  }
+
+  it('el origen de la aplicación pasa', async () => {
+    const { deps, pedido } = conOrigen(PERMITIDO)
+    expect((await manejar(pedido, deps)).estado).toBe(200)
+  })
+
+  it('otro origen se rechaza con 403', async () => {
+    const { deps, pedido } = conOrigen('https://pagina-ajena.example')
+    const r = await manejar(pedido, deps)
+    expect(r.estado).toBe(403)
+    expect(r.cuerpo.codigo).toBe('origen-no-permitido')
+  })
+
+  it('sin origen también se rechaza', async () => {
+    const { deps, pedido } = conOrigen(undefined)
+    expect((await manejar(pedido, deps)).estado).toBe(403)
+  })
+
+  it('CERO llamadas al proveedor', async () => {
+    const { modelo, deps, pedido } = conOrigen('https://pagina-ajena.example')
+    await manejar(pedido, deps)
+    expect(modelo.llamadas()).toBe(0)
+  })
+
+  it('tampoco consume el cupo por IP: una página ajena no gasta el de nadie', async () => {
+    const { deps } = conOrigen('https://pagina-ajena.example')
+    const ajeno = {
+      cuerpo: { descripcion: '40 cajas' },
+      encabezados: { 'x-forwarded-for': '203.0.113.7', origin: 'https://pagina-ajena.example' },
+    }
+    for (let i = 0; i < 50; i++) await manejar(ajeno, deps)
+    // La IP real sigue con su cupo intacto.
+    const propio = {
+      cuerpo: { descripcion: '40 cajas' },
+      encabezados: { 'x-forwarded-for': '203.0.113.7', origin: PERMITIDO },
+    }
+    expect((await manejar(propio, deps)).estado).toBe(200)
+  })
+
+  it('sin orígenes configurados no se verifica: así andan el desarrollo y los tests', async () => {
+    const { deps } = entorno()
+    expect((await manejar(pedido('40 cajas'), deps)).estado).toBe(200)
+  })
+})
+
+describe('AC-31 — qué se registra (FR-029)', () => {
+  function conRegistro(descripcion: string) {
+    const registros: unknown[] = []
+    const modelo = crearModeloDePrueba([respuestas.items({ nombre: 'cajas', cantidad: 40 })])
+    const { reloj } = relojFalso()
+    return {
+      registros,
+      promesa: manejar(pedido(descripcion), {
+        modelo,
+        catalogo: [],
+        contador: crearContadorPorIp(),
+        reloj,
+        registrar: (r) => registros.push(r),
+      }),
+    }
+  }
+
+  it('registra el código, el estado, la duración y los intentos', async () => {
+    const { registros, promesa } = conRegistro('40 cajas')
+    await promesa
+    expect(registros).toHaveLength(1)
+    expect(registros[0]).toMatchObject({ codigo: 'ok', estado: 200, intentos: 1 })
+    expect(registros[0]).toHaveProperty('duracionMs')
+  })
+
+  it('la descripción del usuario NO aparece en el registro', async () => {
+    // Lo que la gente escribe dice qué despacha y cuánto: es dato comercial de su empresa.
+    const secreto = '400 cajas de un producto que no quiero que nadie sepa que despacho'
+    const { registros, promesa } = conRegistro(secreto)
+    await promesa
+    expect(JSON.stringify(registros)).not.toContain('producto')
+    expect(JSON.stringify(registros)).not.toContain('despacho')
+  })
+
+  it('tampoco aparece cuando el pedido se rechaza', async () => {
+    const registros: unknown[] = []
+    const { reloj } = relojFalso()
+    const secreto = 'x'.repeat(LARGO_MAXIMO + 1) + ' producto secreto'
+    await manejar(pedido(secreto), {
+      modelo: crearModeloDePrueba([respuestas.items({ nombre: 'c' })]),
+      catalogo: [],
+      contador: crearContadorPorIp(),
+      reloj,
+      registrar: (r) => registros.push(r),
+    })
+    expect(JSON.stringify(registros)).not.toContain('secreto')
+    expect(registros[0]).toMatchObject({ codigo: 'descripcion-demasiado-larga', estado: 413 })
+  })
+
+  it('todo camino de salida registra: ninguno se escapa', async () => {
+    for (const [desc, deps] of [
+      ['40 cajas', undefined],
+      ['x'.repeat(LARGO_MAXIMO + 1), undefined],
+    ] as const) {
+      const registros: unknown[] = []
+      const { reloj } = relojFalso()
+      await manejar(pedido(desc), {
+        modelo: crearModeloDePrueba([respuestas.items({ nombre: 'c' })]),
+        catalogo: [],
+        contador: crearContadorPorIp(),
+        reloj,
+        registrar: (r) => registros.push(r),
+        ...(deps ?? {}),
+      })
+      expect(registros).toHaveLength(1)
+    }
+  })
+})
