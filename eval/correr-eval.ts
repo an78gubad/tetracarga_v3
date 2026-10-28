@@ -15,8 +15,8 @@
  * usando el sistema.
  */
 
-import { writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
 import { catalogo } from '../src/catalogo/catalogo'
 import { completarItems } from '../src/interpretacion/completar'
@@ -25,6 +25,28 @@ import { interpretarConReintentos } from '../server/modelo/reintentos.js'
 import { validarRespuesta } from '../server/proxy/esquema-respuesta.js'
 import { CASOS } from './dataset/casos'
 import type { CasoDataset, Eje } from './dataset/tipos'
+
+/**
+ * Carga el `.env` a `process.env`.
+ *
+ * Hace falta porque vitest **no** expone las variables sin prefijo a `process.env`: sin esto,
+ * con el `.env` lleno el eval igual falla diciendo que falta la credencial. Lo descubrí
+ * probándolo con un `.env` real.
+ *
+ * Lo que ya está en el entorno manda, para poder correr el eval contra otra configuración sin
+ * tocar el archivo.
+ */
+function cargarEnv(): void {
+  const archivo = resolve(import.meta.dirname, '..', '.env')
+  if (!existsSync(archivo)) return
+  // process.loadEnvFile existe desde Node 20.12 y no agrega dependencias.
+  try {
+    process.loadEnvFile(archivo)
+  } catch {
+    // Si el archivo está mal formado, se sigue: configuracionDesdeEntorno dice qué falta.
+  }
+}
+cargarEnv()
 
 const CONCURRENCIA = 5
 /**

@@ -1,5 +1,22 @@
-import { defineConfig, type Plugin, type ViteDevServer } from 'vite'
+import { defineConfig, loadEnv, type Plugin, type ViteDevServer } from 'vite'
 import react from '@vitejs/plugin-react'
+
+/**
+ * Pasa las variables del `.env` a `process.env` para la función que corre en desarrollo.
+ *
+ * Vite carga el `.env` pero solo expone al bundle las que llevan prefijo `VITE_` —que es
+ * justamente lo que acá no queremos—, y **no toca `process.env`**. Sin esto, con el `.env`
+ * lleno el intermediario igual responde "proveedor-no-configurado": lo descubrí probándolo.
+ *
+ * En producción no hace falta: las variables las pone la plataforma.
+ */
+function cargarEnvDelServidor(modo: string, raiz: string): void {
+  // '' como prefijo trae TODAS, incluidas las sin prefijo, que son las secretas.
+  for (const [nombre, valor] of Object.entries(loadEnv(modo, raiz, ''))) {
+    // Lo que ya está en el entorno manda: así se puede sobreescribir al invocar el comando.
+    if (process.env[nombre] === undefined && valor !== '') process.env[nombre] = valor
+  }
+}
 
 /**
  * Sirve `api/` como middleware en desarrollo, para que `npm run dev` alcance y no haya
@@ -44,7 +61,10 @@ function apiEnDesarrollo(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), apiEnDesarrollo()],
-  build: { outDir: 'dist' },
+export default defineConfig(({ mode }) => {
+  cargarEnvDelServidor(mode, process.cwd())
+  return {
+    plugins: [react(), apiEnDesarrollo()],
+    build: { outDir: 'dist' },
+  }
 })

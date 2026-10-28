@@ -195,3 +195,40 @@ La parte mecánica quedó convertida en test permanente, que es lo que preguntab
 
 **Lo que este test no cubre**: si el texto se entiende. Eso lo sigue juzgando una persona, y es
 la parte de SC-013 que queda en el juicio de quien prueba.
+
+
+## SC-009 — fluidez de la vista 3D (T081)
+
+**Fecha**: 2026-10-28T20:35:29Z
+**Comando**: botón "Medir fps" en `?escenario=sc009`, con `npm run dev`
+**Procedimiento**: 10 s de órbita continua, mínimo sostenido sobre ventanas de 500 ms
+**Carga**: 200 bultos en 12 tipos, que es el caso peor de la paleta
+
+| | Valor |
+|---|---|
+| Objetivo | ≥ 30 fps |
+| **Mínimo sostenido** | **59,9 fps** ✅ |
+| Promedio | 60,0 fps |
+| Cuadros medidos | 600 |
+
+**Máquina** (sin esto el número no es reproducible):
+
+- GPU: ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001638) Direct3D11 vs_5_0 ps_5_0, D3D11)
+- Núcleos: 16 · Memoria: 32 GB
+- Resolución: 2298×497 css, 2560×1080 pantalla · relación de píxeles 1,1
+- Navegador: Chrome 156 en Windows 10/11 x64
+
+### Cómo leer este número
+
+**SC-009 se cumple con el doble de margen**, pero el número dice menos de lo que parece: 59,9 de
+mínimo con 60,0 de promedio significa que la medición **tocó el techo de sincronización vertical**
+de la pantalla. La vista no estuvo al límite de la placa en ningún momento; estuvo esperando el
+refresco del monitor.
+
+O sea: el margen real sobre los 30 fps es **mayor** que 2x, y esta medición no dice cuánto. Para
+saberlo habría que desactivar la sincronización vertical o medir con muchos más bultos. Mientras
+el criterio sea 30 fps con 200 bultos, no hace falta.
+
+Vale notar que la placa es **integrada** (Radeon integrada, vía ANGLE sobre Direct3D 11), no una
+dedicada: el caso peor de la paleta sostiene el techo de refresco en hardware modesto, que es la
+mejor señal que podía dar esta medición.

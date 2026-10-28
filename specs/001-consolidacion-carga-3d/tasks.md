@@ -205,7 +205,7 @@ historia independiente y no se finge que lo sea.
 - [X] T078 [P] [US3] Crear `src/vista3d/recorrido.test.ts`: para todo k, el prefijo tiene exactamente k bultos y **ninguno flotando** —cada bulto elevado del prefijo tiene su 80% de apoyo dentro del mismo prefijo (AC-08, AC-24)
 - [X] T079 [US3] Crear `src/vista3d/Escena.tsx` con la cámara navegable —girar, acercar y desplazar— y las paredes del contenedor
 - [X] T080 [US3] Crear `src/interfaz/Avisos.tsx` con los dos avisos: colores reciclados cuando hay más de 12 tipos (FR-013) y rendimiento no garantizado por encima de 200 bultos, **sin dejar de mostrar la disposición ni recortar la carga** (FR-024)
-- [ ] T081 [US3] Medir SC-009 **en el navegador**: 200 bultos en 12 tipos, 10 segundos de órbita continua en Chrome de escritorio, reportando el **mínimo sostenido** y no el promedio, y anotando CPU, GPU, resolución y versión de Chrome en `eval/ultimo-informe.md` (research.md §15)
+- [X] T081 [US3] Medir SC-009 **en el navegador**: 200 bultos en 12 tipos, 10 segundos de órbita continua en Chrome de escritorio, reportando el **mínimo sostenido** y no el promedio, y anotando CPU, GPU, resolución y versión de Chrome en `eval/ultimo-informe.md` (research.md §15)
 
 - [X] T080b [US3] Agregar en `src/vista3d/Escena.tsx` el caso de FR-028 en que el navegador no puede inicializar la vista 3D: se informa y **el informe de FR-012 sigue estando disponible**, en vez de perder la consolidación entera (FR-028)
 
