@@ -413,7 +413,11 @@ respeta.
   salga del catálogo cuenta como error.
 - **SC-005** (RNF-02 c): Sobre el mismo dataset, al menos el 90% de los ítems quedan asociados a
   la entrada correcta del catálogo. SC-003, SC-004 y SC-005 no se promedian entre sí.
-- **SC-006** (RNF-03): Cero disposiciones inválidas mostradas o guardadas.
+- **SC-006** (RNF-03): Cero disposiciones inválidas mostradas o guardadas. Se hace cumplir por
+  construcción —FR-011 bloquea el renderizado y el guardado de toda disposición que no pase la
+  validación— y se verifica sobre los 10 escenarios de referencia, donde cualquier violación hace
+  fallar el build. El criterio **no** queda acotado a esos 10: alcanza a toda disposición que el
+  sistema muestre.
 - **SC-007** (RNF-04): La consolidación de hasta 200 bultos se resuelve en menos de 5 s (p95),
   medida sobre los 10 escenarios.
 - **SC-008** (RNF-05, AC-14): Los 10 escenarios coinciden bulto por bulto con la línea base
