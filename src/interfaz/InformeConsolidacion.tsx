@@ -42,6 +42,8 @@ export type EstadoConsolidacion =
   | { readonly fase: 'sin-contenedor' }
   | { readonly fase: 'bloqueada'; readonly faltantes: number }
   | { readonly fase: 'calculando' }
+  /** Por encima de 5.000 bultos no se arranca sin confirmación (FR-031, AC-33). */
+  | { readonly fase: 'pide-confirmacion'; readonly bultos: number }
   /** FR-011: no se renderiza ni se guarda. Pero sí se dice por qué (FR-028). */
   | { readonly fase: 'rechazada'; readonly motivo: MotivoRechazo }
   | {
@@ -56,7 +58,13 @@ function Porcentaje({ valor }: { valor: number }) {
   return <strong>{valor.toFixed(1)}%</strong>
 }
 
-export function InformeConsolidacion({ estado }: { readonly estado: EstadoConsolidacion }) {
+export function InformeConsolidacion({
+  estado,
+  onConfirmar,
+}: {
+  readonly estado: EstadoConsolidacion
+  readonly onConfirmar?: () => void
+}) {
   // Los cinco casos sin disposición. Ninguno deja la pantalla vacía (FR-028).
   if (estado.fase === 'sin-items') {
     return <p>Cargá la lista de ítems y elegí un contenedor para consolidar.</p>
@@ -72,8 +80,23 @@ export function InformeConsolidacion({ estado }: { readonly estado: EstadoConsol
       </p>
     )
   }
+  if (estado.fase === 'pide-confirmacion') {
+    return (
+      <div role="alert">
+        <p>
+          Esta carga tiene {estado.bultos.toLocaleString('es-AR')} bultos. Consolidarla puede
+          tardar varios minutos. No se va a recortar nada: solo queremos avisarte antes de
+          empezar.
+        </p>
+        <button type="button" onClick={onConfirmar}>
+          Consolidar igual
+        </button>
+      </div>
+    )
+  }
   if (estado.fase === 'calculando') {
-    return <p role="status">Calculando la disposición…</p>
+    // Corre en un worker: la pestaña sigue respondiendo mientras calcula (FR-031).
+    return <p role="status">Calculando la disposición… la página sigue respondiendo.</p>
   }
   if (estado.fase === 'rechazada') {
     return (

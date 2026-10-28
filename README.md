@@ -48,6 +48,20 @@ npm run typecheck # chequeo de tipos del navegador y del servidor
 interfaz del modelo, así que funciona en un repositorio recién clonado, sin `.env` y sin
 conexión. Si un test necesita red, está mal escrito.
 
+## Desplegar
+
+Antes de poner esto en línea, **configurá el tope de gasto en el panel de DeepSeek**. No es
+opcional: el intermediario es público, y el límite de pedidos por IP acota la velocidad pero no
+el total. El tope de gasto es lo único que acota el daño en pesos si alguien abusa.
+
+El despliegue no está completo sin eso.
+
+```bash
+npm run build     # chequea tipos y construye en dist/
+```
+
+Vercel toma `vercel.json`: sirve `dist/` y corre `api/` como función serverless.
+
 ## Correr la evaluación de precisión
 
 ```bash
@@ -55,7 +69,10 @@ npm run eval
 ```
 
 Es el **único** comando que llama al proveedor real, y por lo tanto el único que gasta plata.
-Está fuera de la suite a propósito. Mide, sobre un dataset de 50 descripciones etiquetadas, qué
+Está fuera de la suite a propósito.
+
+Corre el dataset **3 veces** y reporta el peor de los tres: el proveedor no es determinístico, así
+que una sola corrida puede dar suerte. Mide, sobre un dataset de 50 descripciones etiquetadas, qué
 porcentaje de los campos declarados se extrae bien, que ningún campo ausente se complete con un
 valor inventado, y qué porcentaje de ítems queda asociado a la entrada correcta del catálogo.
 

@@ -17,6 +17,23 @@ import { validar } from '../validador/validar'
 import { consolidacionBloqueada, camposFaltantes } from '../interpretacion/faltantes'
 import type { EstadoConsolidacion } from './InformeConsolidacion'
 
+export type PedidoConsolidacion = {
+  readonly items: readonly Item[]
+  readonly contenedorId: string | null
+}
+
+/**
+ * Por encima de esta cantidad de bultos se pide confirmación antes de consolidar (FR-031).
+ *
+ * Medido: 800 bultos tardan 4,5 s y el crecimiento es de alrededor de n^2,5, así que 5.000
+ * serían minutos. No se rechaza ni se recorta la carga (FR-024): se avisa y se pregunta.
+ */
+export const BULTOS_QUE_PIDEN_CONFIRMACION = 5_000
+
+export function cantidadDeBultos(items: readonly Item[]): number {
+  return items.reduce((n, i) => n + (i.cantidad.estado === 'declarado' ? i.cantidad.valor : 0), 0)
+}
+
 export function consolidar(items: readonly Item[], contenedorId: string | null): EstadoConsolidacion {
   if (items.length === 0) return { fase: 'sin-items' }
   if (contenedorId === null) return { fase: 'sin-contenedor' }

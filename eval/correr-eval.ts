@@ -27,6 +27,14 @@ import { CASOS } from './dataset/casos'
 import type { CasoDataset, Eje } from './dataset/tipos'
 
 const CONCURRENCIA = 5
+/**
+ * Cuántas veces corre el dataset (SC-003 a SC-005).
+ *
+ * El proveedor no es determinístico: la misma descripción puede dar resultados distintos. Con
+ * una sola corrida el número que se reporta puede ser suerte, así que se corre tres veces y
+ * **se reporta la peor**. Es el criterio conservador: si una da 92% y otra 87%, no cumple.
+ */
+const CORRIDAS = 3
 const EJES: readonly Eje[] = ['largo', 'ancho', 'alto', 'peso']
 
 type Medicion = {
@@ -42,6 +50,7 @@ type Medicion = {
 }
 
 const mediciones: Medicion[] = []
+const corridas: { sc003: number; sc004: number; sc005: number }[] = []
 
 async function medirCaso(caso: CasoDataset, modelo: ReturnType<typeof crearModeloDeepSeek>): Promise<Medicion> {
   const arranque = Date.now()
@@ -143,16 +152,31 @@ describe('evaluación de precisión (RNF-02)', () => {
         )
       }
 
-      // De a 5 en paralelo, que es la concurrencia con la que SC-002 declara su p95.
-      for (let i = 0; i < CASOS.length; i += CONCURRENCIA) {
-        const tanda = CASOS.slice(i, i + CONCURRENCIA)
-        mediciones.push(...(await Promise.all(tanda.map((c) => medirCaso(c, modelo)))))
+      const porCorrida: { sc003: number; sc004: number; sc005: number }[] = []
+
+      for (let corrida = 1; corrida <= CORRIDAS; corrida++) {
+        const deEstaCorrida: Medicion[] = []
+        // De a 5 en paralelo, que es la concurrencia con la que SC-002 declara su p95.
+        for (let i = 0; i < CASOS.length; i += CONCURRENCIA) {
+          const tanda = CASOS.slice(i, i + CONCURRENCIA)
+          deEstaCorrida.push(...(await Promise.all(tanda.map((c) => medirCaso(c, modelo)))))
+        }
+        mediciones.push(...deEstaCorrida)
+
+        const suma = (f: (m: Medicion) => number) => deEstaCorrida.reduce((n, m) => n + f(m), 0)
+        porCorrida.push({
+          sc003: porcentaje(suma((m) => m.declaradosBien), suma((m) => m.declaradosTotal)),
+          sc004: porcentaje(suma((m) => m.ausentesBien), suma((m) => m.ausentesTotal)),
+          sc005: porcentaje(suma((m) => m.entradasBien), suma((m) => m.entradasTotal)),
+        })
       }
 
-      const sumar = (f: (m: Medicion) => number) => mediciones.reduce((n, m) => n + f(m), 0)
-      const sc003 = porcentaje(sumar((m) => m.declaradosBien), sumar((m) => m.declaradosTotal))
-      const sc004 = porcentaje(sumar((m) => m.ausentesBien), sumar((m) => m.ausentesTotal))
-      const sc005 = porcentaje(sumar((m) => m.entradasBien), sumar((m) => m.entradasTotal))
+      // El número que vale es el PEOR de las tres corridas, no el promedio: un promedio de 90%
+      // puede esconder una corrida en 85%.
+      const sc003 = Math.min(...porCorrida.map((c) => c.sc003))
+      const sc004 = Math.min(...porCorrida.map((c) => c.sc004))
+      const sc005 = Math.min(...porCorrida.map((c) => c.sc005))
+      corridas.push(...porCorrida)
 
       // Los tres por separado: NO se promedian entre sí (SC-005).
       expect(sc003, 'SC-003: campos declarados bien extraídos').toBeGreaterThanOrEqual(90)
@@ -166,10 +190,9 @@ describe('evaluación de precisión (RNF-02)', () => {
 afterAll(() => {
   if (mediciones.length === 0) return
 
-  const sumar = (f: (m: Medicion) => number) => mediciones.reduce((n, m) => n + f(m), 0)
-  const sc003 = porcentaje(sumar((m) => m.declaradosBien), sumar((m) => m.declaradosTotal))
-  const sc004 = porcentaje(sumar((m) => m.ausentesBien), sumar((m) => m.ausentesTotal))
-  const sc005 = porcentaje(sumar((m) => m.entradasBien), sumar((m) => m.entradasTotal))
+  const sc003 = corridas.length === 0 ? 0 : Math.min(...corridas.map((c) => c.sc003))
+  const sc004 = corridas.length === 0 ? 0 : Math.min(...corridas.map((c) => c.sc004))
+  const sc005 = corridas.length === 0 ? 0 : Math.min(...corridas.map((c) => c.sc005))
   const ms = mediciones.map((m) => m.ms)
 
   const conProblemas = mediciones.filter((m) => m.problemas.length > 0)
@@ -183,7 +206,8 @@ afterAll(() => {
     `**Comando**: \`npm run eval\``,
     `**Modelo**: \`${process.env['DEEPSEEK_MODELO'] ?? 'deepseek-flash'}\``,
     `**Concurrencia**: ${CONCURRENCIA} llamadas en paralelo`,
-    `**Casos**: ${mediciones.length}`,
+    `**Corridas**: ${CORRIDAS}; se reporta **la peor**, no el promedio`,
+    `**Casos medidos**: ${mediciones.length} (${CASOS.length} por corrida)`,
     '',
     '## Precisión (RNF-02)',
     '',
@@ -194,6 +218,8 @@ afterAll(() => {
     `| SC-005 ítems en la entrada correcta | ≥ 90% | **${sc005.toFixed(1)}%** |`,
     '',
     'Los tres se reportan por separado y **no se promedian entre sí**.',
+    '',
+    `Por corrida: ${corridas.map((c, i) => `#${i + 1} ${c.sc003.toFixed(1)}/${c.sc004.toFixed(1)}/${c.sc005.toFixed(1)}`).join(' · ')}`,
     '',
     '## Tiempo (RNF-01)',
     '',

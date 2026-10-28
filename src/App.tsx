@@ -7,7 +7,13 @@ import { ListaItems } from './interfaz/ListaItems'
 import { Avisos } from './interfaz/Avisos'
 import { Recorrido } from './interfaz/Recorrido'
 import { SelectorContenedor } from './interfaz/SelectorContenedor'
-import { consolidar } from './interfaz/consolidar'
+import {
+  BULTOS_QUE_PIDEN_CONFIRMACION,
+  cantidadDeBultos,
+  type PedidoConsolidacion,
+} from './interfaz/consolidar'
+import { consolidarEnSegundoPlano } from './interfaz/consolidar-async'
+import type { EstadoConsolidacion } from './interfaz/InformeConsolidacion'
 import { IDS_DE_PRUEBA, itemsDelEscenarioDePrueba } from './interfaz/escenario-de-prueba'
 import { Escena } from './vista3d/Escena'
 import { coloresDe } from './vista3d/color-por-item'
@@ -31,10 +37,41 @@ export function App() {
 
   // Se recalcula con cada cambio de la lista o del contenedor: editar un campo estimado
   // dispara el recálculo (FR-006), y cambiar de contenedor también (AC-13).
-  const consolidacion = useMemo(
-    () => consolidar(estado.items, contenedorId),
-    [estado.items, contenedorId],
-  )
+  const bultos = useMemo(() => cantidadDeBultos(estado.items), [estado.items])
+  const [confirmado, setConfirmado] = useState(false)
+  const [consolidacion, setConsolidacion] = useState<EstadoConsolidacion>({ fase: 'sin-items' })
+
+  // La consolidación corre en un worker, así que la pestaña sigue respondiendo con cargas
+  // grandes (FR-031). Por encima de 5.000 bultos no arranca sin confirmación.
+  useEffect(() => {
+    const pedido: PedidoConsolidacion = { items: estado.items, contenedorId }
+    if (pedido.items.length === 0) {
+      setConsolidacion({ fase: 'sin-items' })
+      return
+    }
+    if (contenedorId === null) {
+      setConsolidacion({ fase: 'sin-contenedor' })
+      return
+    }
+    if (bultos > BULTOS_QUE_PIDEN_CONFIRMACION && !confirmado) {
+      setConsolidacion({ fase: 'pide-confirmacion', bultos })
+      return
+    }
+
+    setConsolidacion({ fase: 'calculando' })
+    const tarea = consolidarEnSegundoPlano(estado.items, contenedorId)
+    let vigente = true
+    void tarea.resultado.then((r) => {
+      if (vigente) setConsolidacion(r)
+    })
+    return () => {
+      vigente = false
+      tarea.cancelar()
+    }
+  }, [estado.items, contenedorId, bultos, confirmado])
+
+  // Un cambio en la lista o en el contenedor vuelve a pedir confirmación: la carga es otra.
+  useEffect(() => setConfirmado(false), [estado.items, contenedorId])
 
   const colocados = consolidacion.fase === 'lista' ? consolidacion.disposicion.secuencia.length : 0
   const [posicion, setPosicion] = useState(0)
@@ -46,10 +83,6 @@ export function App() {
   }, [colocados])
 
   const colores = useMemo(() => coloresDe(estado.items), [estado.items])
-  const bultos = useMemo(
-    () => estado.items.reduce((n, i) => n + (i.cantidad.estado === 'declarado' ? i.cantidad.valor : 0), 0),
-    [estado.items],
-  )
 
   // La descripción viaja como argumento en vez de leerse del estado: así el efecto queda
   // afuera del actualizador, que tiene que ser una función pura.
@@ -89,7 +122,7 @@ export function App() {
 
       <SelectorContenedor contenedorId={contenedorId} onElegir={setContenedorId} />
 
-      <InformeConsolidacion estado={consolidacion} />
+      <InformeConsolidacion estado={consolidacion} onConfirmar={() => setConfirmado(true)} />
 
       <Avisos
         cantidadDeTipos={estado.items.length}
