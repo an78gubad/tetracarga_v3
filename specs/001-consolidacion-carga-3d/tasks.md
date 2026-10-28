@@ -116,7 +116,7 @@ renderizar nada.
 
 - [ ] T039 [US1] Crear `tests/seguridad/bundle.test.ts` que **arme su propio bundle** (no dependa de un `dist/` que puede estar viejo) y busque la clave, la URL del proveedor y el encabezado de autorización **reales**. No busca patrones genéricos como `sk-`: dan falsos positivos con el código de React (AC-19, SC-010)
 - [ ] T040 [US1] Crear `eval/dataset/` con las 50 descripciones etiquetadas: por ítem, la cantidad, qué campos declara la descripción con su valor, qué campos están ausentes y qué entrada del catálogo corresponde. La separación entre declarados y ausentes es la que permite calcular SC-003 y SC-004 **sin promediarlos**
-- [ ] T041 [US1] Crear `eval/correr-eval.ts` que llame al proveedor real y reporte SC-003 (≥ 90% de campos declarados bien extraídos), SC-004 (100% de los ausentes estimados o preguntados; completar con un valor que no salga del catálogo **cuenta como error**) y SC-005 (≥ 90% de ítems en la entrada correcta), **los tres por separado**. Fuera de la suite: es el único comando que gasta plata
+- [ ] T041 [US1] Crear `eval/correr-eval.ts` que llame al proveedor real y reporte SC-003 (≥ 90% de campos declarados bien extraídos, donde "bien extraído" es **coincidencia exacta tras convertir a milímetros y gramos enteros, sin tolerancia**, y un campo declarado que quede marcado como estimado cuenta como error), SC-004 (100% de los ausentes estimados o preguntados; completar con un valor que no salga del catálogo **cuenta como error**) y SC-005 (≥ 90% de ítems en la entrada correcta), **los tres por separado**. Fuera de la suite: es el único comando que gasta plata
 - [ ] T042 [US1] Medir `max_tokens` sobre el dataset y dejarlo escrito junto al prompt en `server/modelo/deepseek.ts`, con la medición que lo produjo anotada en `eval/ultimo-informe.md` (research.md §2)
 
 **Checkpoint**: una descripción se convierte en lista auditable. **Entrega valor sola**: el pedido
@@ -153,7 +153,7 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 - [ ] T051 [US2] Crear `src/acomodador/acomodar.test.ts`: AC-07 (excede volumen: coloca lo que entra, el resto con motivo "volumen"), AC-15 (excede peso: los colocados no superan la carga útil, el resto con motivo "peso"), AC-23 (excede por volumen **y** por peso: el motivo que se informa es **"peso"**), AC-13 (usa medidas interiores y carga útil de la entrada elegida, y recalcula al cambiar de contenedor)
 - [ ] T052 [US2] Crear `src/acomodador/acomodar.ts` con la firma `acomodar(items: Item[], contenedor: Contenedor): Disposicion` —el contenedor entra por argumento, no se lee del catálogo—, en aritmética entera, con el origen en la esquina del fondo abajo a la izquierda, x el largo hacia la puerta, y el ancho, z el alto, e intervalos semiabiertos `[inicio, inicio + medida)` para que dos bultos pegados no se superpongan
 - [ ] T053 [US2] Crear `src/acomodador/informe.ts` con el aprovechamiento de **volumen** (Σ cajas envolventes de los colocados ÷ volumen interior, en mm³ enteros) y de **peso** (Σ pesos colocados ÷ carga útil, en gramos), los bultos afuera **no** entran en ningún numerador (research.md §8)
-- [ ] T054 [P] [US2] Crear `src/acomodador/determinismo.test.ts`: la misma entrada dos veces da la misma disposición bulto por bulto —posición, orientación y orden de colocación—, **sin tolerancia** (FR-009, AC-21)
+- [ ] T054 [P] [US2] Crear `src/acomodador/determinismo.test.ts`: la misma entrada dos veces da la misma disposición bulto por bulto —posición, orientación y orden de colocación—, **sin tolerancia**; y **la misma carga con los ítems en otro orden en la lista da la misma disposición** (FR-009, AC-21)
 
 ### Validador (cuentas escritas de nuevo, sin importar nada del acomodador)
 
@@ -173,9 +173,11 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 
 - [ ] T066 [P] [US2] Crear `escenarios/escenarios.ts` con los 10 escenarios de referencia, todos los campos en `declarado` para que no dependan del catálogo ni del modelo, cubriendo carga mixta, frágiles, tambores y cajas, no apilables y sobrecarga de peso
 - [ ] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011, SC-006)
-- [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
+- [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos, medido **de a una consolidación por vez, con 10 corridas por escenario** (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
 - [ ] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, usando las medidas interiores y la carga útil (max payload, no el peso bruto) de la entrada elegida, y que recalcule al cambiar (FR-007, AC-13)
 - [ ] T070 [US2] Crear `src/interfaz/InformeConsolidacion.tsx` con los dos aprovechamientos, los colocados y los que quedaron afuera **cada uno con su motivo** (FR-012)
+
+- [ ] T070b [US2] Agregar en `src/interfaz/InformeConsolidacion.tsx` los estados sin disposición de FR-028: lista de ítems vacía; ningún bulto colocado, con todos los motivos a la vista; y disposición rechazada por el validador, informando el rechazo y conservando la lista intacta. **Nunca una pantalla en blanco** (FR-028)
 
 **Checkpoint**: se responde "¿entra?" con un informe defendible, y ninguna disposición imposible
 llega a la pantalla.
@@ -204,6 +206,8 @@ historia independiente y no se finge que lo sea.
 - [ ] T079 [US3] Crear `src/vista3d/Escena.tsx` con la cámara navegable —girar, acercar y desplazar— y las paredes del contenedor
 - [ ] T080 [US3] Crear `src/interfaz/Avisos.tsx` con los dos avisos: colores reciclados cuando hay más de 12 tipos (FR-013) y rendimiento no garantizado por encima de 200 bultos, **sin dejar de mostrar la disposición ni recortar la carga** (FR-024)
 - [ ] T081 [US3] Medir SC-009 **en el navegador**: 200 bultos en 12 tipos, 10 segundos de órbita continua en Chrome de escritorio, reportando el **mínimo sostenido** y no el promedio, y anotando CPU, GPU, resolución y versión de Chrome en `eval/ultimo-informe.md` (research.md §15)
+
+- [ ] T080b [US3] Agregar en `src/vista3d/Escena.tsx` el caso de FR-028 en que el navegador no puede inicializar la vista 3D: se informa y **el informe de FR-012 sigue estando disponible**, en vez de perder la consolidación entera (FR-028)
 
 **Checkpoint**: un número se volvió una instrucción de carga.
 
@@ -240,7 +244,7 @@ eliminan ítems, se ponen las marcas y se verifica que la disposición las respe
 - [ ] T091c Medir SC-001 una vez a mano: de descripción tipeada a disposición visible en 3D, cronometrando que sean menos de dos minutos sin cargar ninguna planilla, y anotarlo en `eval/ultimo-informe.md`
 - [ ] T092 Registrar `escenarios/linea-base.json` con las 10 disposiciones, **una única vez**, según [contracts/linea-base.md](./contracts/linea-base.md)
 - [ ] T093 Crear `escenarios/linea-base.test.ts` que recalcule y compare bulto por bulto —identidad `(itemId, indice)`, posición, orientación y orden de colocación— **sin tolerancia**, rompiendo el build ante cualquier diferencia. **Sin snapshots de Vitest**: `vitest -u` reescribiría la línea base sin que nadie lo decida. Entra en el **mismo commit** que T092: un test que pasa porque el archivo falta es un `.skip` disfrazado (AC-14, SC-008, FR-018)
-- [ ] T094 [P] Correr `npm run eval` y escribir `eval/ultimo-informe.md` con SC-002 a SC-005 **declarando la concurrencia** con la que se midió el p95, más la fecha y el comando de cada número
+- [ ] T094 [P] Correr `npm run eval` y escribir `eval/ultimo-informe.md` con SC-002 a SC-005, midiendo el p95 de la interpretación con **5 llamadas en paralelo** y dejando esa concurrencia escrita al lado del número, más la fecha y el comando de cada número
 - [ ] T095 [P] Verificar `npm test` en un clon limpio, **sin red y sin `.env`**, y dejar constancia del resultado en `eval/ultimo-informe.md` con la fecha y el comando (AC-16, SC-012)
 - [ ] T096 [P] Recorrer `README.md` como si fuera la primera vez y confirmar que la aplicación arranca sin leer código, con cero nombres de variable que haya que descubrir (SC-013, AC-28)
 - [ ] T097 Verificar a mano en el navegador lo que ningún test cubre sobre `src/vista3d/` (`Escena.tsx`, `paleta.ts`, `recorrido.ts`): que los 12 colores se distingan de verdad en pantalla, que dos bultos de la misma pila se distingan, y que el control deslizante no muestre ningún bulto flotando en ningún paso. La vista 3D se verifica en el navegador, no solo con tests

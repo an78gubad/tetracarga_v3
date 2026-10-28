@@ -46,6 +46,17 @@
   la pila, y en aritmética entera: pesos en gramos, áreas en milímetros cuadrados y la parte de
   cada apoyo redondeada hacia arriba. Sin punto flotante, para que el acomodador y el validador
   lleguen al mismo número por separado.
+- Q: ¿Reordenar la lista de ítems sin cambiar su contenido tiene que dar la misma disposición? →
+  A: Sí. El orden de la lista no influye: el acomodador ordena por su cuenta y la misma carga da la
+  misma disposición aunque los ítems vengan en otro orden.
+- Q: ¿Qué muestra el sistema cuando no hay disposición que mostrar? → A: Siempre el motivo, nunca
+  una pantalla en blanco: lista vacía, ningún bulto colocado, disposición rechazada por el
+  validador, o navegador que no puede inicializar la vista 3D.
+- Q: ¿Con cuánta concurrencia se mide el p95 de la interpretación y de la consolidación? → A: La
+  interpretación con 5 llamadas en paralelo; la consolidación de a una, con 10 corridas por
+  escenario.
+- Q: ¿Qué cuenta como campo "extraído correctamente" en la evaluación? → A: Coincidencia exacta
+  después de convertir a milímetros y gramos enteros, sin tolerancia.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -282,7 +293,9 @@ respeta.
   declararlo siempre el usuario.
 - **FR-009** (RF-07, AC-21): El sistema MUST calcular la disposición de forma determinística y
   sin intervención del modelo de lenguaje: la misma entrada da la misma disposición bulto por
-  bulto —posición, orientación y orden de colocación—, sin tolerancia. Las longitudes son enteras
+  bulto —posición, orientación y orden de colocación—, sin tolerancia. **Reordenar la lista de
+  ítems sin cambiar su contenido MUST dar la misma disposición**: el orden en que el usuario los
+  cargó no influye, porque el acomodador los ordena por su cuenta. Las longitudes son enteras
   en milímetros y los pesos enteros en gramos —el usuario los declara en kilos por FR-002—, el
   origen está en la esquina del fondo abajo a la izquierda, x es el largo hacia la puerta, y el
   ancho y z el alto, y la orientación dice qué medida del bulto queda sobre cada eje.
@@ -375,6 +388,13 @@ respeta.
   sea menor que el peso repartido. MUST NOT intervenir el punto flotante en ningún paso. El
   cálculo de la disposición (FR-009) y la validación (FR-010) MUST llegar al mismo número por
   separado, sin compartir código ni constantes.
+- **FR-028** (RF-04, RF-08, RF-09, RF-10): Cuando no hay una disposición que mostrar, el sistema
+  MUST decir por qué y MUST NOT dejar la pantalla en blanco. Son cuatro casos: la lista de ítems
+  está vacía; ningún bulto pudo colocarse y todos quedan afuera, cada uno con su motivo de FR-012;
+  la disposición no pasó la validación de FR-010, caso en el que el sistema MUST informar que se
+  rechazó, MUST NOT renderizarla ni guardarla (FR-011) y MUST conservar la lista de ítems intacta;
+  y el navegador no puede inicializar la vista 3D, caso en el que el informe de FR-012 MUST seguir
+  estando disponible.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -405,9 +425,13 @@ respeta.
   3D en menos de dos minutos, sin cargar ninguna planilla.
 - **SC-002** (RNF-01): La interpretación de una descripción responde en menos de 10 s (p95),
   medido punta a punta y con los reintentos de FR-016 incluidos, sobre todos los pedidos y no solo
-  los que salen bien al primer intento; la medición declara la concurrencia con la que se tomó.
+  los que salen bien al primer intento. La medición se toma con **5 llamadas en paralelo**: con una
+  sola, el p95 queda por debajo del que ve una persona cuando hay otras usando el sistema.
 - **SC-003** (RNF-02 a): Sobre el dataset de 50 descripciones etiquetadas, al menos el 90% de los
-  campos declarados en la descripción se extraen correctamente.
+  campos declarados en la descripción se extraen correctamente. "Correctamente" es **coincidencia
+  exacta después de convertir a milímetros y gramos enteros, sin tolerancia**: un campo que la
+  descripción declara y el sistema marca como estimado cuenta como error, aunque el valor del
+  catálogo acierte.
 - **SC-004** (RNF-02 b): Sobre el mismo dataset, el 100% de los campos ausentes en la descripción
   quedan marcados como estimados o preguntados. Un campo ausente completado con un valor que no
   salga del catálogo cuenta como error.
@@ -419,7 +443,8 @@ respeta.
   fallar el build. El criterio **no** queda acotado a esos 10: alcanza a toda disposición que el
   sistema muestre.
 - **SC-007** (RNF-04): La consolidación de hasta 200 bultos se resuelve en menos de 5 s (p95),
-  medida sobre los 10 escenarios.
+  medida sobre los 10 escenarios **de a una consolidación por vez, con 10 corridas por escenario**.
+  No se mide con concurrencia: el cálculo es local y no compite con otros pedidos.
 - **SC-008** (RNF-05, AC-14): Los 10 escenarios coinciden bulto por bulto con la línea base
   congelada, sin tolerancia.
 - **SC-009** (RNF-06): La vista 3D sostiene al menos 30 fps con 200 bultos repartidos en 12 tipos
