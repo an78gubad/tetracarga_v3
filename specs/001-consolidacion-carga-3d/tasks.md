@@ -93,7 +93,7 @@ renderizar nada.
 - [ ] T024 [P] [US1] Crear `server/proxy/esquema-respuesta.test.ts`: una respuesta mal formada se descarta entera (AC-26); `-5`, `0` y una cantidad no entera dejan ese campo faltante sin tocar los otros ítems, y **no** se salvan por su valor absoluto ni por su signo (AC-27)
 - [ ] T025 [P] [US1] Crear `server/proxy/limite-ip.ts`: ventanas deslizantes de 1 minuto (10 pedidos) y 1 hora (60), en memoria del proceso, con la IP tomada del primer valor de `x-forwarded-for` y `remoteAddress` como respaldo (FR-023)
 - [ ] T026 [US1] Crear `server/proxy/manejador.ts` con el orden de controles de [contracts/proxy.md](./contracts/proxy.md): cuerpo válido → largo ≤ 2.000 **puntos de código** → límite por IP → llamada → validación de esquema. Los tres primeros rechazan **sin llamar al proveedor**. Ningún mensaje de error reenvía el texto crudo del proveedor: por ahí se filtra una URL sin que nadie lo note (FR-015)
-- [ ] T027 [P] [US1] Crear `server/proxy/manejador.test.ts`: 2.001 caracteres se rechazan con el límite en el mensaje y cero llamadas al modelo (AC-25); el pedido 11 de la misma IP en un minuto se rechaza con el límite y cero llamadas (AC-29); falta de credencial se distingue de credencial inválida
+- [ ] T027 [P] [US1] Crear `server/proxy/manejador.test.ts`: 2.001 caracteres se rechazan con el límite en el mensaje y cero llamadas al modelo (AC-25); el pedido 11 de la misma IP en un minuto se rechaza con el límite y cero llamadas (AC-29, SC-014); falta de credencial se distingue de credencial inválida
 - [ ] T028 [US1] Crear `api/interpretar.ts` que **solo** envuelva a `server/proxy/manejador.ts`, sin lógica propia, con los imports relativos con extensión `.js`
 
 ### Completado desde el catálogo
@@ -172,7 +172,7 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 ### Escenarios e interfaz
 
 - [ ] T066 [P] [US2] Crear `escenarios/escenarios.ts` con los 10 escenarios de referencia, todos los campos en `declarado` para que no dependan del catálogo ni del modelo, cubriendo carga mixta, frágiles, tambores y cajas, no apilables y sobrecarga de peso
-- [ ] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011)
+- [ ] T067 [US2] Crear `escenarios/validador.test.ts`: ninguna de las 10 disposiciones dispara el validador, y cualquier violación **hace fallar el build** (AC-10, FR-011, SC-006)
 - [ ] T068 [US2] Crear `escenarios/tiempo.test.ts` que mida la consolidación de los 10 escenarios y **falle** si el p95 supera los 5 s para hasta 200 bultos (SC-007). El número **no** se reporta acá: se reporta en T091b, sobre los escenarios ya calibrados
 - [ ] T069 [P] [US2] Crear `src/interfaz/SelectorContenedor.tsx` con 20', 40' y 40' high cube, usando las medidas interiores y la carga útil (max payload, no el peso bruto) de la entrada elegida, y que recalcule al cambiar (FR-007, AC-13)
 - [ ] T070 [US2] Crear `src/interfaz/InformeConsolidacion.tsx` con los dos aprovechamientos, los colocados y los que quedaron afuera **cada uno con su motivo** (FR-012)
