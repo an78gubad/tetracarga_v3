@@ -157,15 +157,15 @@ de esta fase. El commit del test dice que falla hasta el siguiente.
 
 ### Validador (cuentas escritas de nuevo, sin importar nada del acomodador)
 
-- [ ] T055 [US2] Crear `src/validador/solapamiento.test.ts`: hay superposición solo si los intervalos se solapan en **más de 0 mm** en los tres ejes; compartir cara, arista o vértice **no** es superposición
+- [X] T055 [US2] Crear `src/validador/solapamiento.test.ts`: hay superposición solo si los intervalos se solapan en **más de 0 mm** en los tres ejes; compartir cara, arista o vértice **no** es superposición
 - [ ] T056 [US2] Crear `src/validador/solapamiento.ts`
-- [ ] T057 [US2] Crear `src/validador/limites.test.ts`: ningún bulto sale del contenedor, con el contenedor recibido por argumento y uno de prueba inventado en el test, sin leer el catálogo
+- [X] T057 [US2] Crear `src/validador/limites.test.ts`: ningún bulto sale del contenedor, con el contenedor recibido por argumento y uno de prueba inventado en el test, sin leer el catálogo
 - [ ] T058 [US2] Crear `src/validador/limites.ts`
-- [ ] T059 [US2] Crear `src/validador/apoyo.test.ts`: el 80% de apoyo sobre el piso o sobre bultos **cargados antes en la secuencia**, verificado sobre **cada prefijo** y no solo sobre la disposición final (AC-24)
+- [X] T059 [US2] Crear `src/validador/apoyo.test.ts`: el 80% de apoyo sobre el piso o sobre bultos **cargados antes en la secuencia**, verificado sobre **cada prefijo** y no solo sobre la disposición final (AC-24)
 - [ ] T060 [US2] Crear `src/validador/apoyo.ts` con su propio 80% y su propio cálculo de área: **no importa nada de `src/acomodador/`**
-- [ ] T061 [US2] Crear `src/validador/peso.test.ts`: la carga máxima total no se supera, y el reparto por la pila se verifica con la cuenta propia del validador
+- [X] T061 [US2] Crear `src/validador/peso.test.ts`: la carga máxima total no se supera, y el reparto por la pila se verifica con la cuenta propia del validador
 - [ ] T062 [US2] Crear `src/validador/peso.ts` con su propia fórmula de reparto
-- [ ] T063 [US2] Crear `src/validador/validar.test.ts`: una disposición con superposición, una con un bulto flotando y una que excede la carga útil son rechazadas (FR-010)
+- [X] T063 [US2] Crear `src/validador/validar.test.ts`: una disposición con superposición, una con un bulto flotando y una que excede la carga útil son rechazadas (FR-010)
 - [ ] T064 [US2] Crear `src/validador/validar.ts` con la firma `validar(disposicion: Disposicion, contenedor: Contenedor): ResultadoValidacion` —el mismo contenedor que recibió el acomodador, por argumento— que junte las cuatro verificaciones y devuelva el motivo del rechazo (FR-010)
 - [ ] T065 [US2] Hacer bloqueante la validación en `src/App.tsx`: una disposición que no pasa **no se renderiza ni se guarda** (FR-011)
 
