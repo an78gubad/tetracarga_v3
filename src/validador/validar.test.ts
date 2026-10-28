@@ -74,11 +74,14 @@ describe('las cinco razones de rechazo', () => {
   })
 
   it('algo apoyado sobre un no apilable', () => {
+    // Contenedor más alto a propósito: el tambor mide 877 y la caja encima llega a 1.177, así
+    // que con el de 1.000 fallaría por límites antes de llegar a la marca.
+    const alto = contenedorDe(2000, 1000, 2000, 1_000_000)
     const d = disposicionDe([
       colocacionDe({ itemId: 'tambor', indice: 0, x: 0, y: 0, z: 0 }),
       colocacionDe({ itemId: 'c', indice: 0, x: 0, y: 0, z: 877 }),
     ])
-    const r = validar(d, contenedor, tipos)
+    const r = validar(d, alto, tipos)
     if (!r.valida) expect(r.motivo).toBe('no-apilable-con-carga-encima')
     else expect.unreachable('tendría que haber fallado')
   })
