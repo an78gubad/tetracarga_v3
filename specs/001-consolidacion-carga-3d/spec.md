@@ -12,6 +12,31 @@
 > sale (RF/RNF/AC). Los identificadores del PRD no se renumeran. Si algo de este spec contradice
 > al PRD, gana el PRD.
 
+## Clarifications
+
+### Session 2026-10-28
+
+- Q: ¿Qué tiene que hacer el sistema cuando la carga descrita supera los 200 bultos? → A: Sin tope
+  duro: se consolida y se renderiza cualquier cantidad; 200 es el límite hasta el cual valen los
+  5 s de SC-007 y los 30 fps de SC-009, y por encima la interfaz avisa que el rendimiento puede
+  caer.
+- Q: ¿Cuántas veces reintenta la interfaz del modelo ante una falla transitoria, y el tope de 10 s
+  (p95) incluye esos reintentos? → A: 2 reintentos (3 intentos en total) y un presupuesto total de
+  10 s medido punta a punta; si se agota, se corta y se informa falla del proveedor, sin más
+  reintentos.
+- Q: ¿Cuántos tipos de ítem distintos tiene que poder pintar la vista 3D con colores
+  distinguibles, y cómo se verifica que "se distinguen a simple vista"? → A: Paleta fija de 12
+  colores, con una distancia perceptual mínima entre todos los pares verificada por un test
+  automático; SC-009 se mide con 12 tipos y 200 bultos; con más de 12 tipos los colores se
+  reciclan y la vista lo avisa.
+- Q: ¿Qué pasa con la lista ya interpretada y editada cuando el usuario manda una segunda
+  descripción? → A: Los ítems interpretados se agregan al final de la lista existente; lo que ya
+  estaba conserva sus valores, sus marcas y su color, y lo que sobra se elimina con FR-006.
+- Q: ¿Qué muestra la interfaz mientras interpreta, y qué pasa con la descripción tipeada cuando
+  el proveedor falla o se agota el presupuesto de 10 s? → A: Estado de carga visible, sin
+  cancelar; ante falla se conserva la descripción intacta, se informa que la falla es del
+  proveedor y se ofrece reintentar, sin tocar la lista ya cargada.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Describir la carga hablando normalmente y ver la lista (Priority: P1)
@@ -56,6 +81,10 @@ necesidad de consolidar ni de renderizar nada.
 8. **Dado** "-5 cajas de 60x40x30", **cuando** se interpreta, **entonces** la cantidad no queda
    en 5 ni en -5: el valor no cumple el esquema de ítems y, si vuelve igual, la cantidad queda
    faltante y el sistema la pide. (AC-27)
+9. **Dada** una descripción tipeada y un proveedor que falla en los 3 intentos o agota el
+   presupuesto de 10 s, **cuando** se interpreta, **entonces** la descripción sigue intacta en el
+   campo, el mensaje dice que la falla es del proveedor, se puede reintentar y la lista ya cargada
+   queda igual. (FR-026)
 
 ---
 
@@ -154,6 +183,9 @@ respeta.
    **cuando** se interpreta, **entonces** esas marcas vienen precargadas, señaladas como
    provenientes del catálogo y editables; el peso máximo admitido encima nunca viene precargado.
    (RF-06)
+6. **Dada** una lista ya interpretada, con un campo corregido a mano y una marca de FR-008
+   cargada, **cuando** el usuario envía una segunda descripción, **entonces** los ítems nuevos se
+   agregan al final y el ítem corregido conserva su valor, su marca y su color. (FR-025)
 
 ---
 
@@ -163,10 +195,12 @@ respeta.
   dice el límite y no se le pasa ninguna llamada al proveedor del modelo. (AC-25)
 - **Respuesta que no cumple el esquema de ítems**: no se muestra ningún ítem de esa respuesta y se
   trata como una respuesta vacía. (AC-26)
-- **Respuesta vacía del proveedor**: se vuelve a preguntar hasta un número acotado de veces.
-  (AC-20)
+- **Respuesta vacía del proveedor**: se vuelve a preguntar hasta 2 veces —3 intentos en total—
+  dentro del presupuesto de 10 s; agotado el presupuesto se informa la falla. (AC-20, FR-016)
 - **Límite de velocidad del proveedor**: se reintenta. **Credenciales inválidas o saldo agotado**:
   no se reintenta y se informa. (AC-20)
+- **Falla del proveedor tras agotar los reintentos**: la descripción tipeada no se pierde y la
+  lista ya cargada no se toca. (FR-026)
 - **Entrada de catálogo parcial**: medidas sí, peso no → medidas estimadas, peso faltante con otro
   motivo, consolidación bloqueada. (AC-18)
 - **Ítem sin cantidad**: la cantidad nunca se completa; se pregunta y bloquea. (AC-22, RF-03)
@@ -176,10 +210,17 @@ respeta.
 - **Un solo bulto que no entra en ninguna orientación en el contenedor elegido**: queda afuera con
   su motivo, sin romper la consolidación del resto. (RF-09)
 - **Eliminar un ítem de la lista**: los colores de los demás tipos no se corren. (AC-09)
+- **Más de 12 tipos de ítem**: los colores se reciclan en el mismo orden y la vista avisa que hay
+  tipos que comparten color; la lista los sigue identificando por nombre. (FR-013)
 - **Cambiar de contenedor con la carga ya consolidada**: se recalcula con las medidas y la carga
   útil del nuevo. (AC-13)
+- **Segunda descripción con la lista ya cargada**: los ítems nuevos se agregan al final; nada de
+  lo que ya estaba se reemplaza, se fusiona ni se reinterpreta. (FR-025)
 - **Carga de 200 bultos**: se consolida dentro del tiempo objetivo y la vista 3D se mantiene
   fluida. (RNF-04, RNF-06)
+- **Carga de más de 200 bultos**: se consolida y se muestra igual, con el aviso de que los
+  límites de rendimiento dejan de estar garantizados; no se rechaza ni se recorta la carga.
+  (FR-024)
 - **Número fuera de rango en la descripción**: "-5 cajas", "0 cajas" o una cantidad no entera no
   se toman como dato declarado ni se salvan por su valor absoluto. (AC-27)
 - **Repositorio recién clonado y sin variables de entorno**: la aplicación arranca siguiendo el
@@ -241,7 +282,11 @@ respeta.
 - **FR-013** (RF-10): El sistema MUST renderizar la disposición en 3D navegable y pintar cada
   tipo de ítem con un color fijo, atado al ítem y no a su posición en la lista. Dos tipos
   cualesquiera MUST distinguirse a simple vista y dos bultos del mismo tipo MUST distinguirse uno
-  de otro dentro de una pila.
+  de otro dentro de una pila. Los colores MUST salir de una paleta fija de 12; "distinguirse a
+  simple vista" MUST verificarse como una distancia perceptual mínima entre todos los pares de la
+  paleta, con el umbral declarado junto a ella y un test que falla si algún par queda por debajo.
+  Con más de 12 tipos los colores MUST reciclarse en el mismo orden y la vista MUST avisar que hay
+  tipos que comparten color.
 - **FR-014** (RF-10, AC-08): El usuario MUST poder recorrer la secuencia de carga bulto por
   bulto; en la posición k del recorrido se ven exactamente los primeros k bultos de la secuencia.
 - **FR-015** (RNF-07): La credencial del proveedor del modelo MUST NOT estar en el código ni
@@ -249,8 +294,10 @@ respeta.
   autorización—: vive del lado del servidor y el cliente alcanza al modelo únicamente a través de
   un intermediario propio.
 - **FR-016** (RNF-08): El acceso al modelo MUST pasar por una interfaz propia que distinga una
-  falla del proveedor de un error de interpretación y reintente las fallas transitorias un número
-  acotado de veces. Un límite de velocidad y una respuesta vacía son transitorios; credenciales
+  falla del proveedor de un error de interpretación y reintente las fallas transitorias hasta 2
+  veces —3 intentos en total— dentro de un presupuesto total de 10 s medido punta a punta; agotado
+  el presupuesto MUST cortar e informar una falla del proveedor, sin más reintentos. Un límite de
+  velocidad y una respuesta vacía son transitorios; credenciales
   inválidas o saldo agotado no lo son y MUST NOT reintentarse. Cambiar de proveedor MUST ser
   escribir otra implementación de esa interfaz.
 - **FR-017** (RNF-09): El intermediario MUST rechazar, sin llamar al proveedor, las descripciones
@@ -281,6 +328,21 @@ respeta.
   hacen falta, sin valores.
 - **FR-023** (RNF-11): El intermediario MUST limitar los pedidos por IP y rechazar, sin llamar al
   proveedor, los que excedan 10 por minuto o 60 por hora, con un mensaje que dice el límite.
+- **FR-024** (RNF-04, RNF-06): El sistema MUST NOT rechazar ni recortar una carga por su cantidad
+  de bultos: consolida y renderiza cualquier cantidad. Los 200 bultos son el límite hasta el cual
+  se garantizan SC-007 y SC-009; por encima, la interfaz MUST avisar que el tiempo de
+  consolidación y la fluidez de la vista 3D pueden caer, y MUST NOT dejar de mostrar la
+  disposición.
+- **FR-025** (RF-01, RF-04): Una segunda descripción enviada con la lista ya cargada MUST agregar
+  sus ítems al final de la lista existente. Los ítems que ya estaban MUST conservar sus valores,
+  el estado de cada campo, sus marcas de FR-008 y su color; el sistema MUST NOT reemplazar la
+  lista, MUST NOT fusionar ítems por parecido de nombre y MUST NOT reinterpretar lo ya cargado.
+  Quitar lo que sobra se hace con FR-006.
+- **FR-026** (RF-01, RNF-08): Mientras una interpretación está en curso la interfaz MUST mostrar
+  que está trabajando; no hace falta poder cancelarla. Cuando el intento falla —el proveedor falla
+  o se agota el presupuesto de 10 s de FR-016— la interfaz MUST conservar la descripción tipeada
+  intacta, MUST informar que la falla es del proveedor y no un error de interpretación, MUST
+  ofrecer reintentar y MUST NOT tocar la lista de ítems ya cargada.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -309,8 +371,9 @@ respeta.
 
 - **SC-001** (Objetivos): Una carga descrita hablando normalmente queda consolidada y visible en
   3D en menos de dos minutos, sin cargar ninguna planilla.
-- **SC-002** (RNF-01): La interpretación de una descripción responde en menos de 10 s (p95), y la
-  medición declara la concurrencia con la que se tomó.
+- **SC-002** (RNF-01): La interpretación de una descripción responde en menos de 10 s (p95),
+  medido punta a punta y con los reintentos de FR-016 incluidos, sobre todos los pedidos y no solo
+  los que salen bien al primer intento; la medición declara la concurrencia con la que se tomó.
 - **SC-003** (RNF-02 a): Sobre el dataset de 50 descripciones etiquetadas, al menos el 90% de los
   campos declarados en la descripción se extraen correctamente.
 - **SC-004** (RNF-02 b): Sobre el mismo dataset, el 100% de los campos ausentes en la descripción
@@ -323,7 +386,8 @@ respeta.
   medida sobre los 10 escenarios.
 - **SC-008** (RNF-05, AC-14): Los 10 escenarios coinciden bulto por bulto con la línea base
   congelada, sin tolerancia.
-- **SC-009** (RNF-06): La vista 3D sostiene al menos 30 fps con 200 bultos en Chrome de
+- **SC-009** (RNF-06): La vista 3D sostiene al menos 30 fps con 200 bultos repartidos en 12 tipos
+  —el caso peor de la paleta, porque el costo de dibujo crece con los tipos— en Chrome de
   escritorio, medido con la herramienta de rendimiento del navegador.
 - **SC-010** (AC-19): En lo que llega al navegador hay cero apariciones de la clave del
   proveedor, de la URL del proveedor y de cualquier encabezado de autorización.
@@ -336,6 +400,8 @@ respeta.
   descubrir leyendo código.
 - **SC-014** (RNF-11, AC-29): El pedido número 11 de una misma IP dentro de un minuto se rechaza
   con un mensaje que dice el límite, y cero llamadas al proveedor por pedidos rechazados.
+- **SC-015** (RF-10, FR-013): Cero pares de colores de la paleta de 12 por debajo del umbral de
+  distancia perceptual declarado junto a ella.
 
 ## Assumptions
 
