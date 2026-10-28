@@ -5,6 +5,7 @@
 
 import type { Item } from '../dominio/items'
 import { completarItems, type CampoDescartado, type ItemCrudo } from '../interpretacion/completar'
+import { agregarAlFinal, proximoIndice } from '../interpretacion/fusionar'
 import type { Catalogo } from '../catalogo/catalogo'
 import type { ResultadoPedido } from '../cliente-modelo/interpretar'
 
@@ -65,7 +66,3 @@ export function aplicarResultado(
   }
 }
 
-export function eliminarItem(estado: Estado, itemId: string): Estado {
-  // Los colores de los demás NO se corren: cada uno está atado a su ítem (AC-09).
-  return { ...estado, items: estado.items.filter((i) => i.id !== itemId) }
-}

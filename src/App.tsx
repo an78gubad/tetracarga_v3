@@ -12,7 +12,9 @@ import { IDS_DE_PRUEBA, itemsDelEscenarioDePrueba } from './interfaz/escenario-d
 import { Escena } from './vista3d/Escena'
 import { coloresDe } from './vista3d/color-por-item'
 import { posicionTrasRecalcular } from './vista3d/recorrido'
-import { aplicarResultado, eliminarItem, ESTADO_INICIAL, type Estado } from './interfaz/estado'
+import { aplicarResultado, ESTADO_INICIAL, type Estado } from './interfaz/estado'
+import { itemEnBlanco } from './interpretacion/editar'
+import { eliminarPorId, proximoIndice, reemplazarPorId } from './interpretacion/fusionar'
 
 export function App() {
   // En desarrollo, ?escenario=sc009 carga una disposición sin pasar por el modelo, para poder
@@ -71,7 +73,18 @@ export function App() {
 
       <ListaItems
         items={estado.items}
-        onEliminar={(itemId) => setEstado((p) => eliminarItem(p, itemId))}
+        onEliminar={(itemId) =>
+          setEstado((p) => ({ ...p, items: eliminarPorId(p.items, itemId) }))
+        }
+        onCambiar={(item) => setEstado((p) => ({ ...p, items: reemplazarPorId(p.items, item) }))}
+        onAgregar={(nombre) =>
+          setEstado((p) => ({
+            ...p,
+            // El ítem nuevo sigue la numeración: no se corren los ids ni los colores de los
+            // que ya estaban (AC-09, FR-025).
+            items: [...p.items, itemEnBlanco(nombre, proximoIndice(p.items))],
+          }))
+        }
       />
 
       <SelectorContenedor contenedorId={contenedorId} onElegir={setContenedorId} />

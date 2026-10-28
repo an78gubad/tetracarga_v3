@@ -223,15 +223,15 @@ eliminan ítems, se ponen las marcas y se verifica que la disposición las respe
 
 **⚠️ Test primero, en su propio commit** en las tareas de `src/acomodador/` y `src/validador/`.
 
-- [ ] T082 [US4] Crear `src/interfaz/EdicionItem.tsx` para editar, agregar y eliminar ítems y campos antes de consolidar; editar un campo `estimado` lo pasa a `declarado` y **dispara el recálculo** de la disposición (FR-006, AC-12)
-- [ ] T083 [P] [US4] Crear `src/interfaz/EdicionItem.test.tsx`: un campo estimado editado pierde la marca y queda declarado (AC-12); no hay transición hacia `estimado` desde la edición
-- [ ] T084 [US4] Crear `src/interfaz/EditorDeMarcas.tsx` —no `MarcasItem.tsx`, que chocaría con el tipo `MarcasItem`— con las tres marcas: no apilable y orientación obligatoria **precargadas del catálogo cuando la entrada las trae, señaladas como tales y editables**; peso máximo admitido encima **siempre declarado por el usuario**, nunca precargado (FR-008)
-- [ ] T085 [US4] Crear `src/interpretacion/fusionar.ts`: una segunda descripción **agrega sus ítems al final**; los que ya estaban conservan sus valores, el estado de cada campo, sus marcas y su color. **No** se reemplaza la lista, **no** se fusionan ítems por parecido de nombre y **no** se reinterpreta lo cargado (FR-025)
-- [ ] T086 [P] [US4] Crear `src/interpretacion/fusionar.test.ts`: con un campo corregido a mano y una marca cargada, una segunda descripción agrega al final y el ítem corregido conserva valor, marca y color (FR-025)
-- [ ] T087 [US4] Crear `src/acomodador/marcas.test.ts`: AC-04 (ningún bulto queda apoyado sobre un no apilable), AC-05 (con orientación obligatoria, el alto declarado coincide con el alto final, quedando solo las 2 rotaciones horizontales), AC-06 (sobre un ítem que admite 50 kg no se apoyan más de 50 kg, **contando lo que se propaga por toda la pila**)
-- [ ] T088 [US4] Extender `src/acomodador/orden.ts` y `src/acomodador/acomodar.ts` para respetar las tres marcas
-- [ ] T089 [US4] Crear `src/validador/marcas.test.ts`: las mismas tres verificaciones, con la cuenta propia del validador
-- [ ] T090 [US4] Extender `src/validador/validar.ts` para verificar las tres marcas por su cuenta
+- [X] T082 [US4] Crear `src/interfaz/EdicionItem.tsx` para editar, agregar y eliminar ítems y campos antes de consolidar; editar un campo `estimado` lo pasa a `declarado` y **dispara el recálculo** de la disposición (FR-006, AC-12)
+- [X] T083 [P] [US4] Crear `src/interfaz/EdicionItem.test.tsx`: un campo estimado editado pierde la marca y queda declarado (AC-12); no hay transición hacia `estimado` desde la edición
+- [X] T084 [US4] Crear `src/interfaz/EditorDeMarcas.tsx` —no `MarcasItem.tsx`, que chocaría con el tipo `MarcasItem`— con las tres marcas: no apilable y orientación obligatoria **precargadas del catálogo cuando la entrada las trae, señaladas como tales y editables**; peso máximo admitido encima **siempre declarado por el usuario**, nunca precargado (FR-008)
+- [X] T085 [US4] Crear `src/interpretacion/fusionar.ts`: una segunda descripción **agrega sus ítems al final**; los que ya estaban conservan sus valores, el estado de cada campo, sus marcas y su color. **No** se reemplaza la lista, **no** se fusionan ítems por parecido de nombre y **no** se reinterpreta lo cargado (FR-025)
+- [X] T086 [P] [US4] Crear `src/interpretacion/fusionar.test.ts`: con un campo corregido a mano y una marca cargada, una segunda descripción agrega al final y el ítem corregido conserva valor, marca y color (FR-025)
+- [X] T087 [US4] Crear `src/acomodador/marcas.test.ts`: AC-04 (ningún bulto queda apoyado sobre un no apilable), AC-05 (con orientación obligatoria, el alto declarado coincide con el alto final, quedando solo las 2 rotaciones horizontales), AC-06 (sobre un ítem que admite 50 kg no se apoyan más de 50 kg, **contando lo que se propaga por toda la pila**)
+- [X] T088 [US4] Extender `src/acomodador/orden.ts` y `src/acomodador/acomodar.ts` para respetar las tres marcas
+- [X] T089 [US4] Crear `src/validador/marcas.test.ts`: las mismas tres verificaciones, con la cuenta propia del validador
+- [X] T090 [US4] Extender `src/validador/validar.ts` para verificar las tres marcas por su cuenta
 
 **Checkpoint**: las cuatro historias funcionan. **El acomodador queda completo: desde acá se congela.**
 

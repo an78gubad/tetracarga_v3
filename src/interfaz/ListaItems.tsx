@@ -6,8 +6,10 @@
  * qué puso el sistema.
  */
 
+import { useState } from 'react'
 import type { Campo, Item } from '../dominio/items'
 import { EXPLICACION, camposFaltantes, consolidacionBloqueada } from '../interpretacion/faltantes'
+import { EdicionItem } from './EdicionItem'
 
 function Medida({ campo, unidad }: { campo: Campo<number>; unidad: 'mm' | 'kg' }) {
   if (campo.estado === 'faltante') {
@@ -31,12 +33,44 @@ function Medida({ campo, unidad }: { campo: Campo<number>; unidad: 'mm' | 'kg' }
 export type ListaItemsProps = {
   readonly items: readonly Item[]
   readonly onEliminar: (itemId: string) => void
+  readonly onCambiar: (item: Item) => void
+  readonly onAgregar: (nombre: string) => void
 }
 
-export function ListaItems({ items, onEliminar }: ListaItemsProps) {
+export function ListaItems({ items, onEliminar, onCambiar, onAgregar }: ListaItemsProps) {
+  const [editando, setEditando] = useState<string | null>(null)
+  const [nombreNuevo, setNombreNuevo] = useState('')
+  const agregar = (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (nombreNuevo.trim() === '') return
+        onAgregar(nombreNuevo.trim())
+        setNombreNuevo('')
+      }}
+    >
+      <label>
+        Agregar un ítem que falta:{' '}
+        <input
+          value={nombreNuevo}
+          onChange={(e) => setNombreNuevo(e.target.value)}
+          placeholder="cajones de madera"
+        />
+      </label>
+      <button type="submit" disabled={nombreNuevo.trim() === ''}>
+        Agregar
+      </button>
+    </form>
+  )
+
   if (items.length === 0) {
     // Nunca una pantalla en blanco (FR-028).
-    return <p>Todavía no hay ítems. Describí la carga arriba y apretá Interpretar.</p>
+    return (
+      <section>
+        <p>Todavía no hay ítems. Describí la carga arriba y apretá Interpretar, o agregá uno a mano.</p>
+        {agregar}
+      </section>
+    )
   }
 
   const faltantes = camposFaltantes(items)
@@ -83,6 +117,12 @@ export function ListaItems({ items, onEliminar }: ListaItemsProps) {
               <td><Medida campo={item.alto} unidad="mm" /></td>
               <td><Medida campo={item.pesoUnitario} unidad="kg" /></td>
               <td>
+                <button
+                  type="button"
+                  onClick={() => setEditando(editando === item.id ? null : item.id)}
+                >
+                  {editando === item.id ? 'Cerrar' : 'Editar'}
+                </button>
                 <button type="button" onClick={() => onEliminar(item.id)}>
                   Eliminar
                 </button>
@@ -91,6 +131,22 @@ export function ListaItems({ items, onEliminar }: ListaItemsProps) {
           ))}
         </tbody>
       </table>
+
+      {items
+        .filter((i) => i.id === editando)
+        .map((item) => (
+          <EdicionItem
+            key={item.id}
+            item={item}
+            onCambiar={onCambiar}
+            onEliminar={() => {
+              onEliminar(item.id)
+              setEditando(null)
+            }}
+          />
+        ))}
+
+      {agregar}
     </section>
   )
 }

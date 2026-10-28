@@ -12,6 +12,7 @@ import type { Contenedor, Disposicion, ResultadoValidacion } from '../dominio/di
 import type { Item } from '../dominio/items'
 import { bultoSinApoyo } from './apoyo'
 import { bultoFueraDeLimites } from './limites'
+import { bultoConOrientacionViolada } from './orientacion'
 import { cargaMaximaExcedida, pesoEncimaExcedido } from './peso'
 import { primerSolapamiento } from './solapamiento'
 
@@ -30,6 +31,11 @@ export function validar(
 
   const flotando = bultoSinApoyo(secuencia, tipos)
   if (flotando !== undefined) return { valida: false, motivo: 'apoyo-insuficiente', bulto: flotando }
+
+  const malOrientado = bultoConOrientacionViolada(secuencia, tipos)
+  if (malOrientado !== undefined) {
+    return { valida: false, motivo: 'orientacion-obligatoria-violada', bulto: malOrientado }
+  }
 
   const falla = pesoEncimaExcedido(secuencia, tipos)
   if (falla !== undefined) {
