@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v6)
+**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v7)
 
 > Trazabilidad: cada requerimiento y criterio de este spec cita el identificador del PRD del que
 > sale (RF/RNF/AC). Los identificadores del PRD no se renumeran. Si algo de este spec contradice

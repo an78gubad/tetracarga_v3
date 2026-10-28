@@ -1,4 +1,4 @@
-# PRD-001v6: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
+# PRD-001v7: Tetracarga — describís una carga en castellano y la ves consolidada en un contenedor, en 3D
 
 ## Contexto y Problema
 Antes de exportar hay que responder si la mercadería entra en un contenedor y cómo acomodarla.
@@ -75,10 +75,11 @@ dónde salió cada dato completado.
   interpretación y reintenta las transitorias un número acotado de veces. Un límite de velocidad es
   transitorio; credenciales inválidas o saldo agotado no lo son.
 - RNF-09: El proxy rechaza, sin llamar al proveedor, las descripciones de más de 2.000
-  caracteres, y acota la longitud de la respuesta que le pide al modelo. Una respuesta del
-  modelo que no cumple el esquema de ítems se descarta entera. El esquema exige cantidad entera
-  ≥ 1, y medidas y peso > 0: un número fuera de rango no cumple el esquema, y ni el signo ni el
-  valor se corrigen para salvarlo.
+  caracteres, y acota la longitud de la respuesta que le pide al modelo. Una respuesta cuya forma
+  no cumple el esquema de ítems —que no es una lista de ítems con los campos esperados— se
+  descarta entera. El esquema exige además cantidad entera ≥ 1, y medidas y peso > 0: un valor
+  fuera de rango no descarta la respuesta, se resuelve ítem por ítem, y ni el signo ni el valor se
+  corrigen para salvarlo.
 - RNF-10: El repositorio se clona y la aplicación se corre siguiendo solo el README, sin leer
   código: el README dice los comandos de desarrollo, de tests y del eval, y `.env.example` nombra
   todas las variables de entorno que hacen falta, sin valores.
@@ -155,12 +156,13 @@ Primer entregable: sin ellos, RNF-02 y RNF-05 son decorativos.
 - AC-25 (RNF-09): Dada una descripción de 2.001 caracteres, cuando se envía, entonces el proxy la
   rechaza con un mensaje que dice el límite y la implementación del modelo no recibe ninguna
   llamada.
-- AC-26 (RNF-09): Dada una respuesta del modelo que no cumple el esquema de ítems, cuando se
-  interpreta, entonces no se muestra ningún ítem de esa respuesta y se trata como la respuesta
+- AC-26 (RNF-09): Dada una respuesta del modelo cuya forma no cumple el esquema de ítems, cuando
+  se interpreta, entonces no se muestra ningún ítem de esa respuesta y se trata como la respuesta
   vacía de AC-20.
 - AC-27 (RF-02, RNF-09): Dado "-5 cajas de 60x40x30", cuando se interpreta, entonces la cantidad
-  no queda en 5 ni en -5: el valor no cumple el esquema, la respuesta se descarta entera como en
-  AC-26 y, si vuelve igual, la cantidad queda faltante y el sistema la pide.
+  no queda en 5 ni en -5: el valor queda fuera del rango del esquema, esa cantidad queda faltante
+  con ese motivo y el sistema la pide, sin descartar los demás ítems de la respuesta y sin
+  reintentar.
 - AC-28 (RNF-10): Dado el repositorio recién clonado y sin `.env`, cuando se siguen los pasos del
   README, entonces la aplicación arranca, o dice exactamente qué variable de `.env.example` falta,
   sin que haya que leer el código para averiguar su nombre.
