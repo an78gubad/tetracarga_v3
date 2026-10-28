@@ -62,3 +62,65 @@ Por qué, medido en una versión anterior. **No repetir esta investigación.**
   y se pregunta. La base del ARLOG sale de fabricantes porque la IRAM 10016 no es pública.
 - **Big bag afuera.** La única ficha da la medida nominal de la bolsa vacía, y llena se deforma.
 - **Ninguna marca de RF-06 precargada.** Ninguna ficha dice "no apilable" ni "este lado arriba".
+
+## Lo que se midió en v3
+
+Medido entre el 2026-10-28 y el cierre de las cuatro historias, contra el proveedor real y el
+navegador. Los números completos, con su fecha y su comando, están en `eval/ultimo-informe.md`.
+**No repetir estas mediciones para confirmarlas**: si una contradice la realidad, volver a medir
+y reemplazarla, no promediarla con la vieja.
+
+- **El p95 de la interpretación lo fija el proveedor, no el código.** `deepseek-flash`: mediana
+  3,2 s, p95 16,5 s, 13% de las llamadas por encima de 10 s. `deepseek-v4-pro` es **peor**:
+  mediana 9,2 s, p95 22,6 s, 45% por encima. Por eso RNF-01 pasó de 10 s a 20 s. Cambiar de
+  modelo para acelerar ya se probó y no sirve.
+- **El acomodador llena entre 36% y 90%** según el escenario, medido sobre los 10 congelados. El
+  rango de 50% a 80% que decía la versión anterior era más angosto. Los frágiles quedan abajo
+  porque los topes de peso le ponen techo a las pilas, que es lo que ese escenario mide.
+- **El caso caro del acomodador no es la sobrecarga.** 200 bultos en un contenedor donde entran
+  18 tardan 15 ms, porque con el contenedor lleno quedan pocas candidatas. El caso caro es
+  **muchos bultos que sí entran**: 200 en un 40' high cube tardan 139 ms, 400 tardan 783 y 800
+  tardan 4.536. El crecimiento ronda n^2,5 y los 5 s se cruzan cerca de los 900 bultos.
+- **El acomodo no es monótono.** En `carga-mixta`, subir la carga de 465 a 510 bultos **baja** los
+  colocados de 459 a 445, y a 495 los baja a 372: las cajas grandes tapizan el piso y desplazan a
+  las chicas. Las cantidades de los escenarios salieron de probar y medir, no de una fórmula.
+- **La distancia mínima de la paleta de 12 es 0,1848 en OKLab**, con el umbral declarado en 0,15.
+  Salió de optimizar tono, luminancia y croma por color: una búsqueda por patrones daba 0,1658.
+  Si hace falta cambiar un color, hay que volver a optimizar los 12, no mover el umbral.
+- **La vista 3D sostiene 59,9 fps con 200 bultos en 12 tipos**, en una placa integrada. El número
+  tocó el techo de sincronización vertical, así que el margen real sobre los 30 fps es mayor que
+  2x y esa medición no dice cuánto.
+- **La salida del modelo no es proporcional a la cantidad de ítems.** Un caso de 2 ítems dio 1.383
+  tokens y uno de 3 dio 346. Calcular `max_tokens` como "tokens por ítem × tope de ítems" da un
+  número con cara de preciso sobre una proporcionalidad que no existe.
+
+## Errores que ya se cometieron
+
+Todos salieron de un test o de una medición, no de leer código. Quedan acá para que no se
+repitan, porque cada uno fue invisible hasta que algo lo tocó.
+
+- **Implementar más estricto que el spec.** La validación de forma rechazaba una medida sin
+  unidad, aunque RF-02 dice que una medida sin unidad está en centímetros: era un caso previsto.
+  Y como la forma se valida por respuesta entera, una medida sin unidad mataba todos los ítems de
+  esa descripción. Fueron 32 de 56 fallas del primer eval, y bajaron SC-003 a 68,3%. **Antes de
+  culpar al modelo, verificar que el código no sea más exigente que el requerimiento.**
+- **Verificar dos de tres marcas.** RF-08 pide respetar las tres marcas de RF-06 y el validador
+  solo miraba no apilable y el tope de peso. Era invisible porque el acomodador sí respetaba la
+  orientación, así que ninguna disposición real la violaba.
+- **Medir el artefacto equivocado.** El test de bundle construía con `NODE_ENV=test`, que es lo
+  que pone vitest, y Vite deriva `isProduction` de ahí antes que de `mode`. Así que las
+  verificaciones de la credencial, la URL y el encabezado miraban un bundle de desarrollo.
+- **Confiar en que el `.env` llega solo.** Vite y vitest lo cargan pero **no tocan `process.env`**:
+  solo exponen al bundle las que llevan prefijo `VITE_`, que es justo lo que acá no se quiere. Con
+  el archivo lleno, el intermediario respondía "proveedor-no-configurado".
+- **Un presupuesto de tiempo sin tope por intento.** Los 10 s se verificaban al decidir si
+  arrancar otro intento, pero una llamada lenta se pasaba igual: el máximo medido fue 23,9 s.
+- **Un escenario que medía otra cosa que su nombre.** `sobrecarga-peso` se quedaba en el 84% de la
+  carga útil porque el volumen se agotaba primero: medía volumen con otro nombre.
+- **Un test guardián que nunca vio una violación.** Los tres —arquitectura, bundle y paleta— se
+  probaron al revés, rompiéndolos a propósito. El de arquitectura y el de bundle **no detectaban
+  nada** hasta que se los arregló. Un guardián sin esa prueba no prueba nada.
+- **Creer que la línea base cubre todas las reglas.** Reordenar las orientaciones rompe los 10
+  escenarios, pero **aflojar el apoyo de 80% a 70% no cambia ninguna disposición**: las candidatas
+  salen de esquinas de bultos ya puestos, así que el apoyo tiende a ser total o nulo. La línea base
+  guarda la disposición en conjunto; las reglas individuales las guardan los tests unitarios.
