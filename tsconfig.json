@@ -1,0 +1,28 @@
+{
+  // El navegador y lo que corre con Vite. server/ y api/ van en tsconfig.server.json,
+  // porque ahí los imports llevan extensión .js y la resolución es la de Node (AGENTS.md).
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+
+    // `import type` no se degrada a import de valores: es lo que hace verificable
+    // que el acomodador y el validador compartan tipos y nunca valores (RF-08).
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "resolveJsonModule": true,
+
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "escenarios", "tests", "eval", "vite.config.ts", "vitest.config.ts"]
+}

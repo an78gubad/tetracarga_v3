@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.vercel/
+
+# Las credenciales nunca se versionan. .env.example sí: nombra las variables, sin valores.
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+Thumbs.db
+
+# Las exclusiones locales de cada quien van por .git/info/exclude, no acá (INSTRUCCIONES.md).

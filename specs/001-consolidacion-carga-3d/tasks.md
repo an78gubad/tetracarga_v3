@@ -40,14 +40,14 @@ commit, antes** del código que lo hace pasar.
 
 **Purpose**: que el repositorio arranque, corra tests y se pueda clonar siguiendo solo el README.
 
-- [ ] T001 Crear `package.json` con las dependencias del PRD (React, Vite, Three.js, Vitest) y los scripts `dev`, `test`, `typecheck` y `eval`; fijar `typescript` en la **versión 6, no 7** (Vercel compila las funciones con la API JavaScript de `typescript`, que la 7 no trae) y `engines.node` en 22
-- [ ] T002 [P] Crear `tsconfig.json` con `strict`, módulos ESM y `verbatimModuleSyntax` activado, para que `import type` no se degrade a import de valores
-- [ ] T003 [P] Crear `vite.config.ts` que sirva `api/` como middleware en desarrollo, de modo que `npm run dev` alcance sin levantar un segundo servidor
-- [ ] T004 [P] Crear `vitest.config.ts` incluyendo `src/`, `server/`, `escenarios/` y `tests/`
-- [ ] T005 [P] Crear `.env.example` nombrando `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL` y `DEEPSEEK_MODELO`, sin valores y **sin prefijo `VITE_`** en ninguna (Vite mete las que lo llevan en el bundle del navegador)
-- [ ] T006 [P] Crear `README.md` con los comandos de desarrollo, de tests y del eval, y la lista de variables de entorno, para que el proyecto se corra sin leer código (FR-022, SC-013, AC-28)
-- [ ] T007 [P] Crear `.gitignore` con `node_modules/`, `dist/` y `.env` (las exclusiones **locales** de cada quien van por `.git/info/exclude`, no acá)
-- [ ] T008 [P] Crear `vercel.json` declarando `api/` como función serverless
+- [X] T001 Crear `package.json` con las dependencias del PRD (React, Vite, Three.js, Vitest) y los scripts `dev`, `test`, `typecheck` y `eval`; fijar `typescript` en la **versión 6, no 7** (Vercel compila las funciones con la API JavaScript de `typescript`, que la 7 no trae) y `engines.node` en 22
+- [X] T002 [P] Crear `tsconfig.json` con `strict`, módulos ESM y `verbatimModuleSyntax` activado, para que `import type` no se degrade a import de valores
+- [X] T003 [P] Crear `vite.config.ts` que sirva `api/` como middleware en desarrollo, de modo que `npm run dev` alcance sin levantar un segundo servidor
+- [X] T004 [P] Crear `vitest.config.ts` incluyendo `src/`, `server/`, `escenarios/` y `tests/`
+- [X] T005 [P] Crear `.env.example` nombrando `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL` y `DEEPSEEK_MODELO`, sin valores y **sin prefijo `VITE_`** en ninguna (Vite mete las que lo llevan en el bundle del navegador)
+- [X] T006 [P] Crear `README.md` con los comandos de desarrollo, de tests y del eval, y la lista de variables de entorno, para que el proyecto se corra sin leer código (FR-022, SC-013, AC-28)
+- [X] T007 [P] Crear `.gitignore` con `node_modules/`, `dist/` y `.env` (las exclusiones **locales** de cada quien van por `.git/info/exclude`, no acá)
+- [X] T008 [P] Crear `vercel.json` declarando `api/` como función serverless
 
 **Checkpoint**: `npm install`, `npm test` y `npm run typecheck` corren (sin tests todavía).
 
@@ -59,15 +59,15 @@ commit, antes** del código que lo hace pasar.
 
 **⚠️ El catálogo es el primer entregable (FR-019) y es el único origen de todo dato completado.**
 
-- [ ] T009 [P] Crear `src/dominio/unidades.ts` con los tipos marcados `Milimetros`, `Gramos` y `MilimetrosCuadrados`, todos enteros, para que el compilador no deje sumar milímetros con gramos
-- [ ] T010 [P] Crear `src/dominio/items.ts` con `Item`, `Campo<T>` (`declarado` | `estimado` con su entrada de catálogo | `faltante` con su motivo), `MotivoFaltante` con sus **tres** valores (`sin-entrada-en-catalogo`, `entrada-sin-el-dato`, `valor-fuera-de-rango`), `Marca<T>` y `MarcasItem`
-- [ ] T011 [P] Crear `src/dominio/disposicion.ts` con `Bulto` (identidad `itemId` + `indice`), `Orientacion` (permutación de los tres ejes), `Colocacion`, `Disposicion`, `BultoAfuera` con motivo `'peso' | 'volumen'`, `InformeConsolidacion` y `Contenedor` (medidas interiores y `cargaUtil`), que es lo que el acomodador y el validador reciben **por argumento** en vez de leer del catálogo
-- [ ] T012 Crear `src/catalogo/esquema.ts` que valide cada entrada y **falle** si: falta `fuente` o está vacía, un `id` está repetido, una medida es ≤ 0 o no entera, un `peso` no nulo es ≤ 0, o un sinónimo aparece en dos entradas distintas
+- [X] T009 [P] Crear `src/dominio/unidades.ts` con los tipos marcados `Milimetros`, `Gramos` y `MilimetrosCuadrados`, todos enteros, para que el compilador no deje sumar milímetros con gramos
+- [X] T010 [P] Crear `src/dominio/items.ts` con `Item`, `Campo<T>` (`declarado` | `estimado` con su entrada de catálogo | `faltante` con su motivo), `MotivoFaltante` con sus **tres** valores (`sin-entrada-en-catalogo`, `entrada-sin-el-dato`, `valor-fuera-de-rango`), `Marca<T>` y `MarcasItem`
+- [X] T011 [P] Crear `src/dominio/disposicion.ts` con `Bulto` (identidad `itemId` + `indice`), `Orientacion` (permutación de los tres ejes), `Colocacion`, `Disposicion`, `BultoAfuera` con motivo `'peso' | 'volumen'`, `InformeConsolidacion` y `Contenedor` (medidas interiores y `cargaUtil`), que es lo que el acomodador y el validador reciben **por argumento** en vez de leer del catálogo
+- [X] T012 Crear `src/catalogo/esquema.ts` que valide cada entrada y **falle** si: falta `fuente` o está vacía, un `id` está repetido, una medida es ≤ 0 o no entera, un `peso` no nulo es ≤ 0, o un sinónimo aparece en dos entradas distintas
 - [ ] T013 Crear `src/catalogo/contenedores.json` con el 20', el 40' y el 40' high cube: medidas interiores, `cargaUtil` (**la carga útil / max payload, no el peso bruto**) y `tara`, los tres de fichas "Container specifications" de Maersk, **sin mezclar navieras**, donde `cargaUtil + tara = peso bruto`; cada entrada nombra su ficha en `fuente`
 - [ ] T014 Crear `src/catalogo/objetos.json` con las entradas de objetos, cada una con su ficha exacta en `fuente` y `sinonimos` para que "tambor", "tacho" y "bidón de 200" lleguen a la misma entrada. `peso: null` es el caso normal (depende del contenido). **Ninguna marca de FR-008 precargada**: hoy ninguna ficha dice "no apilable" ni "este lado arriba". **Si un objeto no tiene ficha, se pregunta al usuario antes de agregarlo**
-- [ ] T015 Crear `src/catalogo/catalogo.ts` que cargue los dos archivos, resuelva nombres y sinónimos, y exponga la verificación de id que **descarta la propuesta entera** cuando el id no existe, sin buscar ni usar una entrada parecida (FR-005, AC-17)
-- [ ] T016 Crear `src/catalogo/catalogo.test.ts`: el esquema rechaza una entrada sin `fuente`, un id repetido y un sinónimo ambiguo; un id inexistente se descarta sin caer en la entrada más parecida (AC-17)
-- [ ] T017 [P] Crear `tests/arquitectura/imports.test.ts` que recorra el árbol con la API de compilador de TypeScript y **falle** si: (a) `src/acomodador/` importa de `src/validador/` o al revés; (b) un import de `src/dominio/` desde esas dos carpetas no es `import type`; (c) algo de `src/` importa de `server/` —el Principio V custodiado por delante, no solo por el test de bundle—; (d) `src/acomodador/` o `src/validador/` importan de `src/catalogo/`: el contenedor llega por argumento, así que un error de lectura del catálogo no lo pueden cometer los dos igual (RF-08, Principios II y V)
+- [X] T015 Crear `src/catalogo/catalogo.ts` que cargue los dos archivos, resuelva nombres y sinónimos, y exponga la verificación de id que **descarta la propuesta entera** cuando el id no existe, sin buscar ni usar una entrada parecida (FR-005, AC-17)
+- [X] T016 Crear `src/catalogo/catalogo.test.ts`: el esquema rechaza una entrada sin `fuente`, un id repetido y un sinónimo ambiguo; un id inexistente se descarta sin caer en la entrada más parecida (AC-17)
+- [X] T017 [P] Crear `tests/arquitectura/imports.test.ts` que recorra el árbol con la API de compilador de TypeScript y **falle** si: (a) `src/acomodador/` importa de `src/validador/` o al revés; (b) un import de `src/dominio/` desde esas dos carpetas no es `import type`; (c) algo de `src/` importa de `server/` —el Principio V custodiado por delante, no solo por el test de bundle—; (d) `src/acomodador/` o `src/validador/` importan de `src/catalogo/`: el contenedor llega por argumento, así que un error de lectura del catálogo no lo pueden cometer los dos igual (RF-08, Principios II y V)
 
 **Checkpoint**: los tipos y el catálogo están firmes; el test de arquitectura ya custodia la frontera.
 
