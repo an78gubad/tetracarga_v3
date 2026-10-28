@@ -28,7 +28,8 @@ datos. Cada entrada real sale de una ficha y la nombra; una entrada sin fuente n
 | `id` | sí | Único. Es lo que el modelo propone y el código verifica (FR-005) |
 | `nombre` | sí | Canónico |
 | `sinonimos` | sí | Puede estar vacío. Van acá y no en el prompt: son dato de dominio, versionado |
-| `largo`, `ancho`, `alto` | sí | Enteros en mm, > 0 |
+| `largo`, `ancho` | sí | Enteros en mm, > 0 |
+| `alto` | sí (puede ser `null`) | `null` cuando la ficha no declara un alto usable como carga: el caso son los pallets, que van cargados |
 | `peso` | sí (puede ser `null`) | Gramos enteros o `null`. `null` es el caso normal |
 | `noApilable` | sí (puede ser `null`) | `null` si la ficha no lo dice. Hoy ninguna lo dice |
 | `orientacionObligatoria` | sí (puede ser `null`) | Idem |
@@ -57,7 +58,7 @@ salen de Maersk, sin mezclar navieras, de fichas donde `cargaUtil + tara = peso 
 - falta `fuente`, o está vacía;
 - un `id` está repetido;
 - una medida es ≤ 0 o no entera;
-- un `peso` es ≤ 0 (si no es `null`);
+- un `alto` o un `peso` es ≤ 0 (si no son `null`);
 - un sinónimo aparece en dos entradas distintas: haría ambiguo el matcheo.
 
 ## Lo que el catálogo no tiene

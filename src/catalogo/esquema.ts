@@ -15,7 +15,12 @@ export type EntradaObjeto = {
   readonly sinonimos: readonly string[]
   readonly largo: Milimetros
   readonly ancho: Milimetros
-  readonly alto: Milimetros
+  /**
+   * `null` cuando la ficha no declara una altura usable como carga. El caso son los pallets:
+   * la ficha da la base y la altura del pallet vacío, pero como carga van cargados, así que
+   * su alto depende de lo que llevan y se pregunta (CONTEXTO.md).
+   */
+  readonly alto: Milimetros | null
   /** `null` es el caso normal: el peso de un tambor o un IBC depende del contenido. */
   readonly peso: Gramos | null
   /** `null` si la ficha no lo dice. Hoy ninguna lo dice. */
@@ -143,15 +148,19 @@ export function validarObjetos(crudo: unknown): Resultado<EntradaObjeto> {
     }
     filas.push(fila)
     const nombreEntrada = typeof fila['id'] === 'string' ? fila['id'] : `#${i}`
-    revisarComunes(fila, nombreEntrada, ['largo', 'ancho', 'alto'], errores)
+    revisarComunes(fila, nombreEntrada, ['largo', 'ancho'], errores)
 
-    const peso = fila['peso']
-    if (peso !== null && !medidaValida(peso)) {
-      errores.push({
-        entrada: nombreEntrada,
-        campo: 'peso',
-        problema: 'tiene que ser un entero mayor que 0, o null si la ficha no lo declara',
-      })
+    // `alto` y `peso` admiten null: hay fichas que no los declaran de forma usable como
+    // carga. Lo que no se puede completar se pregunta (FR-004); no se rellena con algo.
+    for (const campo of ['alto', 'peso'] as const) {
+      const valor = fila[campo]
+      if (valor !== null && !medidaValida(valor)) {
+        errores.push({
+          entrada: nombreEntrada,
+          campo,
+          problema: 'tiene que ser un entero mayor que 0, o null si la ficha no lo declara',
+        })
+      }
     }
     for (const campo of ['noApilable', 'orientacionObligatoria'] as const) {
       const valor = fila[campo]

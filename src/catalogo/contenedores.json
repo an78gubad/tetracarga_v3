@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": "20",
+    "nombre": "20' Standard - Steel",
+    "largoInterior": 5898,
+    "anchoInterior": 2352,
+    "altoInterior": 2393,
+    "cargaUtil": 28300000,
+    "tara": 2180000,
+    "fuente": "Maersk — Dry cargo, ficha \"Container specifications\" de 20' Standard - Steel (maersk.com/solutions/shipping/ocean-transport/dry-cargo, consultada 2026-10-28). Cierra: 28.300 kg de carga útil + 2.180 kg de tara = 30.480 kg de peso bruto. Puerta: 2.340 mm de ancho x 2.280 mm de alto, no modelada."
+  },
+  {
+    "id": "40",
+    "nombre": "40' Standard - Steel",
+    "largoInterior": 12032,
+    "anchoInterior": 2352,
+    "altoInterior": 2393,
+    "cargaUtil": 28870000,
+    "tara": 3630000,
+    "fuente": "Maersk — Dry cargo, ficha \"Container specifications\" de 40' Standard - Steel (maersk.com/solutions/shipping/ocean-transport/dry-cargo, consultada 2026-10-28). Cierra: 28.870 kg de carga útil + 3.630 kg de tara = 32.500 kg de peso bruto. Puerta: 2.340 mm de ancho x 2.280 mm de alto, no modelada."
+  },
+  {
+    "id": "40hc",
+    "nombre": "40' High Cube - Steel",
+    "largoInterior": 12032,
+    "anchoInterior": 2352,
+    "altoInterior": 2698,
+    "cargaUtil": 28690000,
+    "tara": 3810000,
+    "fuente": "Maersk — Dry cargo, ficha \"Container specifications\" de 40' High Cube - Steel (maersk.com/solutions/shipping/ocean-transport/dry-cargo, consultada 2026-10-28). Cierra: 28.690 kg de carga útil + 3.810 kg de tara = 32.500 kg de peso bruto. Puerta: 2.340 mm de ancho x 2.585 mm de alto, no modelada."
+  }
+]

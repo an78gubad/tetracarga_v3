@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CatalogoInvalidoError, crearCatalogo } from './catalogo'
+import { catalogo, CatalogoInvalidoError, crearCatalogo } from './catalogo'
 import { validarContenedores, validarObjetos } from './esquema'
 
 /** Una entrada válida, para mutarla en cada caso y probar una sola cosa por test. */
@@ -142,5 +142,68 @@ describe('el contenedor que reciben el acomodador y el validador', () => {
 
   it('un contenedor inexistente devuelve undefined', () => {
     expect(c.contenedor('45hc')).toBeUndefined()
+  })
+})
+
+describe('el catálogo del repositorio', () => {
+  it('trae los tres contenedores del PRD', () => {
+    expect(catalogo.contenedores.map((c) => c.id)).toEqual(['20', '40', '40hc'])
+  })
+
+  it.each(['20', '40', '40hc'])(
+    'en %s la cuenta cierra: carga útil + tara = peso bruto',
+    (id) => {
+      // Es la prueba con la que CONTEXTO.md acepta o descarta una ficha de contenedor.
+      // Los pesos brutos son los de las fichas de Maersk: 30.480 kg el 20', 32.500 los 40'.
+      const brutoEsperado: Record<string, number> = {
+        '20': 30_480_000,
+        '40': 32_500_000,
+        '40hc': 32_500_000,
+      }
+      const c = catalogo.entradaContenedor(id)
+      expect(c).toBeDefined()
+      expect(c!.cargaUtil + c!.tara).toBe(brutoEsperado[id])
+    },
+  )
+
+  it.each([
+    ['20', 33.2],
+    ['40', 67.7],
+    ['40hc', 76.4],
+  ])('en %s el volumen interior coincide con el publicado (%s m3)', (id, m3) => {
+    const c = catalogo.entradaContenedor(id as string)!
+    const calculado = (c.largoInterior * c.anchoInterior * c.altoInterior) / 1e9
+    expect(calculado).toBeCloseTo(m3 as number, 1)
+  })
+
+  it('usa 2352 mm de ancho interior, no los 2350 de la ficha descartada', () => {
+    // CONTEXTO.md descartó un PDF de Maersk Sudáfrica de 2014 justamente por los 2350 mm.
+    for (const c of catalogo.contenedores) {
+      expect(c.anchoInterior).toBe(2352)
+    }
+  })
+
+  it('toda entrada nombra su ficha', () => {
+    for (const entrada of [...catalogo.objetos, ...catalogo.contenedores]) {
+      expect(entrada.fuente.trim().length).toBeGreaterThan(20)
+    }
+  })
+
+  it('el pallet trae la base y deja el alto y el peso para preguntar', () => {
+    const pallet = catalogo.porNombre('europallet')
+    expect(pallet?.id).toBe('pallet-epal-1')
+    expect(pallet?.largo).toBe(800)
+    expect(pallet?.ancho).toBe(1200)
+    // Como carga va cargado: el alto y el peso dependen de lo que lleva (CONTEXTO.md).
+    expect(pallet?.alto).toBeNull()
+    expect(pallet?.peso).toBeNull()
+  })
+
+  it('ninguna entrada trae marcas de FR-008 precargadas', () => {
+    // Ninguna ficha dice "no apilable" ni "este lado arriba" (CONTEXTO.md).
+    for (const o of catalogo.objetos) {
+      expect(o.noApilable).toBeNull()
+      expect(o.orientacionObligatoria).toBeNull()
+    }
   })
 })

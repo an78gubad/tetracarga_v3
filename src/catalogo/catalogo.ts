@@ -47,10 +47,16 @@ export type Catalogo = {
 }
 
 export class CatalogoInvalidoError extends Error {
-  constructor(readonly errores: readonly ErrorDeCatalogo[]) {
+  readonly errores: readonly ErrorDeCatalogo[]
+
+  // Sin propiedad de parámetro (`constructor(readonly errores)`) a propósito: Node corre
+  // TypeScript sacándole los tipos y nada más, y esa sintaxis no se puede sacar sin generar
+  // código. `npm run eval` usa ese modo, así que lo que el eval importe no la puede usar.
+  constructor(errores: readonly ErrorDeCatalogo[]) {
     const detalle = errores.map((e) => `  - ${e.entrada}.${e.campo}: ${e.problema}`).join('\n')
     super(`El catálogo no cumple su esquema:\n${detalle}`)
     this.name = 'CatalogoInvalidoError'
+    this.errores = errores
   }
 }
 

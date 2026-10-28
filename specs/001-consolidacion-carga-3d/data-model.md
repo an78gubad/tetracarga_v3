@@ -112,7 +112,8 @@ no del tipo de bulto (CONTEXTO.md), así que o lo declara el usuario o está fal
 | `id` | `string` | Único. Es lo que el modelo propone y el código verifica (FR-005) |
 | `nombre` | `string` | Nombre canónico |
 | `sinonimos` | `string[]` | Cómo lo llama la gente: "tacho", "bidón de 200" (research.md §14) |
-| `largo`, `ancho`, `alto` | `Milimetros` | > 0 |
+| `largo`, `ancho` | `Milimetros` | > 0 |
+| `alto` | `Milimetros \| null` | `null` cuando la ficha no da un alto usable como carga (pallets) |
 | `peso` | `Gramos \| null` | `null` cuando la ficha no lo declara: casi siempre (CONTEXTO.md) |
 | `noApilable` | `boolean \| null` | `null` si la ficha no dice nada. Hoy ninguna lo dice |
 | `orientacionObligatoria` | `boolean \| null` | Idem |

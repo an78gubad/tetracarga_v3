@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "pallet-epal-1",
+    "nombre": "Pallet EPAL 1 (europallet)",
+    "sinonimos": ["pallet europeo", "europallet", "euro pallet", "epal", "pallet epal"],
+    "largo": 800,
+    "ancho": 1200,
+    "alto": null,
+    "peso": null,
+    "noApilable": null,
+    "orientacionObligatoria": null,
+    "fuente": "EPAL — ficha oficial del EPAL Euro pallet (epal-pallets.org/eu-en/load-carriers/epal-euro-pallet, consultada 2026-10-28): largo 800 mm, ancho 1.200 mm, alto 144 mm, peso aprox. 25 kg, carga de trabajo segura 1.500 kg. Largo y ancho se registran como los publica EPAL. El alto queda en null y el peso también: como carga, un pallet va cargado, así que los dos dependen de lo que lleva y se preguntan (CONTEXTO.md). Los 144 mm y los 25 kg son del pallet vacío y no sirven como medida de la carga."
+  }
+]
