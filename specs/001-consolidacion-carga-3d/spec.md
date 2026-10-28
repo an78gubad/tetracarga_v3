@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v5)
+**Input**: User description: "Generá el spec a partir del PRD en @PRD.md" (PRD-001v6)
 
 > Trazabilidad: cada requerimiento y criterio de este spec cita el identificador del PRD del que
 > sale (RF/RNF/AC). Los identificadores del PRD no se renumeran. Si algo de este spec contradice
@@ -53,6 +53,9 @@ necesidad de consolidar ni de renderizar nada.
 7. **Dado** que la interpretación propone un id de catálogo que no existe, **cuando** se
    interpreta, **entonces** la propuesta se descarta entera, en lugar de completarse con algo
    parecido. (AC-17)
+8. **Dado** "-5 cajas de 60x40x30", **cuando** se interpreta, **entonces** la cantidad no queda
+   en 5 ni en -5: el valor no cumple el esquema de ítems y, si vuelve igual, la cantidad queda
+   faltante y el sistema la pide. (AC-27)
 
 ---
 
@@ -177,6 +180,12 @@ respeta.
   útil del nuevo. (AC-13)
 - **Carga de 200 bultos**: se consolida dentro del tiempo objetivo y la vista 3D se mantiene
   fluida. (RNF-04, RNF-06)
+- **Número fuera de rango en la descripción**: "-5 cajas", "0 cajas" o una cantidad no entera no
+  se toman como dato declarado ni se salvan por su valor absoluto. (AC-27)
+- **Repositorio recién clonado y sin variables de entorno**: la aplicación arranca siguiendo el
+  README o dice exactamente qué variable falta, sin que haya que leer código. (AC-28)
+- **Ráfaga de pedidos desde la misma IP**: a partir del límite se rechazan sin llamar al
+  proveedor. (AC-29)
 - **Sin red y sin credenciales**: la suite completa de tests pasa contra una implementación de
   prueba de la interfaz del modelo. (AC-16)
 
@@ -262,6 +271,16 @@ respeta.
 - **FR-020** (AC-16): La suite completa de tests MUST pasar sin red y sin credenciales, contra una
   implementación de prueba de la interfaz del modelo. La evaluación de precisión que llama al
   proveedor real MUST correr aparte.
+- **FR-021** (RNF-09, AC-27): El esquema de ítems MUST exigir cantidad entera ≥ 1 y medidas y
+  peso > 0. Un número fuera de rango MUST NOT tomarse como dato declarado y MUST NOT corregirse
+  por su signo ni por su valor absoluto: cae por FR-017 y, si al reintentar vuelve igual, el
+  campo queda faltante y se pregunta por FR-004.
+- **FR-022** (RNF-10): El proyecto MUST poder clonarse y correrse siguiendo solo el README, sin
+  leer código: el README MUST dar los comandos de desarrollo, de tests y de la evaluación de
+  precisión, y MUST existir un archivo de ejemplo que nombre todas las variables de entorno que
+  hacen falta, sin valores.
+- **FR-023** (RNF-11): El intermediario MUST limitar los pedidos por IP y rechazar, sin llamar al
+  proveedor, los que excedan 10 por minuto o 60 por hora, con un mensaje que dice el límite.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -312,6 +331,11 @@ respeta.
   estimados e indican la entrada del catálogo de la que salen; cero campos completados sin
   fuente.
 - **SC-012** (AC-16): La suite completa de tests pasa sin red y sin credenciales.
+- **SC-013** (RNF-10, AC-28): Una persona que clona el repositorio por primera vez pone la
+  aplicación a correr siguiendo solo el README; cero nombres de variable de entorno que haya que
+  descubrir leyendo código.
+- **SC-014** (RNF-11, AC-29): El pedido número 11 de una misma IP dentro de un minuto se rechaza
+  con un mensaje que dice el límite, y cero llamadas al proveedor por pedidos rechazados.
 
 ## Assumptions
 
@@ -347,8 +371,8 @@ respeta.
 - Centro de gravedad y distribución de peso.
 - Agregar o editar entradas del catálogo desde la interfaz.
 - Mejorar el aprovechamiento de volumen por encima de la línea base registrada.
-- Limitar la cantidad de pedidos por cliente en el intermediario; el costo se acota con el tope de
-  gasto configurado en el proveedor.
+- Un límite por IP exacto entre instancias del intermediario: alcanza con contar por instancia
+  (FR-023).
 
 ## Dependencies and Risks
 
@@ -360,7 +384,8 @@ respeta.
   usó, FR-006 la hace corregible y SC-005 lo mide.
 - **Riesgo**: se completa una medida que no existe en el catálogo → SC-004 lo verifica en binario.
 - **Riesgo**: un tercero usa el intermediario público y agota el saldo → FR-017 acota el costo de
-  cada pedido y el tope de gasto del proveedor acota el total.
+  cada pedido, FR-023 la cantidad de pedidos por IP, y el tope de gasto del proveedor acota el
+  total.
 - **Riesgo**: una falla intermitente del proveedor se confunde con un error de interpretación →
   FR-016.
 - **Riesgo**: el acomodo es NP-duro y puede comerse el proyecto → se congela contra la línea base
@@ -371,3 +396,6 @@ respeta.
 - **Deuda declarada**: el 80% de apoyo de FR-010 es un criterio propio, sin fuente.
 - **Deuda declarada**: el aprovechamiento de volumen no se compara contra ningún óptimo; FR-018
   detecta que cambió, no si es bueno.
+- **Deuda declarada**: el límite de FR-023 cuenta en la memoria de cada instancia y se reinicia
+  con cada arranque en frío, así que el tope efectivo es más laxo que el declarado y no frena a un
+  tercero distribuido.
