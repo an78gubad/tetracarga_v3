@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { ItemPropuesto } from '../modelo/interfaz.js'
 import { crearModeloDePrueba, respuestas } from '../modelo/prueba.js'
 import type { Reloj } from '../modelo/reintentos.js'
 import { crearContadorPorIp, ipDelPedido, LIMITE_POR_MINUTO } from './limite-ip.js'
@@ -157,7 +158,10 @@ describe('respuesta vacía o fuera de forma se trata como "sin ítems"', () => {
   })
 
   it('una respuesta con la forma mal devuelve sin-items y no rompe', async () => {
-    const { deps } = entorno([{ tipo: 'items', items: [{ sinNombre: true }] }])
+    // Un ítem sin nombre: el tipo no lo admite, y es exactamente lo que se quiere probar —que
+    // el intermediario aguante una respuesta que no cumple la forma.
+    const malFormado = [{ sinNombre: true }] as unknown as ItemPropuesto[]
+    const { deps } = entorno([{ tipo: 'items', items: malFormado }])
     const r = await manejar(pedido('40 cajas'), deps)
     expect(r.estado).toBe(200)
     expect(r.cuerpo.codigo).toBe('sin-items')
